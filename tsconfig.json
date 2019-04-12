@@ -1,28 +1,16 @@
 {
-  "compileOnSave": false,
   "compilerOptions": {
     "target": "esnext",
+    "declaration": true,
+    "outDir": "./dist",
     "module": "commonjs",            // specify module code generation
-    "moduleResolution": "node",
-    "jsx": "react",             // use typescript to transpile jsx to js
-    "allowJs": true,            // allow a partial TypeScript and JavaScript codebase
     "strictNullChecks": true,   // enable strict null checks as a best practice
     "noImplicitReturns": true,
     "noImplicitAny": true,
     "noUnusedLocals": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "noEmit": true,
     "keyofStringsOnly": true,
-    "skipLibCheck": true,
-
-    "baseUrl": ".", // This must be specified if "paths" is set
-    "paths": {
-      "*": [
-        "src/*",
-        "*",
-      ]
-    },
   },
   "exclude": [
     "docs",

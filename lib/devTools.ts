@@ -1,4 +1,4 @@
-import { State } from 'lib/hookstated';
+import { State } from '.';
 
 let id = 0;
 
@@ -39,7 +39,7 @@ export default (storeName: string, initialState: State, setState: (state: State)
     }
   });
 
-  return (state: State, newState: State, action: string) => {
+  return (_state: State, newState: State, action: string) => {
     devTools.send(action, newState, {}, instanceID);
   };
 };

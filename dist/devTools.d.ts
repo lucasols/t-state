@@ -1,0 +1,2 @@
+declare const _default: (storeName: string, initialState: import("./types").anyObject<import("./types").Serializable>, setState: (state: import("./types").anyObject<import("./types").Serializable>) => void) => (_state: import("./types").anyObject<import("./types").Serializable>, newState: import("./types").anyObject<import("./types").Serializable>, action: string) => void;
+export default _default;

@@ -2,32 +2,10 @@
  * forked from v1 of https://github.com/jhonnymichel/react-hookstore
  */
 import { useEffect, useState } from 'react';
-import devtools from './devtools';
+import devtools from './devTools';
+import { anyObject, genericFunction, Serializable } from './types';
 // IDEA: connect function
 // IDEA: create hook for get multiple keys from store at same
-
-type Serializable =
-  | boolean
-  | number
-  | string
-  | null
-  | SerializableArray
-  | SerializableMap;
-
-type SerializableMap = {
-  [key: string]: Serializable;
-};
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface SerializableArray extends Array<Serializable> {}
-
-type anyObject<T = any> = {
-  [key: string]: T;
-}
-
-type genericFunction = {
-  (...params: any): any;
-}
 
 export type State = anyObject<Serializable>;
 
