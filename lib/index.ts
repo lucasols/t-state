@@ -73,18 +73,18 @@ export function createStore<
 
   stores = { ...stores, [name]: store };
 
-  function dispatchHOC<P extends keyof R>(
+  function dispatchHOF<P extends keyof R>(
     type: P,
     ...payload: R[P] extends undefined ? [undefined?] : [R[P]]
   ) {
-    return dispatch(name, type, payload);
+    return dispatch(name, type, payload[0]);
   }
 
   return {
     getState: () => getState<T>(name),
     setKey: <K extends keyof T>(key: K, value: typeof state[K]) =>
       setKey<T>(name, key, value),
-    dispatch: dispatchHOC,
+    dispatch: dispatchHOF,
     subscribe: (callback: genericFunction) => subscribe(name, callback),
     useStore: <K extends keyof T>(key: K) => useStore<T[K]>(name, key),
   };
