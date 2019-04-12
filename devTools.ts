@@ -1,7 +1,9 @@
+import { State } from 'lib/hookstated';
+
 let id = 0;
 
-export default (storeName, initialState, setState) => {
-  const reduxDevTools = window.__REDUX_DEVTOOLS_EXTENSION__;
+export default (storeName: string, initialState: State, setState: (state: State) => void) => {
+  const reduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION__;
 
   const instanceID = id;
   id += 1;
@@ -15,7 +17,7 @@ export default (storeName, initialState, setState) => {
 
   devTools.init(initialState);
 
-  devTools.subscribe((data) => {
+  devTools.subscribe((data: any) => {
     switch (data.type) {
       case 'RESET':
         setState(initialState);
@@ -37,7 +39,7 @@ export default (storeName, initialState, setState) => {
     }
   });
 
-  return (state, newState, action) => {
+  return (state: State, newState: State, action: string) => {
     devTools.send(action, newState, {}, instanceID);
   };
 };

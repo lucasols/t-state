@@ -1,96 +1,78 @@
-/** forked from https://github.com/jhonnymichel/react-hookstore */
+/**
+ * forked from v1 of https://github.com/jhonnymichel/react-hookstore
+ */
 import { useEffect, useState } from 'react';
 import devtools from './devtools';
-// TODO: deep freeze?
-// TODO: connect function
-// TODO: memoize
-// TODO: remove the max callbacks, use for
-// TODO: test unmount remove setter
+// IDEA: connect function
 // IDEA: create hook for get multiple keys from store at same
-// IDEA: improve type inference
 
-type SerializableObject = {
+type Serializable =
+  | boolean
+  | number
+  | string
+  | null
+  | SerializableArray
+  | SerializableMap;
+
+type SerializableMap = {
   [key: string]: Serializable;
 };
 
-type SerializableArray = (
-  | string
-  | number
-  | SerializableObject
-  | boolean
-  | undefined)[];
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface SerializableArray extends Array<Serializable> {}
 
-type Serializable = | string
-  | number
-  | boolean
-  | null
-  | SerializableObject
-  | undefined
-  | SerializableArray;
-
-type State = {
-  [index: string]: Serializable;
-};
-
-interface anyObject<T = any> {
+type anyObject<T = any> = {
   [key: string]: T;
 }
 
-type Subscribe = {
-  (
-    prev: anyObject,
-    current: anyObject,
-    action?: string | anyObject
-  ): void;
-};
-
-type ListOfString = string;
-
-type Payload = { [index: string]: Serializable };
-
-type Reducers<T, A extends string = ListOfString> = {
-  [K in A]: (state: T, payload?: Payload) => T;
-};
-
-export type StoreConfig<T extends State, A extends ListOfString> = {
-  state: T;
-  reducers?: Reducers<T, A>;
-  subscriber?: Subscribe;
-};
-
-type Store<T extends State> = {
-  state: T;
-  reducers?: Reducers<T>;
-  setters: Setter[];
-  subscribers: Subscribe[];
-};
-
-interface genericFunction {
+type genericFunction = {
   (...params: any): any;
 }
+
+export type State = anyObject<Serializable>;
+
+type Subscriber = {
+  (prev: anyObject, current: anyObject, action?: string | anyObject): void;
+};
+
+type ReducersArg = {
+  [index: string]: anyObject | undefined;
+};
+
+type Reducers<T, R = ReducersArg> = {
+  [K in keyof R]: (state: T, payload: R[K]) => T
+};
 
 type Setter = {
   key: string;
   callback: genericFunction;
 };
 
-let stores: { [index: string]: Store<any> } = {};
+type Store<T extends State = State> = {
+  state: T;
+  reducers?: Reducers<T>;
+  setters: Setter[];
+  subscribers: Subscriber[];
+};
 
-const devToolsMiddeware = process.env.NODE_ENV === 'development' &&
+/* code */
+let stores: { [index: string]: any } = {};
+
+const devToolsMiddeware =
+  process.env.NODE_ENV === 'development' &&
   typeof window !== 'undefined' &&
   ((window as any).__REDUX_DEVTOOLS_EXTENSION__ ? devtools : false);
 
-/**
- * Creates a new store
- * @param {String} name - The store namespace.
- * @param {Object} config - An object containing the store setup
- * @param {*} config.state [{}] - The store initial state. It can be of any type.
- * @param {*} confg.reducer [{}] The reducers handlers.
- * @param {*} confg.subscribers [{}] Initial subscriber.
- */
-export function createStore<T extends State, A extends string = ListOfString>(
+export function createStore<
+  T extends State = State,
+  R extends ReducersArg = ReducersArg
+>(
   name: string,
-  { state, reducers, subscriber }: StoreConfig<T, A>
+  {
+    state,
+    reducers,
+    subscriber,
+  }: { state: T; reducers?: Reducers<T, R>; subscriber?: Subscriber }
 ) {
   if (stores[name]) {
     throw new Error(`Store ${name} already exists`);
@@ -113,17 +95,25 @@ export function createStore<T extends State, A extends string = ListOfString>(
 
   stores = { ...stores, [name]: store };
 
+  function dispatchHOC<P extends keyof R>(
+    type: P,
+    ...payload: R[P] extends undefined ? [undefined?] : [R[P]]
+  ) {
+    return dispatch(name, type, payload);
+  }
+
   return {
     getState: () => getState<T>(name),
-    setKey: <K extends keyof T>(key: K, value: typeof state[K]) => setKey<T>(name, key, value),
-    dispatch: <P = Payload>(type: A, payload?: P) => dispatch(name, type, payload),
+    setKey: <K extends keyof T>(key: K, value: typeof state[K]) =>
+      setKey<T>(name, key, value),
+    dispatch: dispatchHOC,
     subscribe: (callback: genericFunction) => subscribe(name, callback),
     useStore: <K extends keyof T>(key: K) => useStore<T[K]>(name, key),
   };
 }
 
 function setState(
-  store: Store<anyObject>,
+  store: Store,
   newState: anyObject,
   action?: string | anyObject
 ) {
@@ -132,7 +122,6 @@ function setState(
 
     if (store.state[setter.key] !== newState[setter.key]) {
       setter.callback(newState[setter.key]);
-      // console.log('callback');
     }
   }
 
@@ -168,13 +157,15 @@ export function dispatch<T extends State>(
 ) {
   const store = getStore<T>(name);
 
-  if (store.reducers && !store.reducers[type]) {
+  if (store.reducers && store.reducers[type]) {
+    const newState = store.reducers[type](store.state, payload);
+
+    if (newState) {
+      setState(store, newState, { type: `${name}.${type}`, ...payload });
+    }
+  } else {
     throw new Error(`Action ${type} does not exist on store ${name}`);
   }
-
-  const newState = store.reducers && store.reducers[type](store.state, payload);
-
-  if (newState) setState(store, newState, { type: `${name}.${type}`, ...payload });
 }
 
 export function setKey<T extends State>(
@@ -240,7 +231,7 @@ export function useStore<T extends Serializable>(
  * @param {String} name - The store name
  * @param {subscribeCallback} callback - callback to run
  */
-export function subscribe(name: string, callback: Subscribe) {
+export function subscribe(name: string, callback: Subscriber) {
   const store = getStore(name);
 
   if (!store.subscribers.includes(callback)) {

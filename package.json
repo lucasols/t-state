@@ -1,5 +1,5 @@
 {
-  "name": "hookstore",
+  "name": "hookstated",
   "version": "1.0.0",
   "description": "Global state manager for React hooks",
   "main": "index.ts",
