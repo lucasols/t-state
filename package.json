@@ -1,6 +1,6 @@
 {
   "name": "hookstated",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Global state manager for React hooks written in Typescript",
   "main": "dist/index.js",
   "types": "dist/index.d.js",

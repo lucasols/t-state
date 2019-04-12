@@ -29,13 +29,13 @@ function createStore(name, { state, reducers, subscriber, }) {
         }));
     }
     stores = { ...stores, [name]: store };
-    function dispatchHOC(type, ...payload) {
-        return dispatch(name, type, payload);
+    function dispatchHOF(type, ...payload) {
+        return dispatch(name, type, payload[0]);
     }
     return {
         getState: () => getState(name),
         setKey: (key, value) => setKey(name, key, value),
-        dispatch: dispatchHOC,
+        dispatch: dispatchHOF,
         subscribe: (callback) => subscribe(name, callback),
         useStore: (key) => useStore(name, key),
     };
