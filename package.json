@@ -1,7 +1,7 @@
 {
   "name": "hookstated",
   "version": "1.0.0",
-  "description": "Global state manager for React hooks",
+  "description": "Global state manager for React hooks written in Typescript",
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
