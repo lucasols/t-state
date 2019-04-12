@@ -1,0 +1,28 @@
+{
+  "name": "hookstore",
+  "version": "1.0.0",
+  "description": "Global state manager for React hooks",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git"
+  },
+  "author": "Lucas Santos",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/react": "^16.8.13",
+    "react": "^16.8.6",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-babel": "^5.3.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-jsx-a11y": "^6.2.1",
+    "eslint-plugin-react": "^7.12.4",
+    "eslint-plugin-react-hooks": "^1.6.0"
+  },
+  "peerDependencies": {
+    "react": "^16.8.6"
+  }
+}
