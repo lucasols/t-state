@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "esnext",
+    "target": "es2018",
     "declaration": true,
     "outDir": "./dist",
     "module": "commonjs",            // specify module code generation
