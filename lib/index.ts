@@ -9,8 +9,8 @@ import { anyObject, genericFunction, Serializable } from './types';
 
 export type State = anyObject<Serializable>;
 
-type Subscriber = {
-  (prev: anyObject, current: anyObject, action?: string | anyObject): void;
+type Subscriber<T = State> = {
+  (prev: T, current: T, action?: string | anyObject): void;
 };
 
 type ReducersArg = {
@@ -30,7 +30,7 @@ type Store<T extends State = State> = {
   state: T;
   reducers?: Reducers<T>;
   setters: Setter[];
-  subscribers: Subscriber[];
+  subscribers: Subscriber<T>[];
 };
 
 /* code */
@@ -50,7 +50,7 @@ export function createStore<
     state,
     reducers,
     subscriber,
-  }: { state: T; reducers?: Reducers<T, R>; subscriber?: Subscriber }
+  }: { state: T; reducers?: Reducers<T, R>; subscriber?: Subscriber<T> }
 ) {
   if (stores[name]) {
     throw new Error(`Store ${name} already exists`);
@@ -85,7 +85,7 @@ export function createStore<
     setKey: <K extends keyof T>(key: K, value: typeof state[K]) =>
       setKey<T>(name, key, value),
     dispatch: dispatchHOF,
-    subscribe: (callback: genericFunction) => subscribe(name, callback),
+    subscribe: (callback: Subscriber<T>) => subscribe(name, callback),
     useStore: <K extends keyof T>(key: K) => useStore<T[K]>(name, key),
   };
 }

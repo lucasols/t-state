@@ -3,14 +3,9 @@ export type Serializable =
   | number
   | string
   | null
-  | SerializableArray
-  | SerializableMap;
-
-type SerializableMap = {
-  [key: string]: Serializable;
-};
-
-interface SerializableArray extends Array<Serializable> {};
+  | Serializable[]
+  | undefined
+  | { [key: string]: Serializable; };
 
 export type anyObject<T = any> = {
   [key: string]: T;
