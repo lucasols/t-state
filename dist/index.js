@@ -1,19 +1,15 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * forked from v1 of https://github.com/jhonnymichel/react-hookstore
  */
-const react_1 = require("react");
-const devTools_1 = __importDefault(require("./devTools"));
+// TODO: remove fork comment and add credit to readme
+import { useEffect, useState } from 'react';
+import devtools from './devTools';
 /* code */
 let stores = {};
 const devToolsMiddeware = process.env.NODE_ENV === 'development' &&
     typeof window !== 'undefined' &&
-    (window.__REDUX_DEVTOOLS_EXTENSION__ ? devTools_1.default : false);
-function createStore(name, { state, reducers, subscriber, }) {
+    (window.__REDUX_DEVTOOLS_EXTENSION__ ? devtools : false);
+export function createStore(name, { state, reducers, subscriber, }) {
     if (stores[name]) {
         throw new Error(`Store ${name} already exists`);
     }
@@ -40,7 +36,6 @@ function createStore(name, { state, reducers, subscriber, }) {
         useStore: (key) => useStore(name, key),
     };
 }
-exports.createStore = createStore;
 function setState(store, newState, action) {
     for (let i = 0; i < store.setters.length; i++) {
         const setter = store.setters[i];
@@ -65,11 +60,10 @@ function getStore(name) {
  * Returns the state for the selected store
  * @param {String} name - The namespace for the wanted store
  */
-function getState(name) {
+export function getState(name) {
     return getStore(name).state;
 }
-exports.getState = getState;
-function dispatch(name, type, payload) {
+export function dispatch(name, type, payload) {
     const store = getStore(name);
     if (store.reducers && store.reducers[type]) {
         const newState = store.reducers[type](store.state, payload);
@@ -81,23 +75,21 @@ function dispatch(name, type, payload) {
         throw new Error(`Action ${type} does not exist on store ${name}`);
     }
 }
-exports.dispatch = dispatch;
-function setKey(name, key, value) {
+export function setKey(name, key, value) {
     const store = getStore(name);
     const newState = { ...store.state, [key]: value };
     setState(store, newState, { type: `${name}.set.${key}`, key, value });
     return value;
 }
-exports.setKey = setKey;
 /**
  * Returns a [ state, setState ] pair for the selected store. Can only be called within React Components
  * @param {String} name - The namespace for the wanted store
  * @param {String} key - The wanted state key
  */
-function useStore(name, key) {
+export function useStore(name, key) {
     const store = getStore(name);
-    const [state, set] = react_1.useState(store.state[key]);
-    react_1.useEffect(() => {
+    const [state, set] = useState(store.state[key]);
+    useEffect(() => {
         store.setters.push({
             key,
             callback: set,
@@ -112,7 +104,6 @@ function useStore(name, key) {
     const getter = () => getState(name)[key];
     return [state, (value) => setKey(name, key, value), getter];
 }
-exports.useStore = useStore;
 /**
  * Subscribe callback
  *
@@ -126,7 +117,7 @@ exports.useStore = useStore;
  * @param {String} name - The store name
  * @param {subscribeCallback} callback - callback to run
  */
-function subscribe(name, callback) {
+export function subscribe(name, callback) {
     const store = getStore(name);
     if (!store.subscribers.includes(callback)) {
         store.subscribers.push(callback);
@@ -135,4 +126,3 @@ function subscribe(name, callback) {
         store.subscribers = store.subscribers.filter(subscriber => subscriber !== callback);
     };
 }
-exports.subscribe = subscribe;

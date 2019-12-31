@@ -1,7 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 let id = 0;
-exports.default = (storeName, initialState, setState) => {
+export default (storeName, initialState, setState) => {
     const reduxDevTools = window.__REDUX_DEVTOOLS_EXTENSION__;
     const instanceID = id;
     id += 1;

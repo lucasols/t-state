@@ -2,7 +2,11 @@ import { anyObject, genericFunction } from './types';
 
 // TODO: test if it is performant
 export function getIfKeyChangeTo(prev: anyObject, current: anyObject) {
-  return (key: string | string[], target: string | any[], callback: genericFunction) => {
+  return (
+    key: string | string[],
+    target: string | any[],
+    callback: genericFunction,
+  ) => {
     if (Array.isArray(key)) {
       let hasChanged = false;
       let allMatchTarget = true;

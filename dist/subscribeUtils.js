@@ -1,7 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 // TODO: test if it is performant
-function getIfKeyChangeTo(prev, current) {
+export function getIfKeyChangeTo(prev, current) {
     return (key, target, callback) => {
         if (Array.isArray(key)) {
             let hasChanged = false;
@@ -34,9 +32,8 @@ function getIfKeyChangeTo(prev, current) {
         }
     };
 }
-exports.getIfKeyChangeTo = getIfKeyChangeTo;
 // IDEA: simplify with upper function
-function getIfKeyChange(prev, current) {
+export function getIfKeyChange(prev, current) {
     return (key, callback) => {
         if (Array.isArray(key)) {
             let hasChanged = false;
@@ -65,4 +62,3 @@ function getIfKeyChange(prev, current) {
         }
     };
 }
-exports.getIfKeyChange = getIfKeyChange;

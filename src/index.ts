@@ -1,10 +1,10 @@
 /**
  * forked from v1 of https://github.com/jhonnymichel/react-hookstore
  */
+// TODO: remove fork comment and add credit to readme
 import { useEffect, useState } from 'react';
 import devtools from './devTools';
 import { anyObject, genericFunction, Serializable } from './types';
-// IDEA: connect function
 // IDEA: create hook for get multiple keys from store at same
 
 export type State = anyObject<Serializable>;
@@ -18,7 +18,7 @@ type ReducersArg = {
 };
 
 type Reducers<T, R = ReducersArg> = {
-  [K in keyof R]: (state: T, payload: R[K]) => T
+  [K in keyof R]: (state: T, payload: R[K]) => T;
 };
 
 type Setter = {
@@ -50,7 +50,7 @@ export function createStore<
     state,
     reducers,
     subscriber,
-  }: { state: T; reducers?: Reducers<T, R>; subscriber?: Subscriber<T> }
+  }: { state: T; reducers?: Reducers<T, R>; subscriber?: Subscriber<T> },
 ) {
   if (stores[name]) {
     throw new Error(`Store ${name} already exists`);
@@ -67,7 +67,7 @@ export function createStore<
     store.subscribers.push(
       devToolsMiddeware(name, state, (newState: anyObject) => {
         setState(getStore(name), newState);
-      })
+      }),
     );
   }
 
@@ -93,7 +93,7 @@ export function createStore<
 function setState(
   store: Store,
   newState: anyObject,
-  action?: string | anyObject
+  action?: string | anyObject,
 ) {
   for (let i = 0; i < store.setters.length; i++) {
     const setter = store.setters[i];
@@ -131,7 +131,7 @@ export function getState<T extends State>(name: string): T {
 export function dispatch<T extends State>(
   name: string,
   type: string,
-  payload?: anyObject
+  payload?: anyObject,
 ) {
   const store = getStore<T>(name);
 
@@ -149,7 +149,7 @@ export function dispatch<T extends State>(
 export function setKey<T extends State>(
   name: string,
   key: keyof T,
-  value: any
+  value: any,
 ) {
   const store = getStore<T>(name);
 
@@ -167,7 +167,7 @@ export function setKey<T extends State>(
  */
 export function useStore<T extends Serializable>(
   name: string,
-  key: string
+  key: string,
 ): [T, (value: T) => T, () => T] {
   const store = getStore(name);
 
@@ -181,7 +181,7 @@ export function useStore<T extends Serializable>(
 
     return () => {
       store.setters = store.setters.filter(
-        (setter: Setter) => setter.callback !== set
+        (setter: Setter) => setter.callback !== set,
       );
     };
   }, []);
@@ -218,7 +218,7 @@ export function subscribe(name: string, callback: Subscriber) {
 
   return () => {
     store.subscribers = store.subscribers.filter(
-      subscriber => subscriber !== callback
+      subscriber => subscriber !== callback,
     );
   };
 }

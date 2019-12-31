@@ -2,7 +2,11 @@ import { State } from '.';
 
 let id = 0;
 
-export default (storeName: string, initialState: State, setState: (state: State) => void) => {
+export default (
+  storeName: string,
+  initialState: State,
+  setState: (state: State) => void,
+) => {
   const reduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION__;
 
   const instanceID = id;

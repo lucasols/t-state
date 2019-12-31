@@ -1,7 +1,7 @@
-import { anyObject, genericFunction, Serializable } from './types';
+import { anyObject, Serializable } from './types';
 export declare type State = anyObject<Serializable>;
-declare type Subscriber = {
-    (prev: anyObject, current: anyObject, action?: string | anyObject): void;
+declare type Subscriber<T = State> = {
+    (prev: T, current: T, action?: string | anyObject): void;
 };
 declare type ReducersArg = {
     [index: string]: anyObject | undefined;
@@ -12,13 +12,13 @@ declare type Reducers<T, R = ReducersArg> = {
 export declare function createStore<T extends State = State, R extends ReducersArg = ReducersArg>(name: string, { state, reducers, subscriber, }: {
     state: T;
     reducers?: Reducers<T, R>;
-    subscriber?: Subscriber;
+    subscriber?: Subscriber<T>;
 }): {
     getState: () => T;
     setKey: <K extends keyof T>(key: K, value: T[K]) => any;
     dispatch: <P extends keyof R>(type: P, ...payload: R[P] extends undefined ? [undefined?] : [R[P]]) => void;
-    subscribe: (callback: genericFunction) => () => void;
-    useStore: <K extends keyof T>(key: K) => [T[K], (value: T[K]) => T[K], () => T[K]];
+    subscribe: (callback: Subscriber<T>) => () => void;
+    useStore: <K_1 extends keyof T>(key: K_1) => [T[K_1], (value: T[K_1]) => T[K_1], () => T[K_1]];
 };
 /**
  * Returns the state for the selected store

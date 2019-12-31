@@ -2,21 +2,16 @@
   "compilerOptions": {
     "target": "es2018",
     "declaration": true,
+    "moduleResolution": "node",
     "outDir": "./dist",
-    "module": "commonjs",            // specify module code generation
-    "strictNullChecks": true,   // enable strict null checks as a best practice
+    "module": "ESNext",
+    "strictNullChecks": true,
     "noImplicitReturns": true,
     "noImplicitAny": true,
     "noUnusedLocals": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "keyofStringsOnly": true,
+    "keyofStringsOnly": true
   },
-  "exclude": [
-    "docs",
-    "dist",
-    "resources",
-    "node_modules",
-    "**/node_modules/*",
-  ]
+  "include": ["src"]
 }
