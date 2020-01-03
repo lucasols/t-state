@@ -8,7 +8,8 @@
     "strictNullChecks": true,
     "noImplicitReturns": true,
     "noImplicitAny": true,
-    "noUnusedLocals": true,
+    "jsx": "react",
+    // "noUnusedLocals": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "keyofStringsOnly": true

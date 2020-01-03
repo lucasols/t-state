@@ -6,7 +6,7 @@ import nodeResolve from '@rollup/plugin-node-resolve';
 import del from 'rollup-plugin-delete';
 import autoExternal from 'rollup-plugin-auto-external';
 import react from 'react';
-// TODO: remove if is not used
+// TODO: remove this file if is not used
 
 export default [
   {

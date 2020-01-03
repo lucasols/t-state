@@ -2,22 +2,25 @@
  * forked from v1 of https://github.com/jhonnymichel/react-hookstore
  */
 // TODO: remove fork comment and add credit to readme
-import { useEffect, useState } from 'react';
-import devtools from './devTools';
-import { anyObject, genericFunction, Serializable } from './types';
 // IDEA: create hook for get multiple keys from store at same
 
-export type State = anyObject<Serializable>;
+import { anyObj, genericFunction } from '@lucasols/utils/typings';
+import { pick, shallowEqual } from '@lucasols/utils';
+import { Serializable } from './typings/utils';
+import devtools, { Action } from './devTools';
+import { useState, useEffect } from 'react';
 
-type Subscriber<T = State> = {
-  (prev: T, current: T, action?: string | anyObject): void;
+export type State = anyObj<Serializable>;
+
+type Subscriber<T extends State> = {
+  (prev: T, current: T, action?: Action): void;
 };
 
 type ReducersArg = {
-  [index: string]: anyObject | undefined;
+  [index: string]: anyObj | undefined;
 };
 
-type Reducers<T, R = ReducersArg> = {
+type Reducers<T extends State, R extends ReducersArg = ReducersArg> = {
   [K in keyof R]: (state: T, payload: R[K]) => T;
 };
 
@@ -26,199 +29,147 @@ type Setter = {
   callback: genericFunction;
 };
 
-type Store<T extends State = State> = {
-  state: T;
-  reducers?: Reducers<T>;
-  setters: Setter[];
-  subscribers: Subscriber<T>[];
-};
-
-/* code */
-let stores: { [index: string]: any } = {};
-
 const devToolsMiddeware =
   process.env.NODE_ENV === 'development' &&
   typeof window !== 'undefined' &&
   ((window as any).__REDUX_DEVTOOLS_EXTENSION__ ? devtools : false);
 
-export function createStore<
-  T extends State = State,
+export default class Store<
+  T extends State,
   R extends ReducersArg = ReducersArg
->(
-  name: string,
-  {
+> {
+  readonly name: string;
+  private state: T;
+  private setters: Setter[] = [];
+  private reducers?: Reducers<T, R>;
+  private subscribers: Subscriber<T>[] = [];
+
+  constructor({
+    name,
     state,
     reducers,
-    subscriber,
-  }: { state: T; reducers?: Reducers<T, R>; subscriber?: Subscriber<T> },
-) {
-  if (stores[name]) {
-    throw new Error(`Store ${name} already exists`);
-  }
+  }: {
+    name: string;
+    state: T;
+    reducers?: Reducers<T, R>;
+  }) {
+    this.name = name;
+    this.state = state;
+    this.reducers = reducers;
 
-  const store = {
-    state,
-    reducers,
-    setters: [],
-    subscribers: subscriber ? [subscriber] : [],
-  };
-
-  if (devToolsMiddeware) {
-    store.subscribers.push(
-      devToolsMiddeware(name, state, (newState: anyObject) => {
-        setState(getStore(name), newState);
-      }),
-    );
-  }
-
-  stores = { ...stores, [name]: store };
-
-  function dispatchHOF<P extends keyof R>(
-    type: P,
-    ...payload: R[P] extends undefined ? [undefined?] : [R[P]]
-  ) {
-    return dispatch(name, type, payload[0]);
-  }
-
-  return {
-    getState: () => getState<T>(name),
-    setKey: <K extends keyof T>(key: K, value: typeof state[K]) =>
-      setKey<T>(name, key, value),
-    dispatch: dispatchHOF,
-    subscribe: (callback: Subscriber<T>) => subscribe(name, callback),
-    useStore: <K extends keyof T>(key: K) => useStore<T[K]>(name, key),
-  };
-}
-
-function setState(
-  store: Store,
-  newState: anyObject,
-  action?: string | anyObject,
-) {
-  for (let i = 0; i < store.setters.length; i++) {
-    const setter = store.setters[i];
-
-    if (store.state[setter.key] !== newState[setter.key]) {
-      setter.callback(newState[setter.key]);
+    if (devToolsMiddeware) {
+      this.subscribers.push(
+        devToolsMiddeware(name, state, (newState: T) => {
+          this.setState(newState);
+        }),
+      );
     }
   }
 
-  const prevState = { ...store.state };
-  store.state = newState;
-
-  for (let i = 0; i < store.subscribers.length; i++) {
-    store.subscribers[i](prevState, newState, action);
-  }
-}
-
-function getStore<T extends State>(name: string) {
-  const store: Store<T> = stores[name];
-  if (!store) {
-    throw new Error(`Store ${name} does not exist`);
+  getState() {
+    return this.state as Readonly<T>;
   }
 
-  return store;
-}
+  setState(newState: T, action?: Action) {
+    for (let i = 0; i < this.setters.length; i++) {
+      const setter = this.setters[i];
 
-/**
- * Returns the state for the selected store
- * @param {String} name - The namespace for the wanted store
- */
-export function getState<T extends State>(name: string): T {
-  return getStore<T>(name).state;
-}
+      if (this.state[setter.key] !== newState[setter.key]) {
+        setter.callback(newState[setter.key]);
+      }
+    }
 
-export function dispatch<T extends State>(
-  name: string,
-  type: string,
-  payload?: anyObject,
-) {
-  const store = getStore<T>(name);
+    const prevState = { ...this.state };
+    this.state = newState;
 
-  if (store.reducers && store.reducers[type]) {
-    const newState = store.reducers[type](store.state, payload);
+    for (let i = 0; i < this.subscribers.length; i++) {
+      this.subscribers[i](prevState, newState, action);
+    }
+  }
+
+  setKey<K extends keyof T>(key: K, value: T[K], callback?: genericFunction) {
+    const newState: T = { ...this.state, [key]: value };
+
+    this.setState(newState, { type: `${this.name}.set.${key}`, key, value });
+
+    callback?.();
+  }
+
+  dispatch<P extends keyof R>(
+    type: P,
+    payload: R[P],
+    callback?: genericFunction,
+  ) {
+    if (!this.reducers?.[type]) {
+      throw new Error(`Action ${type} does not exist on store ${this.name}`);
+    }
+
+    const newState = this.reducers[type](this.state, payload);
 
     if (newState) {
-      setState(store, newState, { type: `${name}.${type}`, ...payload });
+      this.setState(newState, {
+        type: `${this.name}.${type}`,
+        ...payload,
+      });
     }
-  } else {
-    throw new Error(`Action ${type} does not exist on store ${name}`);
+
+    callback?.();
   }
-}
 
-export function setKey<T extends State>(
-  name: string,
-  key: keyof T,
-  value: any,
-) {
-  const store = getStore<T>(name);
-
-  const newState = { ...store.state, [key]: value };
-
-  setState(store, newState, { type: `${name}.set.${key}`, key, value });
-
-  return value;
-}
-
-/**
- * Returns a [ state, setState ] pair for the selected store. Can only be called within React Components
- * @param {String} name - The namespace for the wanted store
- * @param {String} key - The wanted state key
- */
-export function useStore<T extends Serializable>(
-  name: string,
-  key: string,
-): [T, (value: T) => T, () => T] {
-  const store = getStore(name);
-
-  const [state, set] = useState(store.state[key] as T);
-
-  useEffect(() => {
-    store.setters.push({
-      key,
-      callback: set,
-    });
+  subscribe(callback: Subscriber<T>) {
+    if (!this.subscribers.includes(callback)) {
+      this.subscribers.push(callback);
+    }
 
     return () => {
-      store.setters = store.setters.filter(
-        (setter: Setter) => setter.callback !== set,
+      this.subscribers = this.subscribers.filter(
+        subscriber => subscriber !== callback,
       );
     };
-  }, []);
-
-  if (store.state[key] === undefined) {
-    throw new Error(`Key '${key}' for the store '${name}' does not exist`);
   }
 
-  const getter = () => getState(name)[key] as T;
+  useStore<K extends keyof T>(key: K) {
+    const [state, set] = useState(this.state[key]);
 
-  return [state, (value: any) => setKey(name, key, value), getter];
-}
+    useEffect(() => {
+      this.setters.push({
+        key,
+        callback: set,
+      });
 
-/**
- * Subscribe callback
- *
- * @callback subscribeCallback
- * @param {Object} prevState - previous state
- * @param {Object} nextState - next state
- * @param {String} action - action dispatched
- */
+      return () => {
+        this.setters = this.setters.filter(
+          (setter: Setter) => setter.callback !== set,
+        );
+      };
+    }, []);
 
-/**
- * Subscribe to changes in a store
- * @param {String} name - The store name
- * @param {subscribeCallback} callback - callback to run
- */
-export function subscribe(name: string, callback: Subscriber) {
-  const store = getStore(name);
+    if (this.state[key] === undefined) {
+      throw new Error(
+        `Key '${key}' for the store '${this.name}' does not exist`,
+      );
+    }
 
-  if (!store.subscribers.includes(callback)) {
-    store.subscribers.push(callback);
+    const getter = () => this.state[key];
+
+    return [state, (value: T[K]) => this.setKey(key, value), getter] as const;
   }
 
-  return () => {
-    store.subscribers = store.subscribers.filter(
-      subscriber => subscriber !== callback,
-    );
-  };
+  useSlice<K extends keyof T>(...keys: K[]) {
+    const [state, set] = useState(pick(this.state, keys));
+
+    useEffect(() => {
+      const setter = this.subscribe((prev, current) => {
+        const currentSlice = pick(current, keys);
+
+        if (!shallowEqual(pick(prev, keys), currentSlice)) {
+          set(currentSlice);
+        }
+      });
+
+      return setter;
+    }, []);
+
+    return state;
+  }
 }

@@ -1,6 +1,13 @@
 import { State } from '.';
+import { anyObj } from '@lucasols/utils/typings';
+import { Serializable } from './typings/utils';
 
 let id = 0;
+
+export type Action = {
+  type: string;
+  [k: string]: Serializable;
+};
 
 export default (
   storeName: string,
@@ -43,7 +50,7 @@ export default (
     }
   });
 
-  return (_state: State, newState: State, action: string) => {
+  return (_state: State, newState: State, action: Action) => {
     devTools.send(action, newState, {}, instanceID);
   };
 };

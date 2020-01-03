@@ -1,7 +1,7 @@
-import { anyObject, genericFunction } from './types';
+import { genericFunction } from '@lucasols/utils/typings';
+import { State } from '.';
 
-// TODO: test if it is performant
-export function getIfKeyChangeTo(prev: anyObject, current: anyObject) {
+export function getIfKeyChangeTo(prev: State, current: State) {
   return (
     key: string | string[],
     target: string | any[],
@@ -40,8 +40,8 @@ export function getIfKeyChangeTo(prev: anyObject, current: anyObject) {
   };
 }
 
-// IDEA: simplify with upper function
-export function getIfKeyChange(prev: anyObject, current: anyObject) {
+// TODO: simplify with upper function
+export function getIfKeyChange(prev: State, current: State) {
   return (key: string | string[], callback: genericFunction) => {
     if (Array.isArray(key)) {
       let hasChanged = false;
