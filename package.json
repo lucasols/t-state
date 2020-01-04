@@ -8,13 +8,14 @@
     "build": "run-s test format:* lint:* build:*",
     "build:clean": "rimraf dist",
     "build:lib": "tsc -p tsconfig.prod.json",
+    "build:create-pkg": "ts-node scripts/setupPackage.ts",
     "format:prettier": "prettier --write src/**/*.ts",
     "lint:eslint": "eslint --ext .jsx,.js,.ts,.tsx src/",
     "test": "jest",
     "test:tsd": "tsd",
     "test:ts": "tsc",
     "test:watch": "jest --watch",
-    "prepublishOnly": "ts-node scripts/setupPackage.ts",
+    "prepublishOnly": "build",
     "npm-publish": "cd dist && npm publish"
   },
   "repository": {
