@@ -171,10 +171,27 @@
     "@typescript-eslint/no-explicit-any": 0,
     "@typescript-eslint/no-use-before-define": 0,
     "@typescript-eslint/no-non-null-assertion": 0,
+    "space-before-function-paren": 0,
+    "@typescript-eslint/space-before-function-paren": [
+      "error",
+      {
+        "anonymous": "always",
+        "named": "never",
+        "asyncArrow": "always"
+      }
+    ],
 
     /* jest */
     "jest/expect-expect": "error"
   },
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "rules": {
+        "no-dupe-class-members": "off"
+      }
+    }
+  ],
   "extends": [
     "airbnb-typescript",
     "plugin:@typescript-eslint/recommended",

@@ -14,28 +14,27 @@ type Subscriber<T extends State> = {
   (prev: T, current: T, action?: Action): void;
 };
 
-type ReducersArg = {
-  [index: string]: anyObj | undefined;
+type ReducersPayloads = {
+  [index: string]: any;
 };
 
-type Reducers<T extends State, R extends ReducersArg = ReducersArg> = {
-  [K in keyof R]: (state: T, payload: R[K]) => T;
-};
-
-type Setter = {
-  key: string;
-  callback: genericFunction;
+type Reducers<
+  T extends State,
+  P extends ReducersPayloads = ReducersPayloads
+> = {
+  [K in keyof P]: (state: T, payload?: P[K]) => T;
 };
 
 type EqualityFn<T> = (prev: Readonly<T>, current: Readonly<T>) => boolean;
 
 export default class Store<
   T extends State,
-  R extends ReducersArg = ReducersArg
+  P extends ReducersPayloads = ReducersPayloads,
+  R extends Reducers<T, P> = Reducers<T, P>
 > {
   readonly name: string;
   private state: T;
-  private reducers?: Reducers<T, R>;
+  private reducers?: R;
   private subscribers: Subscriber<T>[] = [];
 
   constructor({
@@ -45,7 +44,7 @@ export default class Store<
   }: {
     name: string;
     state: T;
-    reducers?: Reducers<T, R>;
+    reducers?: R;
   }) {
     this.name = name;
     this.state = state;
@@ -86,14 +85,17 @@ export default class Store<
     callback?.();
   }
 
-  dispatch<P extends keyof R>(
-    type: P,
-    payload: R[P],
-    callback?: genericFunction,
+  dispatch<K extends keyof R>(
+    type: K,
+    ...payloadAndCallback: Parameters<R[K]>[1] extends undefined
+      ? [undefined?, genericFunction?]
+      : [Parameters<R[K]>[1], genericFunction?]
   ) {
     if (!this.reducers?.[type]) {
       throw new Error(`Action ${type} does not exist on store ${this.name}`);
     }
+
+    const [payload, callback] = payloadAndCallback;
 
     const newState = this.reducers[type](this.state, payload);
 

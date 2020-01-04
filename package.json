@@ -1,18 +1,20 @@
 {
   "name": "hookstated",
-  "version": "1.1.0",
+  "version": "2.0.0-beta.3",
   "description": "Global state manager for React hooks written in Typescript",
-  "main": "dist/index.js",
-  "types": "dist/index.d.js",
+  "main": "index.js",
+  "types": "index.d.js",
   "scripts": {
-    "build": "run-s format:* lint:* build:*",
+    "build": "run-s test format:* lint:* build:*",
     "build:clean": "rimraf dist",
     "build:lib": "tsc",
+    "build:copy-package": "cpy ./package.json dist/",
     "format:prettier": "prettier --write src/**/*.ts",
     "lint:eslint": "eslint --ext .jsx,.js,.ts,.tsx src/",
     "test": "jest",
+    "test:dtslint": "dtslint test/types",
     "test:watch": "jest --watch",
-    "publish": "npm publish"
+    "npm-publish": "cd dist && npm publish"
   },
   "repository": {
     "type": "git"
@@ -20,7 +22,6 @@
   "author": "Lucas Santos",
   "license": "MIT",
   "devDependencies": {
-    "@lucasols/utils": "^2.1.1",
     "@rollup/plugin-commonjs": "^11.0.0",
     "@rollup/plugin-node-resolve": "^6.0.0",
     "@rollup/plugin-replace": "^2.3.0",
@@ -31,6 +32,7 @@
     "@types/react": "^16.9.17",
     "@typescript-eslint/eslint-plugin": "^2.14.0",
     "@typescript-eslint/parser": "^2.14.0",
+    "cpy-cli": "^3.0.0",
     "eslint": "^6.8.0",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-config-airbnb-typescript": "^6.3.1",
@@ -51,6 +53,9 @@
     "rollup-plugin-delete": "^1.1.0",
     "ts-jest": "^24.2.0",
     "typescript": "^3.7.4"
+  },
+  "dependencies": {
+    "@lucasols/utils": "^2.1.1"
   },
   "peerDependencies": {
     "react": "^16.12.0",
