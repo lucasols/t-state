@@ -77,37 +77,31 @@ export default class Store<
     }
   }
 
-  setKey<K extends keyof T>(key: K, value: T[K], callback?: anyFunction) {
+  setKey<K extends keyof T>(key: K, value: T[K]) {
     const newState: T = { ...this.state, [key]: value };
 
     this.setState(newState, { type: `${this.name}.set.${key}`, key, value });
-
-    callback?.();
   }
 
   dispatch<K extends keyof R>(
     type: K,
-    ...payloadAndCallback: Parameters<R[K]>[1] extends undefined
-      ? [undefined?, anyFunction?]
-      : [Parameters<R[K]>[1], anyFunction?]
+    ...payload: Parameters<R[K]>[1] extends undefined
+      ? [undefined?]
+      : [Parameters<R[K]>[1]]
   ) {
     if (!this.reducers?.[type]) {
       throw new Error(`Action ${type} does not exist on store ${this.name}`);
     }
 
-    const [payload, callback] = payloadAndCallback;
-
     // HACK: assert param to avoid error
-    const newState = this.reducers[type](this.state, payload as P[K]);
+    const newState = this.reducers[type](this.state, payload[0] as P[K]);
 
     if (newState) {
       this.setState(newState, {
         type: `${this.name}.${type}`,
-        ...payload,
+        payload: payload[0],
       });
     }
-
-    callback?.();
   }
 
   subscribe(callback: Subscriber<T>) {
