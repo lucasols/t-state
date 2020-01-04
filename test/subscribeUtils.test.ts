@@ -36,49 +36,45 @@ beforeEach(() => {
 });
 
 describe('getIfKeysChange', () => {
-  test('call callback when keys change', () =>
-    new Promise(done => {
-      const mockCallback = jest.fn();
+  test('call callback when keys change', () => {
+    const mockCallback = jest.fn();
 
-      testState.subscribe((prev, current) => {
-        const ifKeyChange = getIfKeysChange(prev, current);
+    testState.subscribe((prev, current) => {
+      const ifKeyChange = getIfKeysChange(prev, current);
 
-        ifKeyChange(['key1'], mockCallback);
-      });
+      ifKeyChange(['key1'], mockCallback);
+    });
 
-      testState.setKey('key1', 3);
-      testState.setKey('key1', 3);
-      testState.setKey('key1', 3);
-      testState.setKey('key2', 'Test');
-      testState.setKey('key1', 3);
-      testState.setKey('key1', 4);
+    testState.setKey('key1', 3);
+    testState.setKey('key1', 3);
+    testState.setKey('key1', 3);
+    testState.setKey('key2', 'Test');
+    testState.setKey('key1', 3);
+    testState.setKey('key1', 4);
 
-      expect(mockCallback).toHaveBeenCalledTimes(2);
-      done();
-    }));
+    expect(mockCallback).toHaveBeenCalledTimes(2);
+  });
 
-  test('call callback when keys change to', () =>
-    new Promise(done => {
-      const mockCallback = jest.fn();
+  test('call callback when keys change to', () => {
+    const mockCallback = jest.fn();
 
-      testState.subscribe((prev, current) => {
-        const ifKeyChange = getIfKeysChange(prev, current);
+    testState.subscribe((prev, current) => {
+      const ifKeyChange = getIfKeysChange(prev, current);
 
-        ifKeyChange({ key1: 5 }, mockCallback);
-      });
+      ifKeyChange({ key1: 5 }, mockCallback);
+    });
 
-      testState.setKey('key1', 2);
-      testState.setKey('key1', 3);
-      testState.setKey('key1', 3);
-      testState.setKey('key2', 'Test');
-      testState.setKey('key1', 3);
-      testState.setKey('key1', 5);
-      testState.setKey('key1', 2);
-      testState.setKey('key1', 5);
+    testState.setKey('key1', 2);
+    testState.setKey('key1', 3);
+    testState.setKey('key1', 3);
+    testState.setKey('key2', 'Test');
+    testState.setKey('key1', 3);
+    testState.setKey('key1', 5);
+    testState.setKey('key1', 2);
+    testState.setKey('key1', 5);
 
-      expect(mockCallback).toHaveBeenCalledTimes(2);
-      done();
-    }));
+    expect(mockCallback).toHaveBeenCalledTimes(2);
+  });
 
   test('call callback when keys change with deepEquality', () => {
     const mockCallback = jest.fn();

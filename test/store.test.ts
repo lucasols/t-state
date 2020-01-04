@@ -29,7 +29,7 @@ describe('create and manipulate store', () => {
           ...state,
           items: [...state.items, newItem],
         }),
-        doNothing: (state) => state,
+        doNothing: state => state,
       },
     });
   }
@@ -98,119 +98,104 @@ describe('create and manipulate store', () => {
   });
 
   describe('subscribe', () => {
-    test('add subscriber', () =>
-      new Promise(done => {
-        const testState = createTestStore();
+    test('add subscriber', () => {
+      const testState = createTestStore();
 
-        const mockSubscriber = jest.fn();
+      const mockSubscriber = jest.fn();
 
-        testState.subscribe(mockSubscriber);
+      testState.subscribe(mockSubscriber);
 
-        testState.dispatch('addItem', {
-          id: 2,
-          text: 'new item added',
-        });
+      testState.dispatch('addItem', {
+        id: 2,
+        text: 'new item added',
+      });
 
-        testState.dispatch(
-          'addItem',
+      testState.dispatch('addItem', {
+        id: 3,
+        text: 'new item added',
+      });
+
+      const firstCall = mockSubscriber.mock.calls[0];
+      const secondCall = mockSubscriber.mock.calls[1];
+
+      expect(firstCall[0]).toStrictEqual({
+        items: [
+          {
+            id: 1,
+            text: 'Hello',
+          },
+        ],
+      });
+
+      expect(firstCall[1]).toStrictEqual({
+        items: [
+          {
+            id: 1,
+            text: 'Hello',
+          },
+          {
+            id: 2,
+            text: 'new item added',
+          },
+        ],
+      });
+
+      expect(secondCall[0]).toStrictEqual({
+        items: [
+          {
+            id: 1,
+            text: 'Hello',
+          },
+          {
+            id: 2,
+            text: 'new item added',
+          },
+        ],
+      });
+
+      expect(secondCall[1]).toStrictEqual({
+        items: [
+          {
+            id: 1,
+            text: 'Hello',
+          },
+          {
+            id: 2,
+            text: 'new item added',
+          },
           {
             id: 3,
             text: 'new item added',
           },
-          () => {
-            const firstCall = mockSubscriber.mock.calls[0];
-            const secondCall = mockSubscriber.mock.calls[1];
+        ],
+      });
+    });
 
-            expect(firstCall[0]).toStrictEqual({
-              items: [
-                {
-                  id: 1,
-                  text: 'Hello',
-                },
-              ],
-            });
+    test('remove subscriber', () => {
+      const testState = createTestStore();
 
-            expect(firstCall[1]).toStrictEqual({
-              items: [
-                {
-                  id: 1,
-                  text: 'Hello',
-                },
-                {
-                  id: 2,
-                  text: 'new item added',
-                },
-              ],
-            });
+      const mockSubscriber = jest.fn();
 
-            expect(secondCall[0]).toStrictEqual({
-              items: [
-                {
-                  id: 1,
-                  text: 'Hello',
-                },
-                {
-                  id: 2,
-                  text: 'new item added',
-                },
-              ],
-            });
+      const removeSubscriber = testState.subscribe(mockSubscriber);
 
-            expect(secondCall[1]).toStrictEqual({
-              items: [
-                {
-                  id: 1,
-                  text: 'Hello',
-                },
-                {
-                  id: 2,
-                  text: 'new item added',
-                },
-                {
-                  id: 3,
-                  text: 'new item added',
-                },
-              ],
-            });
+      testState.dispatch('addItem', {
+        id: 2,
+        text: 'new item added',
+      });
 
-            done();
-          },
-        );
-      }));
+      removeSubscriber();
 
-    test('remove subscriber', () =>
-      new Promise(done => {
-        const testState = createTestStore();
+      testState.dispatch('addItem', {
+        id: 2,
+        text: 'new item added',
+      });
 
-        const mockSubscriber = jest.fn(() => {
-          // will call once
-        });
+      testState.dispatch('addItem', {
+        id: 3,
+        text: 'new item added',
+      });
 
-        const removeSubscriber = testState.subscribe(mockSubscriber);
-
-        testState.dispatch('addItem', {
-          id: 2,
-          text: 'new item added',
-        });
-
-        removeSubscriber();
-
-        testState.dispatch('addItem', {
-          id: 2,
-          text: 'new item added',
-        });
-
-        testState.dispatch(
-          'addItem',
-          {
-            id: 3,
-            text: 'new item added',
-          },
-          () => {
-            expect(mockSubscriber).toHaveBeenCalledTimes(1);
-            done();
-          },
-        );
-      }));
+      expect(mockSubscriber).toHaveBeenCalledTimes(1);
+    });
   });
 });
