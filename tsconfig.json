@@ -3,8 +3,8 @@
     "target": "es2018",
     "declaration": true,
     "moduleResolution": "node",
-    "outDir": "./dist",
-    "module": "ESNext",
+    "module": "CommonJS",
+    "noEmit": true,
     "strictNullChecks": true,
     "noImplicitReturns": true,
     "noImplicitAny": true,
@@ -14,5 +14,5 @@
     "esModuleInterop": true,
     "keyofStringsOnly": true
   },
-  "include": ["src"]
+  "include": ["src", "test"]
 }

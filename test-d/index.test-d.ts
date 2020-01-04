@@ -1,5 +1,6 @@
 // TypeScript Version: 3.7
-import Store from '../../src';
+import Store from '../dist';
+import { expectError, expectNotAssignable } from 'tsd';
 
 const testState = new Store({
   name: 'test',
@@ -17,17 +18,13 @@ const testState = new Store({
   },
 });
 
-// $ExpectError
-testState.getState().items = 5;
+expectNotAssignable(testState.getState().items);
 
-// $ExpectError
-testState.useKey('items')[0].push({ id: 2, text: 'Error' });
+expectNotAssignable(testState.useKey('items')[0]);
 
-// $ExpectError
-testState.useSlice(['items']).items = [];
+expectNotAssignable(testState.useSlice('items').items);
 
-// $ExpectError
-testState.useSelector(s => s.items)[0] = { id: 2, text: 'Error' };
+expectNotAssignable(testState.useSelector(s => s.items)[0]);
 
 // Should not throw error
 testState.dispatch('test');
@@ -61,8 +58,7 @@ const testState2 = new Store<TestState2, ReducersPayloads>({
   },
 });
 
-// $ExpectError
-testState2.dispatch('test');
+expectError(testState2.dispatch('test'));
 
 const testState3 = new Store<TestState2, ReducersPayloads>({
   name: 'test',

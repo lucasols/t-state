@@ -1,74 +1,28 @@
-import { genericFunction } from '@lucasols/utils/typings';
-import { State } from '.';
+import { anyFunction } from '@lucasols/utils/typings';
+import { State, EqualityFn } from '.';
+import { shallowEqual, pick } from '@lucasols/utils';
+import fastDeepEqual from 'fast-deep-equal';
 
-export function getIfKeyChangeTo(prev: State, current: State) {
-  return (
-    key: string | string[],
-    target: string | any[],
-    callback: genericFunction,
+export function getIfKeysChange<T extends State>(prev: T, current: T) {
+  return <K extends keyof T>(
+    keys: K[] | Pick<T, K>,
+    callback: anyFunction,
+    checkDeepEquality = false,
+    deepEqualityFn: EqualityFn<Pick<T, K>> = fastDeepEqual,
   ) => {
-    if (Array.isArray(key)) {
-      let hasChanged = false;
-      let allMatchTarget = true;
+    const areEqual = checkDeepEquality ? deepEqualityFn : shallowEqual;
+    const verifyIfChangesOnly = Array.isArray(keys);
+    const changeToObjKeys = (verifyIfChangesOnly
+      ? keys
+      : Object.keys(keys)) as K[];
+    const currentSlice = pick(current, changeToObjKeys);
 
-      for (let i = 0; i < key.length; i++) {
-        const currentElem = current[key[i]];
-        const lastElem = prev[key[i]];
-        const targetElem = target[i];
-
-        if (process.env.NODE_ENV === 'development') {
-          if (currentElem === undefined && targetElem !== undefined) {
-            throw new Error(`key: ${key} does not exist`);
-          }
-        }
-
-        if (!hasChanged) hasChanged = currentElem !== lastElem;
-        if (currentElem !== targetElem) allMatchTarget = false;
+    if (!areEqual(pick(prev, changeToObjKeys), currentSlice)) {
+      if (verifyIfChangesOnly) {
+        callback();
+      } else if (areEqual(keys as Pick<T, K>, currentSlice)) {
+        callback();
       }
-
-      if (hasChanged && allMatchTarget) callback();
-    } else if (current[key] !== prev[key] && current[key] === target) {
-      // check if key exists
-      if (process.env.NODE_ENV === 'development') {
-        if (current[key] === undefined && target !== undefined) {
-          throw new Error(`key: ${key} does not exist`);
-        }
-      }
-
-      callback();
-    }
-  };
-}
-
-// TODO: simplify with upper function
-export function getIfKeyChange(prev: State, current: State) {
-  return (key: string | string[], callback: genericFunction) => {
-    if (Array.isArray(key)) {
-      let hasChanged = false;
-
-      for (let i = 0; i < key.length; i++) {
-        const currentElem = current[key[i]];
-        const lastElem = prev[key[i]];
-
-        if (process.env.NODE_ENV === 'development') {
-          if (currentElem === undefined) {
-            throw new Error(`key: ${key} does not exist`);
-          }
-        }
-
-        if (!hasChanged) hasChanged = currentElem !== lastElem;
-      }
-
-      if (hasChanged) callback();
-    } else if (current[key] !== prev[key]) {
-      // check if key exists
-      if (process.env.NODE_ENV === 'development') {
-        if (current[key] === undefined) {
-          throw new Error(`key: ${key} does not exist`);
-        }
-      }
-
-      callback();
     }
   };
 }

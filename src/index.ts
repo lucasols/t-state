@@ -2,7 +2,7 @@
  * forked from v1 of https://github.com/jhonnymichel/react-hookstore
  */
 // TODO: remove fork comment and add credit to readme
-import { anyObj, genericFunction } from '@lucasols/utils/typings';
+import { anyObj, anyFunction } from '@lucasols/utils/typings';
 import { pick, shallowEqual } from '@lucasols/utils';
 import { Serializable } from './typings/utils';
 import devtools, { Action } from './devTools';
@@ -20,12 +20,12 @@ type ReducersPayloads = {
 
 type Reducers<
   T extends State,
-  P extends ReducersPayloads = ReducersPayloads
+  P extends ReducersPayloads
 > = {
-  [K in keyof P]: (state: T, payload?: P[K]) => T;
+  [K in keyof P]: (state: T, payload: P[K]) => T;
 };
 
-type EqualityFn<T> = (prev: Readonly<T>, current: Readonly<T>) => boolean;
+export type EqualityFn<T> = (prev: Readonly<T>, current: Readonly<T>) => boolean;
 
 export default class Store<
   T extends State,
@@ -77,7 +77,7 @@ export default class Store<
     }
   }
 
-  setKey<K extends keyof T>(key: K, value: T[K], callback?: genericFunction) {
+  setKey<K extends keyof T>(key: K, value: T[K], callback?: anyFunction) {
     const newState: T = { ...this.state, [key]: value };
 
     this.setState(newState, { type: `${this.name}.set.${key}`, key, value });
@@ -88,8 +88,8 @@ export default class Store<
   dispatch<K extends keyof R>(
     type: K,
     ...payloadAndCallback: Parameters<R[K]>[1] extends undefined
-      ? [undefined?, genericFunction?]
-      : [Parameters<R[K]>[1], genericFunction?]
+      ? [undefined?, anyFunction?]
+      : [Parameters<R[K]>[1], anyFunction?]
   ) {
     if (!this.reducers?.[type]) {
       throw new Error(`Action ${type} does not exist on store ${this.name}`);
@@ -97,7 +97,8 @@ export default class Store<
 
     const [payload, callback] = payloadAndCallback;
 
-    const newState = this.reducers[type](this.state, payload);
+    // HACK: assert param to avoid error
+    const newState = this.reducers[type](this.state, payload as P[K]);
 
     if (newState) {
       this.setState(newState, {

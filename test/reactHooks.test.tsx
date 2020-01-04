@@ -2,7 +2,7 @@ import '@testing-library/jest-dom/extend-expect';
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import Store from '../src';
-import { genericFunction } from '@lucasols/utils/typings';
+import { anyFunction } from '@lucasols/utils/typings';
 import { shallowEqual } from '@lucasols/utils';
 
 describe('hooks ', () => {
@@ -26,7 +26,7 @@ describe('hooks ', () => {
       state: initialState,
     });
 
-    const Component = ({ onRender }: { onRender?: genericFunction }) => {
+    const Component = ({ onRender }: { onRender?: anyFunction }) => {
       const [numOfClicks, setNumOfClicks] = testState.useKey('numOfClicks');
 
       if (onRender) {
@@ -171,7 +171,7 @@ describe('hooks ', () => {
 
     let testState: Store<TestState, Reducers>;
 
-    const Component = ({ onRender }: { onRender?: genericFunction }) => {
+    const Component = ({ onRender }: { onRender?: anyFunction }) => {
       const { key1, key2, key3 } = testState.useSlice(['key1', 'key2', 'key3'], shallowEqual);
 
       if (onRender) {
@@ -389,7 +389,7 @@ describe('hooks ', () => {
 
     let testState: Store<TestState, Reducers>;
 
-    const Component = ({ onRender }: { onRender?: genericFunction }) => {
+    const Component = ({ onRender }: { onRender?: anyFunction }) => {
       const sum = testState.useSelector(state => state.key1 + state.key3[0]);
 
       if (onRender) {
