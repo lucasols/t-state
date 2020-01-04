@@ -18,14 +18,14 @@ type ReducersPayloads = {
   [index: string]: any;
 };
 
-type Reducers<
-  T extends State,
-  P extends ReducersPayloads
-> = {
+type Reducers<T extends State, P extends ReducersPayloads> = {
   [K in keyof P]: (state: T, payload: P[K]) => T;
 };
 
-export type EqualityFn<T> = (prev: Readonly<T>, current: Readonly<T>) => boolean;
+export type EqualityFn<T> = (
+  prev: Readonly<T>,
+  current: Readonly<T>,
+) => boolean;
 
 export default class Store<
   T extends State,
@@ -90,7 +90,11 @@ export default class Store<
       : [Parameters<R[K]>[1]]
   ) {
     if (!this.reducers?.[type]) {
-      throw new Error(`Action ${type} does not exist on store ${this.name}`);
+      if (process.env.NODE_ENV !== 'production') {
+        throw new Error(`Action ${type} does not exist on store ${this.name}`);
+      }
+
+      return;
     }
 
     // HACK: assert param to avoid error
