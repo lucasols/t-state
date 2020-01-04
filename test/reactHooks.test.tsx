@@ -3,15 +3,22 @@ import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import Store from '../src';
 import { genericFunction } from '@lucasols/utils/typings';
+import { shallowEqual } from '@lucasols/utils';
 
 describe('hooks ', () => {
-  describe('useStore', () => {
+  describe('useKey', () => {
     type TestState = {
       numOfClicks: number;
+      obj: {
+        test: boolean;
+      };
     };
 
     const initialState = {
       numOfClicks: 0,
+      obj: {
+        test: true,
+      },
     };
 
     let testState = new Store<TestState>({
@@ -20,7 +27,7 @@ describe('hooks ', () => {
     });
 
     const Component = ({ onRender }: { onRender?: genericFunction }) => {
-      const [numOfClicks, setNumOfClicks] = testState.useStore('numOfClicks');
+      const [numOfClicks, setNumOfClicks] = testState.useKey('numOfClicks');
 
       if (onRender) {
         onRender();
@@ -57,7 +64,7 @@ describe('hooks ', () => {
 
     test('update all components if setState is called from anywhere', () => {
       const AnotherComponent = () => {
-        const [numOfClicks] = testState.useStore('numOfClicks');
+        const [numOfClicks] = testState.useKey('numOfClicks');
 
         return <div data-testid="another-component">{numOfClicks}</div>;
       };
@@ -143,7 +150,7 @@ describe('hooks ', () => {
     });
   });
 
-  describe('useSlice', () => {
+  describe('useGetSlice', () => {
     type TestState = {
       key1: number;
       key2: string;
@@ -165,7 +172,7 @@ describe('hooks ', () => {
     let testState: Store<TestState, Reducers>;
 
     const Component = ({ onRender }: { onRender?: genericFunction }) => {
-      const { key1, key2, key3 } = testState.useSlice('key1', 'key2', 'key3');
+      const { key1, key2, key3 } = testState.useSlice(['key1', 'key2', 'key3'], shallowEqual);
 
       if (onRender) {
         onRender();
@@ -358,6 +365,170 @@ describe('hooks ', () => {
 
       expect(onRender).toHaveBeenCalledTimes(2);
       expect(mockSubscriber).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('useSelect', () => {
+    type TestState = {
+      key1: number;
+      key2: string;
+      key3: number[];
+      key4: number[];
+    };
+
+    const initialState = {
+      key1: 1,
+      key2: '👍',
+      key3: [0, 1, 2],
+      key4: [0, 1, 2],
+    };
+
+    type Reducers = {
+      changeMultipleKeys: Pick<TestState, 'key1' | 'key2'>;
+    };
+
+    let testState: Store<TestState, Reducers>;
+
+    const Component = ({ onRender }: { onRender?: genericFunction }) => {
+      const sum = testState.useSelector(state => state.key1 + state.key3[0]);
+
+      if (onRender) {
+        onRender();
+      }
+
+      return (
+        <button type="button" onClick={() => testState.setKey('key1', sum + 1)}>
+          {sum}
+        </button>
+      );
+    };
+
+    beforeEach(() => {
+      testState = new Store<TestState, Reducers>({
+        name: 'test',
+        state: initialState,
+        reducers: {
+          changeMultipleKeys: (state, { key1, key2 }) => ({
+            ...state,
+            key1,
+            key2,
+          }),
+        },
+      });
+    });
+
+    test('get all values from store and updates when some of then changes', () => {
+      const { getByRole } = render(<Component />);
+
+      const button = getByRole('button');
+      expect(button).toHaveTextContent('1');
+
+      fireEvent.click(button);
+      expect(button).toHaveTextContent('2');
+
+      act(() => {
+        testState.setKey('key3', [2]);
+      });
+
+      expect(button).toHaveTextContent('4');
+    });
+
+    test('not render when the the returned values are the same', () => {
+      const onRender = jest.fn();
+      const mockSubscriber = jest.fn();
+
+      testState.subscribe(mockSubscriber);
+
+      const { getByRole } = render(<Component onRender={onRender} />);
+
+      const button = getByRole('button');
+
+      expect(button).toHaveTextContent('1');
+
+      act(() => {
+        testState.setKey('key1', 1);
+      });
+      act(() => {
+        testState.setKey('key3', [0]);
+      });
+      act(() => {
+        testState.setKey('key2', '👍');
+      });
+
+      act(() => {
+        testState.setKey('key1', 1);
+      });
+      act(() => {
+        testState.setKey('key3', [0]);
+      });
+      act(() => {
+        testState.setKey('key2', '👍');
+      });
+
+      act(() => {
+        testState.dispatch('changeMultipleKeys', {
+          key2: '👍',
+          key1: 1,
+        });
+      });
+
+      expect(onRender).toHaveBeenCalledTimes(1);
+      expect(mockSubscriber).toHaveBeenCalledTimes(7);
+    });
+
+    test('not render when the equality function return true', () => {
+      const onRender = jest.fn();
+      const mockSubscriber = jest.fn();
+
+      const Component2 = () => {
+        const state = testState.useSelector(s => s, (_, current) =>
+          current.key1 === 1
+        );
+
+        if (onRender) {
+          onRender();
+        }
+
+        return <div data-testid="another-component">{state.key1}</div>;
+      };
+
+      testState.subscribe(mockSubscriber);
+
+      const { getByTestId } = render(<Component2 />);
+
+      const div = getByTestId('another-component');
+
+      expect(div).toHaveTextContent('1');
+
+      act(() => {
+        testState.setKey('key1', 1);
+      });
+      act(() => {
+        testState.setKey('key3', [0]);
+      });
+      act(() => {
+        testState.setKey('key2', '👍');
+      });
+
+      act(() => {
+        testState.setKey('key1', 1);
+      });
+      act(() => {
+        testState.setKey('key3', [0]);
+      });
+      act(() => {
+        testState.setKey('key2', '👍');
+      });
+
+      act(() => {
+        testState.dispatch('changeMultipleKeys', {
+          key2: '👍',
+          key1: 1,
+        });
+      });
+
+      expect(onRender).toHaveBeenCalledTimes(1);
+      expect(mockSubscriber).toHaveBeenCalledTimes(7);
     });
   });
 });

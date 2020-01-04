@@ -1,5 +1,4 @@
 import { State } from '.';
-import { anyObj } from '@lucasols/utils/typings';
 import { Serializable } from './typings/utils';
 
 let id = 0;

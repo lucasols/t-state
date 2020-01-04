@@ -9,6 +9,7 @@ type TestState = {
 
 type Reducers = {
   addItem: TestState['items'][0];
+  doNothing: undefined;
 };
 
 describe('create and manipulate store', () => {
@@ -28,6 +29,7 @@ describe('create and manipulate store', () => {
           ...state,
           items: [...state.items, newItem],
         }),
+        doNothing: (state) => state,
       },
     });
   }
