@@ -32,6 +32,7 @@ testState.useSelector(s => s.items)[0] = { id: 2, text: 'Error' };
 // Should not throw error
 testState.dispatch('test');
 
+// Should typecheck payload
 testState.dispatch('test2', 5);
 
 type TestState2 = {
