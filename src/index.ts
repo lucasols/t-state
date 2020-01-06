@@ -2,8 +2,9 @@
  * forked from v1 of https://github.com/jhonnymichel/react-hookstore
  */
 // TODO: remove fork comment and add credit to readme
-import { anyObj, anyFunction } from '@lucasols/utils/typings';
-import { pick, shallowEqual } from '@lucasols/utils';
+import { anyObj } from '@lucasols/utils/typings';
+import { shallowEqual } from '@lucasols/utils/shallowEqual';
+import { pick } from '@lucasols/utils/pick';
 import { Serializable } from './typings/utils';
 import devtools, { Action } from './devTools';
 import { useState, useEffect } from 'react';

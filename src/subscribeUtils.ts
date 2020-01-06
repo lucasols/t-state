@@ -1,6 +1,7 @@
 import { anyFunction } from '@lucasols/utils/typings';
 import { State, EqualityFn } from '.';
-import { shallowEqual, pick } from '@lucasols/utils';
+import { shallowEqual } from '@lucasols/utils/shallowEqual';
+import { pick } from '@lucasols/utils/pick';
 import fastDeepEqual from 'fast-deep-equal';
 
 export function getIfKeysChange<T extends State>(prev: T, current: T) {
