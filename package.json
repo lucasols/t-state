@@ -15,8 +15,7 @@
     "test:tsd": "tsd",
     "test:ts": "tsc",
     "test:watch": "jest --watch",
-    "prepublishOnly": "build",
-    "npm-publish": "cd dist && npm publish"
+    "npm-publish": "yarn build && cd dist && npm publish"
   },
   "repository": {
     "type": "git"
