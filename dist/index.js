@@ -16,7 +16,7 @@ class Store {
         const devToolsMiddeware = process.env.NODE_ENV === 'development' &&
             typeof window !== 'undefined' &&
             (window.__REDUX_DEVTOOLS_EXTENSION__ ? devTools_1.default : false);
-        if (devToolsMiddeware) {
+        if (devToolsMiddeware && name) {
             this.subscribers.push(devToolsMiddeware(name, state, (newState) => {
                 this.setState(newState);
             }));

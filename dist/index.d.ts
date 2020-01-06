@@ -16,12 +16,12 @@ declare type Reducers<T extends State, P extends ReducersPayloads> = {
 };
 export declare type EqualityFn<T> = (prev: Readonly<T>, current: Readonly<T>) => boolean;
 export default class Store<T extends State, P extends ReducersPayloads = ReducersPayloads, R extends Reducers<T, P> = Reducers<T, P>> {
-    readonly name: string;
+    readonly name?: string;
     private state;
     private reducers?;
     private subscribers;
     constructor({ name, state, reducers, }: {
-        name: string;
+        name?: string;
         state: T;
         reducers?: R;
     });
