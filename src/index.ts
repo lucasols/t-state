@@ -33,7 +33,7 @@ export default class Store<
   P extends ReducersPayloads = ReducersPayloads,
   R extends Reducers<T, P> = Reducers<T, P>
 > {
-  readonly name: string;
+  readonly name?: string;
   private state: T;
   private reducers?: R;
   private subscribers: Subscriber<T>[] = [];
@@ -43,7 +43,7 @@ export default class Store<
     state,
     reducers,
   }: {
-    name: string;
+    name?: string;
     state: T;
     reducers?: R;
   }) {
@@ -56,7 +56,7 @@ export default class Store<
       typeof window !== 'undefined' &&
       ((window as any).__REDUX_DEVTOOLS_EXTENSION__ ? devtools : false);
 
-    if (devToolsMiddeware) {
+    if (devToolsMiddeware && name) {
       this.subscribers.push(
         devToolsMiddeware(name, state, (newState: T) => {
           this.setState(newState);
