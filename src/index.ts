@@ -199,4 +199,8 @@ export default class Store<
 
     return state;
   }
+
+  useState(areEqual?: EqualityFn<T>) {
+    return this.useSelector(s => s, areEqual);
+  }
 }
