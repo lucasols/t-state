@@ -46,7 +46,9 @@ export function getIfSelectorChange<T extends State>(prev: T, current: T) {
     if (!areEqual(selectorFn(prev), currentSelection)) {
       if (!verifyIfChangesTo) {
         callback();
-      } else if (areEqual(currentSelection, (selector as [S, ReturnType<S>])[1])) {
+      } else if (
+        areEqual(currentSelection, (selector as [S, ReturnType<S>])[1])
+      ) {
         callback();
       }
     }
