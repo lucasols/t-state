@@ -1,6 +1,6 @@
 {
-  "name": "hookstated",
-  "version": "2.1.0",
+  "name": "t-state",
+  "version": "1.0.0",
   "description": "Global state manager for React hooks written in Typescript",
   "main": "index.js",
   "types": "index.d.ts",
@@ -17,6 +17,6 @@
   },
   "peerDependencies": {
     "react": "^16.12.0",
-    "typescript": "^3.7.4"
+    "typescript": "^3.7.5"
   }
 }

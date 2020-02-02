@@ -115,5 +115,8 @@ class Store {
         }, []);
         return state;
     }
+    useState(areEqual) {
+        return this.useSelector(s => s, areEqual);
+    }
 }
 exports.default = Store;
