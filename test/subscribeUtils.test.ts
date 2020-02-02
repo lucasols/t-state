@@ -1,5 +1,5 @@
 import Store from '../src';
-import { getIfKeysChange } from '../src/subscribeUtils';
+import { getIfKeysChange, getIfSelectorChange } from '../src/subscribeUtils';
 
 type TestState = {
   key1: number;
@@ -84,6 +84,82 @@ describe('getIfKeysChange', () => {
 
       ifKeyChange(
         ['key3', 'key4'],
+        () => {
+          mockCallback(current.key3.join(', '), current.key4.join(', '));
+        },
+        true,
+      );
+    });
+
+    testState.setKey('key3', [3]);
+    testState.setKey('key3', [3]);
+    testState.setKey('key3', [3]);
+    testState.setKey('key4', [4]);
+    testState.setKey('key1', 3);
+    testState.setKey('key2', 'Test');
+    testState.setKey('key1', 3);
+    testState.setKey('key1', 4);
+    testState.setKey('key3', [3]);
+    testState.setKey('key4', [4]);
+    testState.setKey('key3', [3]);
+    testState.setKey('key4', [4]);
+
+    expect(mockCallback.mock.calls).toEqual([
+      ['3', '0, 1, 2'],
+      ['3', '4'],
+    ]);
+  });
+});
+
+describe('getIfSelectorChange', () => {
+  test('call callback when keys change', () => {
+    const mockCallback = jest.fn();
+
+    testState.subscribe((prev, current) => {
+      const ifChange = getIfSelectorChange(prev, current);
+
+      ifChange(s => s.key1, mockCallback);
+    });
+
+    testState.setKey('key1', 3);
+    testState.setKey('key1', 3);
+    testState.setKey('key1', 3);
+    testState.setKey('key2', 'Test');
+    testState.setKey('key1', 3);
+    testState.setKey('key1', 4);
+
+    expect(mockCallback).toHaveBeenCalledTimes(2);
+  });
+
+  test('call callback when keys change to', () => {
+    const mockCallback = jest.fn();
+
+    testState.subscribe((prev, current) => {
+      const ifKeyChange = getIfSelectorChange(prev, current);
+
+      ifKeyChange([s => s.key1, 5], mockCallback);
+    });
+
+    testState.setKey('key1', 2);
+    testState.setKey('key1', 3);
+    testState.setKey('key1', 3);
+    testState.setKey('key2', 'Test');
+    testState.setKey('key1', 3);
+    testState.setKey('key1', 5);
+    testState.setKey('key1', 2);
+    testState.setKey('key1', 5);
+
+    expect(mockCallback).toHaveBeenCalledTimes(2);
+  });
+
+  test('call callback when keys change with deepEquality', () => {
+    const mockCallback = jest.fn();
+
+    testState.subscribe((prev, current) => {
+      const ifKeyChange = getIfSelectorChange(prev, current);
+
+      ifKeyChange(
+        s => ({ a: s.key3, b: s.key4 }),
         () => {
           mockCallback(current.key3.join(', '), current.key4.join(', '));
         },
