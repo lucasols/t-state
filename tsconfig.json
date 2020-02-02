@@ -9,6 +9,7 @@
     "noImplicitReturns": true,
     "noImplicitAny": true,
     "jsx": "react",
+    "skipLibCheck": true,
     // "noUnusedLocals": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
