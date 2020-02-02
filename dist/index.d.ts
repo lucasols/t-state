@@ -1,50 +1,38 @@
-import { anyObject, genericFunction, Serializable } from './types';
-export declare type State = anyObject<Serializable>;
-declare type Subscriber = {
-    (prev: anyObject, current: anyObject, action?: string | anyObject): void;
-};
-declare type ReducersArg = {
-    [index: string]: anyObject | undefined;
-};
-declare type Reducers<T, R = ReducersArg> = {
-    [K in keyof R]: (state: T, payload: R[K]) => T;
-};
-export declare function createStore<T extends State = State, R extends ReducersArg = ReducersArg>(name: string, { state, reducers, subscriber, }: {
-    state: T;
-    reducers?: Reducers<T, R>;
-    subscriber?: Subscriber;
-}): {
-    getState: () => T;
-    setKey: <K extends keyof T>(key: K, value: T[K]) => any;
-    dispatch: <P extends keyof R>(type: P, ...payload: R[P] extends undefined ? [undefined?] : [R[P]]) => void;
-    subscribe: (callback: genericFunction) => () => void;
-    useStore: <K extends keyof T>(key: K) => [T[K], (value: T[K]) => T[K], () => T[K]];
-};
 /**
- * Returns the state for the selected store
- * @param {String} name - The namespace for the wanted store
+ * forked from v1 of https://github.com/jhonnymichel/react-hookstore
  */
-export declare function getState<T extends State>(name: string): T;
-export declare function dispatch<T extends State>(name: string, type: string, payload?: anyObject): void;
-export declare function setKey<T extends State>(name: string, key: keyof T, value: any): any;
-/**
- * Returns a [ state, setState ] pair for the selected store. Can only be called within React Components
- * @param {String} name - The namespace for the wanted store
- * @param {String} key - The wanted state key
- */
-export declare function useStore<T extends Serializable>(name: string, key: string): [T, (value: T) => T, () => T];
-/**
- * Subscribe callback
- *
- * @callback subscribeCallback
- * @param {Object} prevState - previous state
- * @param {Object} nextState - next state
- * @param {String} action - action dispatched
- */
-/**
- * Subscribe to changes in a store
- * @param {String} name - The store name
- * @param {subscribeCallback} callback - callback to run
- */
-export declare function subscribe(name: string, callback: Subscriber): () => void;
+import { anyObj } from '@lucasols/utils/typings';
+import { Serializable } from './typings/utils';
+import { Action } from './devTools';
+export declare type State = anyObj<Serializable>;
+declare type Subscriber<T extends State> = {
+    (prev: T, current: T, action?: Action): void;
+};
+declare type ReducersPayloads = {
+    [index: string]: any;
+};
+declare type Reducers<T extends State, P extends ReducersPayloads> = {
+    [K in keyof P]: (state: T, payload: P[K]) => T;
+};
+export declare type EqualityFn<T> = (prev: Readonly<T>, current: Readonly<T>) => boolean;
+export default class Store<T extends State, P extends ReducersPayloads = ReducersPayloads, R extends Reducers<T, P> = Reducers<T, P>> {
+    readonly name?: string;
+    private state;
+    private reducers?;
+    private subscribers;
+    constructor({ name, state, reducers, }: {
+        name?: string;
+        state: T;
+        reducers?: R;
+    });
+    getState(): Readonly<T>;
+    setState(newState: T, action?: Action): void;
+    setKey<K extends keyof T>(key: K, value: T[K]): void;
+    dispatch<K extends keyof R>(type: K, ...payload: Parameters<R[K]>[1] extends undefined ? [undefined?] : [Parameters<R[K]>[1]]): void;
+    subscribe(callback: Subscriber<T>): () => void;
+    useKey<K extends keyof T>(key: K, areEqual?: EqualityFn<T[K]>): readonly [Readonly<T[K]>, (value: T[K]) => void, () => Readonly<T[K]>];
+    useSlice<K extends keyof T>(...keys: K[]): Readonly<Pick<T, K>>;
+    useSlice<K extends keyof T>(keys: K[], areEqual: EqualityFn<Pick<T, K>>): Readonly<Pick<T, K>>;
+    useSelector<S extends (state: T) => any>(selector: S, areEqual?: EqualityFn<ReturnType<S>>): Readonly<ReturnType<S>>;
+}
 export {};

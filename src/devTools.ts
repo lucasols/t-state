@@ -1,8 +1,18 @@
 import { State } from '.';
+import { Serializable } from './typings/utils';
 
 let id = 0;
 
-export default (storeName: string, initialState: State, setState: (state: State) => void) => {
+export type Action = {
+  type: string;
+  [k: string]: Serializable;
+};
+
+export default (
+  storeName: string,
+  initialState: State,
+  setState: (state: State) => void,
+) => {
   const reduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION__;
 
   const instanceID = id;
@@ -39,7 +49,7 @@ export default (storeName: string, initialState: State, setState: (state: State)
     }
   });
 
-  return (_state: State, newState: State, action: string) => {
+  return (_state: State, newState: State, action: Action) => {
     devTools.send(action, newState, {}, instanceID);
   };
 };

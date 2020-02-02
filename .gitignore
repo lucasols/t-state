@@ -10,3 +10,4 @@ production
 compilation-stats.json
 stats.json
 resources
+coverage

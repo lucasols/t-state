@@ -112,6 +112,7 @@
     ],
     "no-trailing-spaces": 0,
     "eol-last": 0,
+    "lines-between-class-members": 0,
 
     "import/no-extraneous-dependencies": 0,
     "import/extensions": 0,
@@ -119,6 +120,7 @@
     "import/first": 0,
     "import/prefer-default-export": 0,
     "import/order": 0,
+    "import/no-cycle": 0,
 
     "react/sort-comp": [
       "error",
@@ -168,9 +170,32 @@
     "@typescript-eslint/prefer-interface": 0,
     "@typescript-eslint/no-explicit-any": 0,
     "@typescript-eslint/no-use-before-define": 0,
-    "no-useless-constructor": 0,
-    "@typescript-eslint/no-useless-constructor": "error",
-    "@typescript-eslint/no-non-null-assertion": 0
+    "@typescript-eslint/no-non-null-assertion": 0,
+    "space-before-function-paren": 0,
+    "@typescript-eslint/space-before-function-paren": [
+      "error",
+      {
+        "anonymous": "always",
+        "named": "never",
+        "asyncArrow": "always"
+      }
+    ],
+
+    /* jest */
+    "jest/expect-expect": "error"
   },
-  "extends": ["airbnb", "plugin:@typescript-eslint/recommended"]
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "rules": {
+        "no-dupe-class-members": "off"
+      }
+    }
+  ],
+  "extends": [
+    "airbnb-typescript",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:jest/recommended",
+    "plugin:jest/style"
+  ]
 }

@@ -1,68 +1,27 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-// TODO: test if it is performant
-function getIfKeyChangeTo(prev, current) {
-    return (key, target, callback) => {
-        if (Array.isArray(key)) {
-            let hasChanged = false;
-            let allMatchTarget = true;
-            for (let i = 0; i < key.length; i++) {
-                const currentElem = current[key[i]];
-                const lastElem = prev[key[i]];
-                const targetElem = target[i];
-                if (process.env.NODE_ENV === 'development') {
-                    if (currentElem === undefined && targetElem !== undefined) {
-                        throw new Error(`key: ${key} does not exist`);
-                    }
-                }
-                if (!hasChanged)
-                    hasChanged = currentElem !== lastElem;
-                if (currentElem !== targetElem)
-                    allMatchTarget = false;
-            }
-            if (hasChanged && allMatchTarget)
+const shallowEqual_1 = require("@lucasols/utils/shallowEqual");
+const pick_1 = require("@lucasols/utils/pick");
+const fast_deep_equal_1 = __importDefault(require("fast-deep-equal"));
+function getIfKeysChange(prev, current) {
+    return (keys, callback, checkDeepEquality = false, deepEqualityFn = fast_deep_equal_1.default) => {
+        const areEqual = checkDeepEquality ? deepEqualityFn : shallowEqual_1.shallowEqual;
+        const verifyIfChangesOnly = Array.isArray(keys);
+        const changeToObjKeys = (verifyIfChangesOnly
+            ? keys
+            : Object.keys(keys));
+        const currentSlice = pick_1.pick(current, changeToObjKeys);
+        if (!areEqual(pick_1.pick(prev, changeToObjKeys), currentSlice)) {
+            if (verifyIfChangesOnly) {
                 callback();
-        }
-        else if (current[key] !== prev[key] && current[key] === target) {
-            // check if key exists
-            if (process.env.NODE_ENV === 'development') {
-                if (current[key] === undefined && target !== undefined) {
-                    throw new Error(`key: ${key} does not exist`);
-                }
             }
-            callback();
+            else if (areEqual(keys, currentSlice)) {
+                callback();
+            }
         }
     };
 }
-exports.getIfKeyChangeTo = getIfKeyChangeTo;
-// IDEA: simplify with upper function
-function getIfKeyChange(prev, current) {
-    return (key, callback) => {
-        if (Array.isArray(key)) {
-            let hasChanged = false;
-            for (let i = 0; i < key.length; i++) {
-                const currentElem = current[key[i]];
-                const lastElem = prev[key[i]];
-                if (process.env.NODE_ENV === 'development') {
-                    if (currentElem === undefined) {
-                        throw new Error(`key: ${key} does not exist`);
-                    }
-                }
-                if (!hasChanged)
-                    hasChanged = currentElem !== lastElem;
-            }
-            if (hasChanged)
-                callback();
-        }
-        else if (current[key] !== prev[key]) {
-            // check if key exists
-            if (process.env.NODE_ENV === 'development') {
-                if (current[key] === undefined) {
-                    throw new Error(`key: ${key} does not exist`);
-                }
-            }
-            callback();
-        }
-    };
-}
-exports.getIfKeyChange = getIfKeyChange;
+exports.getIfKeysChange = getIfKeysChange;
