@@ -15,15 +15,15 @@ export const fastDeepEqual = fastDeepEqualFn;
 
 export type State = anyObj<Serializable>;
 
-type Subscriber<T extends State> = {
+export type Subscriber<T extends State> = {
   (prev: T, current: T, action?: Action): void;
 };
 
-type ReducersPayloads = {
+export type ReducersPayloads = {
   [index: string]: any;
 };
 
-type Reducers<T extends State, P extends ReducersPayloads> = {
+export type Reducers<T extends State, P extends ReducersPayloads> = {
   [K in keyof P]: (state: T, payload: P[K]) => T;
 };
 
