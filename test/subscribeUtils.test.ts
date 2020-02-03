@@ -1,4 +1,4 @@
-import Store from '../src';
+import Store, { fastDeepEqual } from '../src';
 import { getIfKeysChange, getIfSelectorChange } from '../src/subscribeUtils';
 
 type TestState = {
@@ -82,13 +82,9 @@ describe('getIfKeysChange', () => {
     testState.subscribe((prev, current) => {
       const ifKeyChange = getIfKeysChange(prev, current);
 
-      ifKeyChange(
-        ['key3', 'key4'],
-        () => {
-          mockCallback(current.key3.join(', '), current.key4.join(', '));
-        },
-        true,
-      );
+      ifKeyChange(['key3', 'key4'], () => {
+        mockCallback(current.key3.join(', '), current.key4.join(', '));
+      });
     });
 
     testState.setKey('key3', [3]);
@@ -156,14 +152,14 @@ describe('getIfSelectorChange', () => {
     const mockCallback = jest.fn();
 
     testState.subscribe((prev, current) => {
-      const ifKeyChange = getIfSelectorChange(prev, current);
+      const ifSelectorChange = getIfSelectorChange(prev, current);
 
-      ifKeyChange(
+      ifSelectorChange(
         s => ({ a: s.key3, b: s.key4 }),
         () => {
           mockCallback(current.key3.join(', '), current.key4.join(', '));
         },
-        true,
+        fastDeepEqual,
       );
     });
 

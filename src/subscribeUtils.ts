@@ -2,16 +2,13 @@ import { anyFunction } from '@lucasols/utils/typings';
 import { State, EqualityFn } from '.';
 import { shallowEqual } from '@lucasols/utils/shallowEqual';
 import { pick } from '@lucasols/utils/pick';
-import fastDeepEqual from 'fast-deep-equal';
 
 export function getIfKeysChange<T extends State>(prev: T, current: T) {
   return <K extends keyof T>(
     keys: K[] | Pick<T, K>,
     callback: anyFunction,
-    checkDeepEquality = false,
-    deepEqualityFn: EqualityFn<Pick<T, K>> = fastDeepEqual,
+    areEqual: EqualityFn<Pick<T, K>> = shallowEqual,
   ) => {
-    const areEqual = checkDeepEquality ? deepEqualityFn : shallowEqual;
     const verifyIfChangesOnly = Array.isArray(keys);
     const changeToObjKeys = (verifyIfChangesOnly
       ? keys
@@ -32,10 +29,8 @@ export function getIfSelectorChange<T extends State>(prev: T, current: T) {
   return <S extends (state: T) => any>(
     selector: S | [S, ReturnType<S>],
     callback: anyFunction,
-    checkDeepEquality = false,
-    deepEqualityFn: EqualityFn<ReturnType<S>> = fastDeepEqual,
+    areEqual: EqualityFn<ReturnType<S>> = shallowEqual,
   ) => {
-    const areEqual = checkDeepEquality ? deepEqualityFn : shallowEqual;
     const verifyIfChangesTo = Array.isArray(selector);
     const selectorFn = verifyIfChangesTo
       ? (selector as [S, any])[0]
