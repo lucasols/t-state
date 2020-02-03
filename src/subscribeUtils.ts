@@ -3,7 +3,6 @@ import { State, EqualityFn } from '.';
 import { shallowEqual } from '@lucasols/utils/shallowEqual';
 import { pick } from '@lucasols/utils/pick';
 import fastDeepEqual from 'fast-deep-equal';
-import { type } from 'os';
 
 export function getIfKeysChange<T extends State>(prev: T, current: T) {
   return <K extends keyof T>(

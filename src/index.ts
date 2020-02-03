@@ -3,11 +3,15 @@
  */
 // TODO: remove fork comment and add credit to readme
 import { anyObj } from '@lucasols/utils/typings';
-import { shallowEqual } from '@lucasols/utils/shallowEqual';
+import { shallowEqual as shallowEqualFn } from '@lucasols/utils/shallowEqual';
 import { pick } from '@lucasols/utils/pick';
 import { Serializable } from './typings/utils';
 import devtools, { Action } from './devTools';
 import { useState, useEffect } from 'react';
+import fastDeepEqualFn from 'fast-deep-equal';
+
+export const shallowEqual = shallowEqualFn;
+export const fastDeepEqual = fastDeepEqualFn;
 
 export type State = anyObj<Serializable>;
 
@@ -180,7 +184,7 @@ export default class Store<
 
   useSelector<S extends (state: T) => any>(
     selector: S,
-    areEqual?: EqualityFn<ReturnType<S>>,
+    areEqual: EqualityFn<ReturnType<S>> | false = shallowEqual,
   ): Readonly<ReturnType<S>> {
     const [state, set] = useState(selector(this.state));
 

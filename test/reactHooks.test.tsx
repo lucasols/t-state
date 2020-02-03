@@ -172,7 +172,10 @@ describe('hooks ', () => {
     let testState: Store<TestState, Reducers>;
 
     const Component = ({ onRender }: { onRender?: anyFunction }) => {
-      const { key1, key2, key3 } = testState.useSlice(['key1', 'key2', 'key3'], shallowEqual);
+      const { key1, key2, key3 } = testState.useSlice(
+        ['key1', 'key2', 'key3'],
+        shallowEqual,
+      );
 
       if (onRender) {
         onRender();
@@ -389,8 +392,17 @@ describe('hooks ', () => {
 
     let testState: Store<TestState, Reducers>;
 
-    const Component = ({ onRender }: { onRender?: anyFunction }) => {
-      const sum = testState.useSelector(state => state.key1 + state.key3[0]);
+    const Component = ({
+      onRender,
+      useShallowEqual,
+    }: {
+      onRender?: anyFunction;
+      useShallowEqual?: boolean;
+    }) => {
+      const sum = testState.useSelector(
+        state => state.key1 + state.key3[0],
+        useShallowEqual ? undefined : false,
+      );
 
       if (onRender) {
         onRender();
@@ -476,18 +488,68 @@ describe('hooks ', () => {
       expect(mockSubscriber).toHaveBeenCalledTimes(7);
     });
 
+    test('shallow equality check disabled', () => {
+      const onRender = jest.fn();
+      const mockSubscriber = jest.fn();
+
+      testState.subscribe(mockSubscriber);
+
+      const Component2 = () => {
+        const state = testState.useSelector(s => s, false);
+
+        onRender(state.key1, state.key2, state.key3);
+
+        return <div data-testid="another-component">{state.key1}</div>;
+      };
+
+      const { getByTestId } = render(<Component2 />);
+
+      const div = getByTestId('another-component');
+
+      expect(div).toHaveTextContent('1');
+
+      act(() => {
+        testState.setKey('key1', 1);
+      });
+      act(() => {
+        testState.setKey('key3', [0]);
+      });
+      act(() => {
+        testState.setKey('key2', '👍');
+      });
+
+      act(() => {
+        testState.setKey('key1', 1);
+      });
+      act(() => {
+        testState.setKey('key3', [0]);
+      });
+      act(() => {
+        testState.setKey('key2', '👍');
+      });
+
+      act(() => {
+        testState.dispatch('changeMultipleKeys', {
+          key2: '👍',
+          key1: 1,
+        });
+      });
+
+      expect(onRender).toHaveBeenCalledTimes(8);
+      expect(mockSubscriber).toHaveBeenCalledTimes(7);
+    });
+
     test('not render when the equality function return true', () => {
       const onRender = jest.fn();
       const mockSubscriber = jest.fn();
 
       const Component2 = () => {
-        const state = testState.useSelector(s => s, (_, current) =>
-          current.key1 === 1
+        const state = testState.useSelector(
+          s => s,
+          (_, current) => current.key1 === 1,
         );
 
-        if (onRender) {
-          onRender();
-        }
+        onRender();
 
         return <div data-testid="another-component">{state.key1}</div>;
       };
