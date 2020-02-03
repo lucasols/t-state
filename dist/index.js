@@ -7,6 +7,9 @@ const shallowEqual_1 = require("@lucasols/utils/shallowEqual");
 const pick_1 = require("@lucasols/utils/pick");
 const devTools_1 = __importDefault(require("./devTools"));
 const react_1 = require("react");
+const fast_deep_equal_1 = __importDefault(require("fast-deep-equal"));
+exports.shallowEqual = shallowEqual_1.shallowEqual;
+exports.fastDeepEqual = fast_deep_equal_1.default;
 class Store {
     constructor({ name, state, reducers, }) {
         this.subscribers = [];
@@ -85,7 +88,7 @@ class Store {
     }
     useSlice(...args) {
         const keys = (typeof args[0] === 'string' ? args : args[0]);
-        const areEqual = typeof args[1] === 'function' ? args[1] : shallowEqual_1.shallowEqual;
+        const areEqual = typeof args[1] === 'function' ? args[1] : exports.shallowEqual;
         const [state, set] = react_1.useState(pick_1.pick(this.state, keys));
         react_1.useEffect(() => {
             const setter = this.subscribe((prev, current) => {
@@ -98,7 +101,7 @@ class Store {
         }, []);
         return state;
     }
-    useSelector(selector, areEqual) {
+    useSelector(selector, areEqual = exports.shallowEqual) {
         const [state, set] = react_1.useState(selector(this.state));
         react_1.useEffect(() => {
             const setterSubscriber = this.subscribe((prev, current) => {

@@ -2,8 +2,11 @@
  * forked from v1 of https://github.com/jhonnymichel/react-hookstore
  */
 import { anyObj } from '@lucasols/utils/typings';
+import { shallowEqual as shallowEqualFn } from '@lucasols/utils/shallowEqual';
 import { Serializable } from './typings/utils';
 import { Action } from './devTools';
+export declare const shallowEqual: typeof shallowEqualFn;
+export declare const fastDeepEqual: (a: any, b: any) => boolean;
 export declare type State = anyObj<Serializable>;
 declare type Subscriber<T extends State> = {
     (prev: T, current: T, action?: Action): void;
@@ -33,7 +36,7 @@ export default class Store<T extends State, P extends ReducersPayloads = Reducer
     useKey<K extends keyof T>(key: K, areEqual?: EqualityFn<T[K]>): readonly [Readonly<T[K]>, (value: T[K]) => void, () => Readonly<T[K]>];
     useSlice<K extends keyof T>(...keys: K[]): Readonly<Pick<T, K>>;
     useSlice<K extends keyof T>(keys: K[], areEqual: EqualityFn<Pick<T, K>>): Readonly<Pick<T, K>>;
-    useSelector<S extends (state: T) => any>(selector: S, areEqual?: EqualityFn<ReturnType<S>>): Readonly<ReturnType<S>>;
+    useSelector<S extends (state: T) => any>(selector: S, areEqual?: EqualityFn<ReturnType<S>> | false): Readonly<ReturnType<S>>;
     useState(areEqual?: EqualityFn<T>): Readonly<T>;
 }
 export {};
