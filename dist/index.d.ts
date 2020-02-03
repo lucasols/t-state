@@ -8,13 +8,13 @@ import { Action } from './devTools';
 export declare const shallowEqual: typeof shallowEqualFn;
 export declare const fastDeepEqual: (a: any, b: any) => boolean;
 export declare type State = anyObj<Serializable>;
-declare type Subscriber<T extends State> = {
+export declare type Subscriber<T extends State> = {
     (prev: T, current: T, action?: Action): void;
 };
-declare type ReducersPayloads = {
+export declare type ReducersPayloads = {
     [index: string]: any;
 };
-declare type Reducers<T extends State, P extends ReducersPayloads> = {
+export declare type Reducers<T extends State, P extends ReducersPayloads> = {
     [K in keyof P]: (state: T, payload: P[K]) => T;
 };
 export declare type EqualityFn<T> = (prev: Readonly<T>, current: Readonly<T>) => boolean;
@@ -39,4 +39,3 @@ export default class Store<T extends State, P extends ReducersPayloads = Reducer
     useSelector<S extends (state: T) => any>(selector: S, areEqual?: EqualityFn<ReturnType<S>> | false): Readonly<ReturnType<S>>;
     useState(areEqual?: EqualityFn<T>): Readonly<T>;
 }
-export {};
