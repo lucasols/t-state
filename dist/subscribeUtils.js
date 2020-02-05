@@ -29,10 +29,10 @@ function getIfSelectorChange(prev, current) {
         const currentSelection = selectorFn(current);
         if (!areEqual(selectorFn(prev), currentSelection)) {
             if (!verifyIfChangesTo) {
-                callback();
+                callback(currentSelection);
             }
             else if (areEqual(currentSelection, selector[1])) {
-                callback();
+                callback(currentSelection);
             }
         }
     };
