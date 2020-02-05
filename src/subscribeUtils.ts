@@ -28,7 +28,7 @@ export function getIfKeysChange<T extends State>(prev: T, current: T) {
 export function getIfSelectorChange<T extends State>(prev: T, current: T) {
   return <S extends (state: T) => any>(
     selector: S | [S, ReturnType<S>],
-    callback: anyFunction,
+    callback: (currentSelection: ReturnType<S>) => any,
     areEqual: EqualityFn<ReturnType<S>> = shallowEqual,
   ) => {
     const verifyIfChangesTo = Array.isArray(selector);
@@ -39,11 +39,11 @@ export function getIfSelectorChange<T extends State>(prev: T, current: T) {
 
     if (!areEqual(selectorFn(prev), currentSelection)) {
       if (!verifyIfChangesTo) {
-        callback();
+        callback(currentSelection);
       } else if (
         areEqual(currentSelection, (selector as [S, ReturnType<S>])[1])
       ) {
-        callback();
+        callback(currentSelection);
       }
     }
   };
