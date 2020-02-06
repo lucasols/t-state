@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/extend-expect';
 import { act, fireEvent, render } from '@testing-library/react';
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import Store from '../src';
 import { anyFunction } from '@lucasols/utils/typings';
 import { shallowEqual } from '@lucasols/utils';
@@ -591,6 +591,50 @@ describe('hooks ', () => {
 
       expect(onRender).toHaveBeenCalledTimes(1);
       expect(mockSubscriber).toHaveBeenCalledTimes(7);
+    });
+
+    test('update selector if selector deps change', () => {
+      const mockSubscriber = jest.fn();
+      testState.subscribe(mockSubscriber);
+      let idCounter = 1;
+
+      const Component3 = () => {
+        const [selectorDep, setselectorDep] = useState(1);
+
+        const id = useRef(idCounter++);
+        const state = testState.useSelector(
+          s => ({ value: selectorDep + s.key1 }),
+          undefined,
+          [selectorDep],
+        );
+
+        return (
+          <div>
+            <span data-testid="another-component">{state.value}</span>
+            <span data-testid="id-component" onClick={() => setselectorDep(2)}>
+              {id.current}
+            </span>
+          </div>
+        );
+      };
+
+      const { getByTestId } = render(<Component3 />);
+      expect(getByTestId('another-component')).toHaveTextContent('2');
+
+      fireEvent.click(getByTestId('id-component'));
+      expect(getByTestId('another-component')).toHaveTextContent('3');
+
+      act(() => {
+        testState.setKey('key1', 2);
+      });
+      act(() => {
+        testState.setKey('key1', 2);
+      });
+
+      expect(getByTestId('another-component')).toHaveTextContent('4');
+      expect(getByTestId('id-component')).toHaveTextContent('1');
+
+      expect(mockSubscriber).toHaveBeenCalledTimes(2);
     });
   });
 });

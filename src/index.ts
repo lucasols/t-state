@@ -7,7 +7,7 @@ import { shallowEqual as shallowEqualFn } from '@lucasols/utils/shallowEqual';
 import { pick } from '@lucasols/utils/pick';
 import { Serializable } from './typings/utils';
 import devtools, { Action } from './devTools';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import fastDeepEqualFn from 'fast-deep-equal';
 
 export const shallowEqual = shallowEqualFn;
@@ -185,8 +185,10 @@ export default class Store<
   useSelector<S extends (state: T) => any>(
     selector: S,
     areEqual: EqualityFn<ReturnType<S>> | false = shallowEqual,
+    selectorDeps: any[] = [],
   ): Readonly<ReturnType<S>> {
     const [state, set] = useState(selector(this.state));
+    const isFirstRender = useRef(true);
 
     useEffect(() => {
       const setterSubscriber = this.subscribe((prev, current) => {
@@ -198,8 +200,14 @@ export default class Store<
         } else if (currentSelection !== selector(prev)) set(currentSelection);
       });
 
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+      } else {
+        set(selector(this.state));
+      }
+
       return setterSubscriber;
-    }, []);
+    }, selectorDeps);
 
     return state;
   }
