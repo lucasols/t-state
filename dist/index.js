@@ -101,8 +101,9 @@ class Store {
         }, []);
         return state;
     }
-    useSelector(selector, areEqual = exports.shallowEqual) {
+    useSelector(selector, areEqual = exports.shallowEqual, selectorDeps = []) {
         const [state, set] = react_1.useState(selector(this.state));
+        const isFirstRender = react_1.useRef(true);
         react_1.useEffect(() => {
             const setterSubscriber = this.subscribe((prev, current) => {
                 const currentSelection = selector(current);
@@ -114,8 +115,14 @@ class Store {
                 else if (currentSelection !== selector(prev))
                     set(currentSelection);
             });
+            if (isFirstRender.current) {
+                isFirstRender.current = false;
+            }
+            else {
+                set(selector(this.state));
+            }
             return setterSubscriber;
-        }, []);
+        }, selectorDeps);
         return state;
     }
     useState(areEqual) {

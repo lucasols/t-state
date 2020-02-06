@@ -36,6 +36,6 @@ export default class Store<T extends State, P extends ReducersPayloads = Reducer
     useKey<K extends keyof T>(key: K, areEqual?: EqualityFn<T[K]>): readonly [Readonly<T[K]>, (value: T[K]) => void, () => Readonly<T[K]>];
     useSlice<K extends keyof T>(...keys: K[]): Readonly<Pick<T, K>>;
     useSlice<K extends keyof T>(keys: K[], areEqual: EqualityFn<Pick<T, K>>): Readonly<Pick<T, K>>;
-    useSelector<S extends (state: T) => any>(selector: S, areEqual?: EqualityFn<ReturnType<S>> | false): Readonly<ReturnType<S>>;
+    useSelector<S extends (state: T) => any>(selector: S, areEqual?: EqualityFn<ReturnType<S>> | false, selectorDeps?: any[]): Readonly<ReturnType<S>>;
     useState(areEqual?: EqualityFn<T>): Readonly<T>;
 }
