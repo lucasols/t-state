@@ -5,7 +5,7 @@ exports.default = (storeName, initialState, setState) => {
     const reduxDevTools = window.__REDUX_DEVTOOLS_EXTENSION__;
     const instanceID = id;
     id += 1;
-    const name = `react-hookstore - ${storeName}`;
+    const name = `t-state - ${storeName}`;
     const features = {
         jump: true,
     };
