@@ -18,7 +18,7 @@ export default (
   const instanceID = id;
   id += 1;
 
-  const name = `react-hookstore - ${storeName}`;
+  const name = `t-state - ${storeName}`;
   const features = {
     jump: true,
   };
