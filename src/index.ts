@@ -12,7 +12,6 @@ import fastDeepEqualFn from 'fast-deep-equal';
 
 const isDev = process.env.NODE_ENV === 'development';
 
-
 export const shallowEqual = shallowEqualFn;
 export const fastDeepEqual = fastDeepEqualFn;
 

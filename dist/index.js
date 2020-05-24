@@ -8,6 +8,7 @@ const pick_1 = require("@lucasols/utils/pick");
 const devTools_1 = __importDefault(require("./devTools"));
 const react_1 = require("react");
 const fast_deep_equal_1 = __importDefault(require("fast-deep-equal"));
+const isDev = process.env.NODE_ENV === 'development';
 exports.shallowEqual = shallowEqual_1.shallowEqual;
 exports.fastDeepEqual = fast_deep_equal_1.default;
 class Store {
@@ -16,7 +17,7 @@ class Store {
         this.name = name;
         this.state = state;
         this.reducers = reducers;
-        const devToolsMiddeware = process.env.NODE_ENV === 'development' &&
+        const devToolsMiddeware = isDev &&
             typeof window !== 'undefined' &&
             (window.__REDUX_DEVTOOLS_EXTENSION__ ? devTools_1.default : false);
         if (devToolsMiddeware && name) {
