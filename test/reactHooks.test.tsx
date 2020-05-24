@@ -174,7 +174,7 @@ describe('hooks ', () => {
     const Component = ({ onRender }: { onRender?: anyFunction }) => {
       const { key1, key2, key3 } = testState.useSlice(
         ['key1', 'key2', 'key3'],
-        shallowEqual,
+        { equalityFn: shallowEqual },
       );
 
       if (onRender) {
@@ -399,10 +399,9 @@ describe('hooks ', () => {
       onRender?: anyFunction;
       useShallowEqual?: boolean;
     }) => {
-      const sum = testState.useSelector(
-        state => state.key1 + state.key3[0],
-        useShallowEqual ? undefined : false,
-      );
+      const sum = testState.useSelector(state => state.key1 + state.key3[0], {
+        equalityFn: useShallowEqual ? undefined : false,
+      });
 
       if (onRender) {
         onRender();
@@ -495,7 +494,7 @@ describe('hooks ', () => {
       testState.subscribe(mockSubscriber);
 
       const Component2 = () => {
-        const state = testState.useSelector(s => s, false);
+        const state = testState.useSelector(s => s, { equalityFn: false });
 
         onRender(state.key1, state.key2, state.key3);
 
@@ -544,10 +543,9 @@ describe('hooks ', () => {
       const mockSubscriber = jest.fn();
 
       const Component2 = () => {
-        const state = testState.useSelector(
-          s => s,
-          (_, current) => current.key1 === 1,
-        );
+        const state = testState.useSelector(s => s, {
+          equalityFn: (_, current) => current.key1 === 1,
+        });
 
         onRender();
 
@@ -604,8 +602,7 @@ describe('hooks ', () => {
         const id = useRef(idCounter++);
         const state = testState.useSelector(
           s => ({ value: selectorDep + s.key1 }),
-          undefined,
-          [selectorDep],
+          { selectorDeps: [selectorDep] },
         );
 
         return (

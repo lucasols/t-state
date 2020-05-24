@@ -126,13 +126,16 @@ export default class Store<
     };
   }
 
-  useKey<K extends keyof T>(key: K, areEqual?: EqualityFn<T[K]>) {
+  useKey<K extends keyof T>(
+    key: K,
+    { equalityFn }: { equalityFn?: EqualityFn<T[K]> } = {},
+  ) {
     const [state, set] = useState<Readonly<T[K]>>(this.state[key]);
 
     useEffect(() => {
       const setter = this.subscribe((prev, current) => {
-        if (areEqual) {
-          if (!areEqual(prev[key], current[key])) {
+        if (equalityFn) {
+          if (!equalityFn(prev[key], current[key])) {
             set(current[key]);
           }
         } else if (prev[key] !== current[key]) {
@@ -160,13 +163,16 @@ export default class Store<
   useSlice<K extends keyof T>(...keys: K[]): Readonly<Pick<T, K>>;
   useSlice<K extends keyof T>(
     keys: K[],
-    areEqual: EqualityFn<Pick<T, K>>,
+    options: { equalityFn?: EqualityFn<Pick<T, K>> },
   ): Readonly<Pick<T, K>>;
   useSlice<K extends keyof T>(
-    ...args: (K[] | EqualityFn<Pick<T, K>>)[]
+    ...args: K[] | [K[], { equalityFn?: EqualityFn<Pick<T, K>> }]
   ): Readonly<Pick<T, K>> {
     const keys = (typeof args[0] === 'string' ? args : args[0]) as K[];
-    const areEqual = typeof args[1] === 'function' ? args[1] : shallowEqual;
+    const areEqual =
+      typeof args[1] === 'object' && args[1].equalityFn
+        ? args[1].equalityFn
+        : shallowEqual;
 
     const [state, set] = useState(pick(this.state, keys));
 
@@ -187,8 +193,13 @@ export default class Store<
 
   useSelector<S extends (state: T) => any>(
     selector: S,
-    areEqual: EqualityFn<ReturnType<S>> | false = shallowEqual,
-    selectorDeps: any[] = [],
+    {
+      equalityFn = shallowEqual,
+      selectorDeps = [],
+    }: {
+      equalityFn?: EqualityFn<ReturnType<S>> | false;
+      selectorDeps?: any[];
+    } = {},
   ): Readonly<ReturnType<S>> {
     const [state, set] = useState(selector(this.state));
     const isFirstRender = useRef(true);
@@ -196,8 +207,8 @@ export default class Store<
     useEffect(() => {
       const setterSubscriber = this.subscribe((prev, current) => {
         const currentSelection = selector(current);
-        if (areEqual) {
-          if (!areEqual(selector(prev), currentSelection)) {
+        if (equalityFn) {
+          if (!equalityFn(selector(prev), currentSelection)) {
             set(currentSelection);
           }
         } else if (currentSelection !== selector(prev)) set(currentSelection);
@@ -215,7 +226,7 @@ export default class Store<
     return state;
   }
 
-  useState(areEqual?: EqualityFn<T>) {
-    return this.useSelector(s => s, areEqual);
+  useState(equalityFn?: EqualityFn<T>) {
+    return this.useSelector(s => s, { equalityFn });
   }
 }
