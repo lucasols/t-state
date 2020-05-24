@@ -10,9 +10,13 @@ import devtools, { Action } from './devTools';
 import { useState, useEffect, useRef } from 'react';
 import fastDeepEqualFn from 'fast-deep-equal';
 
+const isDev = process.env.NODE_ENV === 'development';
+
+
 export const shallowEqual = shallowEqualFn;
 export const fastDeepEqual = fastDeepEqualFn;
 
+// TODO: allow state to be any serializable value
 export type State = anyObj<Serializable>;
 
 export type Subscriber<T extends State> = {
@@ -56,7 +60,7 @@ export default class Store<
     this.reducers = reducers;
 
     const devToolsMiddeware =
-      process.env.NODE_ENV === 'development' &&
+      isDev &&
       typeof window !== 'undefined' &&
       ((window as any).__REDUX_DEVTOOLS_EXTENSION__ ? devtools : false);
 
