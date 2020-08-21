@@ -3,14 +3,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.deepEqual = exports.shallowEqual = void 0;
 const shallowEqual_1 = require("@lucasols/utils/shallowEqual");
 const pick_1 = require("@lucasols/utils/pick");
 const devTools_1 = __importDefault(require("./devTools"));
 const react_1 = require("react");
-const fast_deep_equal_1 = __importDefault(require("fast-deep-equal"));
+const lite_1 = require("dequal/lite");
 const isDev = process.env.NODE_ENV === 'development';
 exports.shallowEqual = shallowEqual_1.shallowEqual;
-exports.fastDeepEqual = fast_deep_equal_1.default;
+exports.deepEqual = lite_1.dequal;
 class Store {
     constructor({ name, state, reducers, }) {
         this.subscribers = [];
@@ -65,12 +66,12 @@ class Store {
             this.subscribers.splice(this.subscribers.indexOf(callback), 1);
         };
     }
-    useKey(key, areEqual) {
+    useKey(key, { equalityFn } = {}) {
         const [state, set] = react_1.useState(this.state[key]);
         react_1.useEffect(() => {
             const setter = this.subscribe((prev, current) => {
-                if (areEqual) {
-                    if (!areEqual(prev[key], current[key])) {
+                if (equalityFn) {
+                    if (!equalityFn(prev[key], current[key])) {
                         set(current[key]);
                     }
                 }
@@ -89,7 +90,9 @@ class Store {
     }
     useSlice(...args) {
         const keys = (typeof args[0] === 'string' ? args : args[0]);
-        const areEqual = typeof args[1] === 'function' ? args[1] : exports.shallowEqual;
+        const areEqual = typeof args[1] === 'object' && args[1].equalityFn
+            ? args[1].equalityFn
+            : exports.shallowEqual;
         const [state, set] = react_1.useState(pick_1.pick(this.state, keys));
         react_1.useEffect(() => {
             const setter = this.subscribe((prev, current) => {
@@ -102,14 +105,14 @@ class Store {
         }, []);
         return state;
     }
-    useSelector(selector, areEqual = exports.shallowEqual, selectorDeps = []) {
+    useSelector(selector, { equalityFn = exports.shallowEqual, selectorDeps = [], } = {}) {
         const [state, set] = react_1.useState(selector(this.state));
         const isFirstRender = react_1.useRef(true);
         react_1.useEffect(() => {
             const setterSubscriber = this.subscribe((prev, current) => {
                 const currentSelection = selector(current);
-                if (areEqual) {
-                    if (!areEqual(selector(prev), currentSelection)) {
+                if (equalityFn) {
+                    if (!equalityFn(selector(prev), currentSelection)) {
                         set(currentSelection);
                     }
                 }
@@ -126,8 +129,8 @@ class Store {
         }, selectorDeps);
         return state;
     }
-    useState(areEqual) {
-        return this.useSelector(s => s, areEqual);
+    useState(equalityFn) {
+        return this.useSelector(s => s, { equalityFn });
     }
 }
 exports.default = Store;

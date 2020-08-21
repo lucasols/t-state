@@ -5,8 +5,9 @@ import { anyObj } from '@lucasols/utils/typings';
 import { shallowEqual as shallowEqualFn } from '@lucasols/utils/shallowEqual';
 import { Serializable } from './typings/utils';
 import { Action } from './devTools';
+import { dequal } from 'dequal/lite';
 export declare const shallowEqual: typeof shallowEqualFn;
-export declare const fastDeepEqual: (a: any, b: any) => boolean;
+export declare const deepEqual: typeof dequal;
 export declare type State = anyObj<Serializable>;
 export declare type Subscriber<T extends State> = {
     (prev: T, current: T, action?: Action): void;
@@ -33,9 +34,16 @@ export default class Store<T extends State, P extends ReducersPayloads = Reducer
     setKey<K extends keyof T>(key: K, value: T[K]): void;
     dispatch<K extends keyof R>(type: K, ...payload: Parameters<R[K]>[1] extends undefined ? [undefined?] : [Parameters<R[K]>[1]]): void;
     subscribe(callback: Subscriber<T>): () => void;
-    useKey<K extends keyof T>(key: K, areEqual?: EqualityFn<T[K]>): readonly [Readonly<T[K]>, (value: T[K]) => void, () => Readonly<T[K]>];
+    useKey<K extends keyof T>(key: K, { equalityFn }?: {
+        equalityFn?: EqualityFn<T[K]>;
+    }): readonly [Readonly<T[K]>, (value: T[K]) => void, () => Readonly<T[K]>];
     useSlice<K extends keyof T>(...keys: K[]): Readonly<Pick<T, K>>;
-    useSlice<K extends keyof T>(keys: K[], areEqual: EqualityFn<Pick<T, K>>): Readonly<Pick<T, K>>;
-    useSelector<S extends (state: T) => any>(selector: S, areEqual?: EqualityFn<ReturnType<S>> | false, selectorDeps?: any[]): Readonly<ReturnType<S>>;
-    useState(areEqual?: EqualityFn<T>): Readonly<T>;
+    useSlice<K extends keyof T>(keys: K[], options: {
+        equalityFn?: EqualityFn<Pick<T, K>>;
+    }): Readonly<Pick<T, K>>;
+    useSelector<S extends (state: T) => any>(selector: S, { equalityFn, selectorDeps, }?: {
+        equalityFn?: EqualityFn<ReturnType<S>> | false;
+        selectorDeps?: any[];
+    }): Readonly<ReturnType<S>>;
+    useState(equalityFn?: EqualityFn<T>): Readonly<T>;
 }

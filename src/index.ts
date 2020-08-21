@@ -8,12 +8,12 @@ import { pick } from '@lucasols/utils/pick';
 import { Serializable } from './typings/utils';
 import devtools, { Action } from './devTools';
 import { useState, useEffect, useRef } from 'react';
-import fastDeepEqualFn from 'fast-deep-equal';
+import { dequal } from 'dequal/lite';
 
 const isDev = process.env.NODE_ENV === 'development';
 
 export const shallowEqual = shallowEqualFn;
-export const fastDeepEqual = fastDeepEqualFn;
+export const deepEqual = dequal;
 
 // TODO: allow state to be any serializable value
 export type State = anyObj<Serializable>;

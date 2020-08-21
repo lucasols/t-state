@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getIfSelectorChange = exports.getIfKeysChange = void 0;
 const shallowEqual_1 = require("@lucasols/utils/shallowEqual");
 const pick_1 = require("@lucasols/utils/pick");
 function getIfKeysChange(prev, current) {

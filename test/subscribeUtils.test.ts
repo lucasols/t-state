@@ -1,4 +1,4 @@
-import Store, { fastDeepEqual } from '../src';
+import Store, { deepEqual } from '../src';
 import { getIfKeysChange, getIfSelectorChange } from '../src/subscribeUtils';
 
 type TestState = {
@@ -84,7 +84,7 @@ describe('getIfKeysChange', () => {
 
       ifKeysChange(['key3', 'key4'], () => {
         mockCallback(current.key3.join(', '), current.key4.join(', '));
-      }, fastDeepEqual);
+      }, deepEqual);
     });
 
     testState.setKey('key3', [3]);
@@ -192,7 +192,7 @@ describe('getIfSelectorChange', () => {
         () => {
           mockCallback(current.key3.join(', '), current.key4.join(', '));
         },
-        fastDeepEqual,
+        deepEqual,
       );
     });
 
