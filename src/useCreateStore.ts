@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import Store, { Reducers, ReducersPayloads, State, StoreProps } from '.';
 
 export function useCreateStore<
