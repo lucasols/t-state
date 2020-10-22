@@ -35,6 +35,12 @@ export type EqualityFn<T> = (
   current: Readonly<T>,
 ) => boolean;
 
+export type StoreProps<T, R> = {
+  name?: string;
+  state: T;
+  reducers?: R;
+};
+
 export default class Store<
   T extends State,
   P extends ReducersPayloads = ReducersPayloads,
@@ -45,15 +51,7 @@ export default class Store<
   private reducers?: R;
   private subscribers: Subscriber<T>[] = [];
 
-  constructor({
-    name,
-    state,
-    reducers,
-  }: {
-    name?: string;
-    state: T;
-    reducers?: R;
-  }) {
+  constructor({ name, state, reducers }: StoreProps<T, R>) {
     this.name = name;
     this.state = state;
     this.reducers = reducers;

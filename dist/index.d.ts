@@ -19,16 +19,17 @@ export declare type Reducers<T extends State, P extends ReducersPayloads> = {
     [K in keyof P]: (state: T, payload: P[K]) => T;
 };
 export declare type EqualityFn<T> = (prev: Readonly<T>, current: Readonly<T>) => boolean;
+export declare type StoreProps<T, R> = {
+    name?: string;
+    state: T;
+    reducers?: R;
+};
 export default class Store<T extends State, P extends ReducersPayloads = ReducersPayloads, R extends Reducers<T, P> = Reducers<T, P>> {
     readonly name?: string;
     private state;
     private reducers?;
     private subscribers;
-    constructor({ name, state, reducers, }: {
-        name?: string;
-        state: T;
-        reducers?: R;
-    });
+    constructor({ name, state, reducers }: StoreProps<T, R>);
     getState(): Readonly<T>;
     setState(newState: T, action?: Action): void;
     setKey<K extends keyof T>(key: K, value: T[K]): void;

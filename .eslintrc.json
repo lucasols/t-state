@@ -142,6 +142,7 @@
     "react/no-array-index-key": 0,
     "react/jsx-key": 2,
     "react/jsx-one-expression-per-line": 0,
+    "react/jsx-curly-newline": 0,
     "react/jsx-wrap-multilines": [
       "error",
       {

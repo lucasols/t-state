@@ -13,7 +13,7 @@ const isDev = process.env.NODE_ENV === 'development';
 exports.shallowEqual = shallowEqual_1.shallowEqual;
 exports.deepEqual = lite_1.dequal;
 class Store {
-    constructor({ name, state, reducers, }) {
+    constructor({ name, state, reducers }) {
         this.subscribers = [];
         this.name = name;
         this.state = state;
