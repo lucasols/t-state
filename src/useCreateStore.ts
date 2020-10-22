@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Store, { Reducers, ReducersPayloads, State, StoreProps } from '.';
 
 export function useCreateStore<
@@ -6,7 +6,9 @@ export function useCreateStore<
   P extends ReducersPayloads = ReducersPayloads,
   R extends Reducers<T, P> = Reducers<T, P>
 >(storeProps: StoreProps<T, R>) {
-  const [store] = useState(() => new Store(storeProps));
+  const store = useRef<Store<T, P>>();
 
-  return store;
+  if (!store.current) store.current = new Store(storeProps);
+
+  return store.current;
 }
