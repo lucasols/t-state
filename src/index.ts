@@ -5,7 +5,6 @@
 import { anyObj } from '@lucasols/utils/typings';
 import { shallowEqual as shallowEqualFn } from '@lucasols/utils/shallowEqual';
 import { pick } from '@lucasols/utils/pick';
-import { Serializable } from './typings/utils';
 import devtools, { Action } from './devTools';
 import { useState, useEffect, useRef } from 'react';
 import { dequal } from 'dequal/lite';
@@ -16,7 +15,7 @@ export const shallowEqual = shallowEqualFn;
 export const deepEqual = dequal;
 
 // TODO: allow state to be any serializable value
-export type State = anyObj<Serializable>;
+export type State = anyObj;
 
 export type Subscriber<T extends State> = {
   (prev: T, current: T, action?: Action): void;
