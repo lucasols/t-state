@@ -3,12 +3,11 @@
  */
 import { anyObj } from '@lucasols/utils/typings';
 import { shallowEqual as shallowEqualFn } from '@lucasols/utils/shallowEqual';
-import { Serializable } from './typings/utils';
 import { Action } from './devTools';
 import { dequal } from 'dequal/lite';
 export declare const shallowEqual: typeof shallowEqualFn;
 export declare const deepEqual: typeof dequal;
-export declare type State = anyObj<Serializable>;
+export declare type State = anyObj;
 export declare type Subscriber<T extends State> = {
     (prev: T, current: T, action?: Action): void;
 };
