@@ -46,6 +46,39 @@ describe('useCreateStore ', () => {
     expect(button).toHaveTextContent('Num of clicks: 2');
   });
 
+  test('basic usag with lazy config', () => {
+    const Component = () => {
+      const testState = useCreateStore<TestState>(() => ({
+        name: 'teste',
+        state: {
+          numOfClicks: 0,
+          obj: {
+            test: true,
+          },
+        },
+      }));
+
+      const [numOfClicks, setNumOfClicks] = testState.useKey('numOfClicks');
+
+      return (
+        <button type="button" onClick={() => setNumOfClicks(numOfClicks + 1)}>
+          Num of clicks: {numOfClicks}
+        </button>
+      );
+    };
+
+    const { getByRole } = render(<Component />);
+
+    const button = getByRole('button');
+    expect(button).toHaveTextContent('Num of clicks: 0');
+
+    fireEvent.click(button);
+    expect(button).toHaveTextContent('Num of clicks: 1');
+
+    fireEvent.click(button);
+    expect(button).toHaveTextContent('Num of clicks: 2');
+  });
+
   test('only render the correct components', () =>
     new Promise(done => {
       const consoleError = jest.spyOn(global.console, 'error');

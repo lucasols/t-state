@@ -46,8 +46,11 @@ export default class Store<
   R extends Reducers<T, P> = Reducers<T, P>
 > {
   readonly name?: string;
+
   private state: T;
+
   private reducers?: R;
+
   private subscribers: Subscriber<T>[] = [];
 
   constructor({ name, state, reducers }: StoreProps<T, R>) {
