@@ -46,4 +46,6 @@ export default class Store<T extends State, P extends ReducersPayloads = Reducer
         selectorDeps?: any[];
     }): Readonly<ReturnType<S>>;
     useState(equalityFn?: EqualityFn<T>): Readonly<T>;
+    /** set a new state mutanting the state with Immer produce function */
+    produceState(recipe: (draftState: T) => void): void;
 }

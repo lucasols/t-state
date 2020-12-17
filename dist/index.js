@@ -9,6 +9,7 @@ const pick_1 = require("@lucasols/utils/pick");
 const devTools_1 = __importDefault(require("./devTools"));
 const react_1 = require("react");
 const lite_1 = require("dequal/lite");
+const immer_1 = require("immer");
 const isDev = process.env.NODE_ENV === 'development';
 exports.shallowEqual = shallowEqual_1.shallowEqual;
 exports.deepEqual = lite_1.dequal;
@@ -131,6 +132,10 @@ class Store {
     }
     useState(equalityFn) {
         return this.useSelector(s => s, { equalityFn });
+    }
+    /** set a new state mutanting the state with Immer produce function */
+    produceState(recipe) {
+        this.setState(immer_1.produce(this.state, recipe));
     }
 }
 exports.default = Store;
