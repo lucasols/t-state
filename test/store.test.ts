@@ -198,4 +198,40 @@ describe('create and manipulate store', () => {
       expect(mockSubscriber).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('change state using producState', () => {
+    test('set key', () => {
+      const testState = createTestStore();
+
+      testState.produceState(state => {
+        state.items[0].text = 'change text';
+      });
+
+      expect(testState.getState()).toStrictEqual({
+        items: [
+          {
+            id: 1,
+            text: 'change text',
+          },
+        ],
+      });
+
+      testState.produceState(state => {
+        state.items.push({ id: 3, text: 'new' });
+      });
+
+      expect(testState.getState()).toStrictEqual({
+        items: [
+          {
+            id: 1,
+            text: 'change text',
+          },
+          {
+            id: 3,
+            text: 'new',
+          },
+        ],
+      });
+    });
+  });
 });

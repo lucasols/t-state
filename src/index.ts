@@ -8,6 +8,7 @@ import { pick } from '@lucasols/utils/pick';
 import devtools, { Action } from './devTools';
 import { useState, useEffect, useRef } from 'react';
 import { dequal } from 'dequal/lite';
+import { produce } from 'immer';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -228,5 +229,10 @@ export default class Store<
 
   useState(equalityFn?: EqualityFn<T>) {
     return this.useSelector(s => s, { equalityFn });
+  }
+
+  /** set a new state mutanting the state with Immer produce function */
+  produceState(recipe: (draftState: T) => void) {
+    this.setState(produce(this.state, recipe));
   }
 }
