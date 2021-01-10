@@ -5,7 +5,7 @@ import Store from '../src';
 import { anyFunction } from '@lucasols/utils/typings';
 import { shallowEqual } from '@lucasols/utils';
 
-describe('hooks ', () => {
+describe('hooks', () => {
   describe('useKey', () => {
     type TestState = {
       numOfClicks: number;
