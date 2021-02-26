@@ -5,7 +5,7 @@ import React from 'react';
 import { useCreateStore } from '../src/useCreateStore';
 import Store from '../src';
 
-describe('useCreateStore ', () => {
+describe('useCreateStore', () => {
   type TestState = {
     numOfClicks: number;
     obj: {
@@ -80,7 +80,7 @@ describe('useCreateStore ', () => {
   });
 
   test('only render the correct components', () =>
-    new Promise(done => {
+    new Promise<void>(done => {
       const consoleError = jest.spyOn(global.console, 'error');
 
       const onRenderChild = jest.fn();

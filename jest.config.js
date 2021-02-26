@@ -3,5 +3,4 @@ module.exports = {
   testMatch: ['**/?(*.)+(spec|test).+(ts|tsx|js)'],
   moduleDirectories: ['.', 'src', 'node_modules'],
   preset: 'ts-jest',
-  collectCoverage: true,
 };

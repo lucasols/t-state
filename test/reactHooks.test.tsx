@@ -1,6 +1,6 @@
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import '@testing-library/jest-dom/extend-expect';
 import { act, fireEvent, render } from '@testing-library/react';
-import React, { useRef, useState } from 'react';
 import Store from '../src';
 import { anyFunction } from '@lucasols/utils/typings';
 import { shallowEqual } from '@lucasols/utils';
@@ -95,7 +95,7 @@ describe('hooks', () => {
     });
 
     test('when a component unmounts, the store removes its reference', () =>
-      new Promise(done => {
+      new Promise<void>(done => {
         const consoleError = jest.spyOn(global.console, 'error');
 
         const { getByRole, unmount } = render(<Component />);
@@ -267,7 +267,7 @@ describe('hooks', () => {
     });
 
     test('when a component unmounts, the store removes its reference', () =>
-      new Promise(done => {
+      new Promise<void>(done => {
         const consoleError = jest.spyOn(global.console, 'error');
 
         const { getByRole, unmount } = render(<Component />);
@@ -395,22 +395,32 @@ describe('hooks', () => {
     const Component = ({
       onRender,
       useShallowEqual,
+      children,
     }: {
       onRender?: anyFunction;
       useShallowEqual?: boolean;
+      children?: ReactNode;
     }) => {
       const sum = testState.useSelector(state => state.key1 + state.key3[0], {
         equalityFn: useShallowEqual ? undefined : false,
       });
 
-      if (onRender) {
-        onRender();
-      }
+      useEffect(() => {
+        if (onRender) {
+          onRender();
+        }
+      });
 
       return (
-        <button type="button" onClick={() => testState.setKey('key1', sum + 1)}>
-          {sum}
-        </button>
+        <>
+          <button
+            type="button"
+            onClick={() => testState.setKey('key1', sum + 1)}
+          >
+            {sum}
+          </button>
+          {children}
+        </>
       );
     };
 
@@ -632,6 +642,96 @@ describe('hooks', () => {
       expect(getByTestId('id-component')).toHaveTextContent('1');
 
       expect(mockSubscriber).toHaveBeenCalledTimes(2);
+    });
+
+    test.skip('update selector function is allways refreshed', () => {
+      const mockSubscriber = jest.fn();
+      const onRender = jest.fn();
+      testState.subscribe(mockSubscriber);
+
+      const Component3 = () => {
+        const [selectorDep, setselectorDep] = useState(1);
+
+        const state = testState.useSelector(s => ({
+          value: selectorDep + s.key1,
+        }));
+
+        onRender();
+
+        return (
+          <div>
+            <span data-testid="another-component">{state.value}</span>
+            <span
+              data-testid="id-component"
+              onClick={() => setselectorDep(3)}
+            />
+          </div>
+        );
+      };
+
+      const { getByTestId } = render(<Component3 />);
+      expect(getByTestId('another-component')).toHaveTextContent('2');
+
+      fireEvent.click(getByTestId('id-component'));
+
+      act(() => {
+        testState.setKey('key1', 2);
+      });
+      act(() => {
+        testState.setKey('key1', 2);
+      });
+
+      expect(getByTestId('another-component')).toHaveTextContent('5');
+
+      expect(mockSubscriber).toHaveBeenCalledTimes(2);
+      expect(onRender).toHaveBeenCalledTimes(3);
+    });
+
+    test('bailout batched updates', () => {
+      const onRenderParent = jest.fn();
+      const onRenderChild = jest.fn();
+      const mockSubscriber = jest.fn();
+
+      function useTestState() {
+        return testState.useSelector(state => state.key1 + state.key3[0]);
+      }
+
+      const Parent = () => {
+        const sum = testState.useSelector(state => state.key1 + state.key3[0]);
+        const sum2 = testState.useSelector(state => state.key1 + state.key3[1]);
+        const sum3 = testState.useSelector(state => state.key1 + state.key3[2]);
+        const sum4 = testState.useSelector(state => state.key1 + state.key3[0]);
+        const sum5 = useTestState();
+
+        onRenderParent();
+
+        return (
+          <>
+            <div data-testid="parent-value">
+              {sum} + {sum2} + {sum3} + {sum4} + {sum5}
+            </div>
+            <div>
+              <Component onRender={onRenderChild} />
+            </div>
+          </>
+        );
+      };
+
+      testState.subscribe(mockSubscriber);
+
+      const { getByTestId } = render(<Parent />);
+
+      const sumValue = getByTestId('parent-value');
+
+      expect(sumValue).toHaveTextContent('1 + 2 + 3 + 1 + 1');
+
+      act(() => {
+        testState.setKey('key1', 3);
+      });
+
+      expect(onRenderParent).toHaveBeenCalledTimes(2);
+      expect(onRenderChild).toHaveBeenCalledTimes(2);
+      expect(mockSubscriber).toHaveBeenCalledTimes(1);
     });
   });
 });

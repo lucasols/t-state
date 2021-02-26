@@ -1,5 +1,5 @@
-import Store, { deepEqual } from '../src';
-import { getIfKeysChange, getIfSelectorChange } from '../src/subscribeUtils';
+import Store from '../src';
+import { observeChanges } from '../src/subscribeUtils';
 
 type TestState = {
   key1: number;
@@ -40,9 +40,9 @@ describe('getIfKeysChange', () => {
     const mockCallback = jest.fn();
 
     testState.subscribe((prev, current) => {
-      const ifKeyChange = getIfKeysChange(prev, current);
+      const observe = observeChanges(prev, current);
 
-      ifKeyChange(['key1'], mockCallback);
+      observe.ifKeysChange('key1').then(mockCallback);
     });
 
     testState.setKey('key1', 3);
@@ -59,9 +59,9 @@ describe('getIfKeysChange', () => {
     const mockCallback = jest.fn();
 
     testState.subscribe((prev, current) => {
-      const ifKeyChange = getIfKeysChange(prev, current);
+      const observe = observeChanges(prev, current);
 
-      ifKeyChange({ key1: 5 }, mockCallback);
+      observe.ifKeysChangeTo({ key1: 5 }).then(mockCallback);
     });
 
     testState.setKey('key1', 2);
@@ -80,11 +80,11 @@ describe('getIfKeysChange', () => {
     const mockCallback = jest.fn();
 
     testState.subscribe((prev, current) => {
-      const ifKeysChange = getIfKeysChange(prev, current);
+      const observe = observeChanges(prev, current);
 
-      ifKeysChange(['key3', 'key4'], () => {
+      observe.ifKeysChange('key3', 'key4').then(() => {
         mockCallback(current.key3.join(', '), current.key4.join(', '));
-      }, deepEqual);
+      });
     });
 
     testState.setKey('key3', [3]);
@@ -112,9 +112,9 @@ describe('getIfSelectorChange', () => {
     const mockCallback = jest.fn();
 
     testState.subscribe((prev, current) => {
-      const ifChange = getIfSelectorChange(prev, current);
+      const observe = observeChanges(prev, current);
 
-      ifChange(s => s.key1, mockCallback);
+      observe.ifSelector(s => s.key1).change.then(mockCallback);
     });
 
     testState.setKey('key1', 3);
@@ -131,9 +131,12 @@ describe('getIfSelectorChange', () => {
     const mockCallback = jest.fn();
 
     testState.subscribe((prev, current) => {
-      const ifKeyChange = getIfSelectorChange(prev, current);
+      const observe = observeChanges(prev, current);
 
-      ifKeyChange([s => s.key1, 5], mockCallback);
+      observe
+        .ifSelector(s => s.key1)
+        .changeTo(5)
+        .then(mockCallback);
     });
 
     testState.setKey('key1', 2);
@@ -152,14 +155,13 @@ describe('getIfSelectorChange', () => {
     const mockCallback = jest.fn();
 
     testState.subscribe((prev, current) => {
-      const ifSelectorChange = getIfSelectorChange(prev, current);
+      const observe = observeChanges(prev, current);
 
-      ifSelectorChange(
-        s => [s.key3.join(', '), s.key4.join(', ')],
-        () => {
+      observe
+        .ifSelector(s => [s.key3.join(', '), s.key4.join(', ')])
+        .change.then(() => {
           mockCallback(current.key3.join(', '), current.key4.join(', '));
-        },
-      );
+        });
     });
 
     testState.setKey('key3', [3]);
@@ -185,15 +187,13 @@ describe('getIfSelectorChange', () => {
     const mockCallback = jest.fn();
 
     testState.subscribe((prev, current) => {
-      const ifSelectorChange = getIfSelectorChange(prev, current);
+      const observe = observeChanges(prev, current);
 
-      ifSelectorChange(
-        s => ({ a: s.key3, b: s.key4 }),
-        () => {
+      observe
+        .ifSelector(s => ({ a: s.key3, b: s.key4 }))
+        .change.then(() => {
           mockCallback(current.key3.join(', '), current.key4.join(', '));
-        },
-        deepEqual,
-      );
+        });
     });
 
     testState.setKey('key3', [3]);
