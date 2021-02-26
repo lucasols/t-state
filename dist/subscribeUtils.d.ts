@@ -8,11 +8,8 @@ export declare function getIfKeysChange<T extends State>(prev: T, current: T): <
  * @deprecated use `observeChanges` instead
  */
 export declare function getIfSelectorChange<T extends State>(prev: T, current: T): <S extends (state: T) => any>(selector: S | [S, ReturnType<S>], callback: (currentSelection: ReturnType<S>) => any, areEqual?: EqualityFn<ReturnType<S>>) => void;
-interface Options {
-    deepEqual?: boolean;
-}
 interface Then {
-    then: (callback: anyFunction) => any;
+    then: (callback: () => any) => any;
 }
 interface SelectorThen<R> {
     then: (callback: (currentSelection: R) => any) => any;
@@ -20,9 +17,9 @@ interface SelectorThen<R> {
 interface ChangeMethods<T extends State> {
     ifKeysChange<K extends keyof T>(...keys: K[]): Then;
     ifKeysChangeTo<K extends keyof T>(target: Pick<T, K>): Then;
-    ifSelector<R, S extends (state: T) => R>(selector: S, options?: Options): {
+    ifSelector<R>(selector: (state: T) => R): {
         change: SelectorThen<R>;
-        changeTo<CT>(target: CT): SelectorThen<CT>;
+        changeTo<CT extends R>(target: CT): SelectorThen<CT>;
     };
 }
 interface ObserveChangesReturn<T extends State> extends ChangeMethods<T> {
