@@ -70,12 +70,13 @@ function observeChanges(prev, current) {
         },
         ifSelector: selector => {
             const currentSelection = selector(current);
-            const isDiff = !equalityFn(currentSelection, selector(prev));
+            const prevSelection = selector(prev);
+            const isDiff = !equalityFn(currentSelection, prevSelection);
             return {
                 change: {
                     then(callback) {
                         if (isDiff) {
-                            callback(currentSelection);
+                            callback(currentSelection, prevSelection);
                         }
                     },
                 },
@@ -83,7 +84,7 @@ function observeChanges(prev, current) {
                     return {
                         then(callback) {
                             if (isDiff && equalityFn(currentSelection, target)) {
-                                callback(target);
+                                callback(target, prevSelection);
                             }
                         },
                     };

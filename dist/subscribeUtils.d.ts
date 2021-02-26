@@ -11,15 +11,15 @@ export declare function getIfSelectorChange<T extends State>(prev: T, current: T
 interface Then {
     then: (callback: () => any) => any;
 }
-interface SelectorThen<R> {
-    then: (callback: (currentSelection: R) => any) => any;
+interface SelectorThen<R, P = R> {
+    then: (callback: (currentSelection: R, previousSelection: P) => any) => any;
 }
 interface ChangeMethods<T extends State> {
     ifKeysChange<K extends keyof T>(...keys: K[]): Then;
     ifKeysChangeTo<K extends keyof T>(target: Pick<T, K>): Then;
     ifSelector<R>(selector: (state: T) => R): {
         change: SelectorThen<R>;
-        changeTo<CT extends R>(target: CT): SelectorThen<CT>;
+        changeTo<CT extends R>(target: CT): SelectorThen<CT, R>;
     };
 }
 interface ObserveChangesReturn<T extends State> extends ChangeMethods<T> {
