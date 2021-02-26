@@ -136,7 +136,7 @@ describe('getIfSelectorChange', () => {
       observe
         .ifSelector(s => s.key1)
         .changeTo(5)
-        .then(mockCallback);
+        .then((newValue) => mockCallback());
     });
 
     testState.setKey('key1', 2);
@@ -159,7 +159,7 @@ describe('getIfSelectorChange', () => {
 
       observe
         .ifSelector(s => [s.key3.join(', '), s.key4.join(', ')])
-        .change.then(() => {
+        .change.then((returnValue) => {
           mockCallback(current.key3.join(', '), current.key4.join(', '));
         });
     });
@@ -191,7 +191,7 @@ describe('getIfSelectorChange', () => {
 
       observe
         .ifSelector(s => ({ a: s.key3, b: s.key4 }))
-        .change.then(() => {
+        .change.then((selection) => {
           mockCallback(current.key3.join(', '), current.key4.join(', '));
         });
     });

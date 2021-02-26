@@ -56,12 +56,8 @@ export function getIfSelectorChange<T extends State>(prev: T, current: T) {
   };
 }
 
-interface Options {
-  deepEqual?: boolean;
-}
-
 interface Then {
-  then: (callback: anyFunction) => any;
+  then: (callback: () => any) => any;
 }
 
 interface SelectorThen<R> {
@@ -71,12 +67,11 @@ interface SelectorThen<R> {
 interface ChangeMethods<T extends State> {
   ifKeysChange<K extends keyof T>(...keys: K[]): Then;
   ifKeysChangeTo<K extends keyof T>(target: Pick<T, K>): Then;
-  ifSelector<R, S extends (state: T) => R>(
-    selector: S,
-    options?: Options,
+  ifSelector<R>(
+    selector: (state: T) => R,
   ): {
     change: SelectorThen<R>;
-    changeTo<CT>(target: CT): SelectorThen<CT>;
+    changeTo<CT extends R>(target: CT): SelectorThen<CT>;
   };
 }
 
