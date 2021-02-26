@@ -60,8 +60,8 @@ interface Then {
   then: (callback: () => any) => any;
 }
 
-interface SelectorThen<R> {
-  then: (callback: (currentSelection: R) => any) => any;
+interface SelectorThen<R, P = R> {
+  then: (callback: (currentSelection: R, previousSelection: P) => any) => any;
 }
 
 interface ChangeMethods<T extends State> {
@@ -71,7 +71,7 @@ interface ChangeMethods<T extends State> {
     selector: (state: T) => R,
   ): {
     change: SelectorThen<R>;
-    changeTo<CT extends R>(target: CT): SelectorThen<CT>;
+    changeTo<CT extends R>(target: CT): SelectorThen<CT, R>;
   };
 }
 
@@ -110,13 +110,14 @@ export function observeChanges<T extends State>(
     },
     ifSelector: selector => {
       const currentSelection = selector(current);
-      const isDiff = !equalityFn(currentSelection, selector(prev));
+      const prevSelection = selector(prev);
+      const isDiff = !equalityFn(currentSelection, prevSelection);
 
       return {
         change: {
           then(callback) {
             if (isDiff) {
-              callback(currentSelection);
+              callback(currentSelection, prevSelection);
             }
           },
         },
@@ -124,7 +125,7 @@ export function observeChanges<T extends State>(
           return {
             then(callback) {
               if (isDiff && equalityFn(currentSelection, target)) {
-                callback(target);
+                callback(target, prevSelection);
               }
             },
           };

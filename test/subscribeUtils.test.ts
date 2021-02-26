@@ -136,7 +136,7 @@ describe('getIfSelectorChange', () => {
       observe
         .ifSelector(s => s.key1)
         .changeTo(5)
-        .then((newValue) => mockCallback());
+        .then((newValue, prevValue) => mockCallback());
     });
 
     testState.setKey('key1', 2);
