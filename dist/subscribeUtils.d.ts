@@ -30,5 +30,5 @@ export declare function useSubscribeToStore<T>(store: Store<T>, onChange: ({ pre
     prev: T;
     current: T;
     observe: ObserveChangesReturn<T>;
-}) => any, deps?: any[]): void;
+}) => any): void;
 export {};

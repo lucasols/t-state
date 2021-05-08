@@ -102,13 +102,17 @@ function observeChanges(prev, current) {
     };
 }
 exports.observeChanges = observeChanges;
-function useSubscribeToStore(store, onChange, deps = []) {
+function useSubscribeToStore(store, onChange) {
+    const callbackRef = react_1.useRef(onChange);
+    react_1.useLayoutEffect(() => {
+        callbackRef.current = onChange;
+    });
     react_1.useEffect(() => {
         const unsubscribe = store.subscribe((prev, current) => {
             const observe = observeChanges(prev, current);
-            onChange({ prev, current, observe });
+            callbackRef.current({ prev, current, observe });
         });
         return unsubscribe;
-    }, deps);
+    }, []);
 }
 exports.useSubscribeToStore = useSubscribeToStore;
