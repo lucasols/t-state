@@ -1,5 +1,5 @@
 import { anyFunction } from '@lucasols/utils/typings';
-import { State, EqualityFn } from '.';
+import Store, { State, EqualityFn } from '.';
 /**
  * @deprecated use `observeChanges` instead
  */
@@ -26,4 +26,9 @@ interface ObserveChangesReturn<T extends State> extends ChangeMethods<T> {
     withEqualityFn(equalityFn: EqualityFn<any>): ChangeMethods<T>;
 }
 export declare function observeChanges<T extends State>(prev: T, current: T): ObserveChangesReturn<T>;
+export declare function useSubscribeToStore<T>(store: Store<T>, onChange: ({ prev, current, observe, }: {
+    prev: T;
+    current: T;
+    observe: ObserveChangesReturn<T>;
+}) => any, deps?: any[]): void;
 export {};

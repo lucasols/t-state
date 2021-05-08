@@ -1,9 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.observeChanges = exports.getIfSelectorChange = exports.getIfKeysChange = void 0;
+exports.useSubscribeToStore = exports.observeChanges = exports.getIfSelectorChange = exports.getIfKeysChange = void 0;
 const _1 = require(".");
 const shallowEqual_1 = require("@lucasols/utils/shallowEqual");
 const pick_1 = require("@lucasols/utils/pick");
+const react_1 = require("react");
 /**
  * @deprecated use `observeChanges` instead
  */
@@ -101,3 +102,13 @@ function observeChanges(prev, current) {
     };
 }
 exports.observeChanges = observeChanges;
+function useSubscribeToStore(store, onChange, deps = []) {
+    react_1.useEffect(() => {
+        const unsubscribe = store.subscribe((prev, current) => {
+            const observe = observeChanges(prev, current);
+            onChange({ prev, current, observe });
+        });
+        return unsubscribe;
+    }, deps);
+}
+exports.useSubscribeToStore = useSubscribeToStore;

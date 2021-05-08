@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/lines-between-class-members */
 import { anyFunction } from '@lucasols/utils/typings';
-import { State, EqualityFn, deepEqual } from '.';
+import Store, { State, EqualityFn, deepEqual } from '.';
 import { shallowEqual } from '@lucasols/utils/shallowEqual';
 import { pick } from '@lucasols/utils/pick';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 
 /**
  * @deprecated use `observeChanges` instead
@@ -142,4 +143,32 @@ export function observeChanges<T extends State>(
     },
     ...methods,
   };
+}
+
+export function useSubscribeToStore<T>(
+  store: Store<T>,
+  onChange: ({
+    prev,
+    current,
+    observe,
+  }: {
+    prev: T;
+    current: T;
+    observe: ObserveChangesReturn<T>;
+  }) => any,
+) {
+  const callbackRef = useRef(onChange);
+  useLayoutEffect(() => {
+    callbackRef.current = onChange;
+  });
+
+  useEffect(() => {
+    const unsubscribe = store.subscribe((prev, current) => {
+      const observe = observeChanges(prev, current);
+
+      callbackRef.current({ prev, current, observe });
+    });
+
+    return unsubscribe;
+  }, []);
 }
