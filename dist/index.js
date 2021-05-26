@@ -69,7 +69,7 @@ class Store {
     }
     useKey(key, { equalityFn } = {}) {
         const [state, set] = react_1.useState(this.state[key]);
-        react_1.useLayoutEffect(() => {
+        react_1.useEffect(() => {
             const setter = this.subscribe((prev, current) => {
                 if (equalityFn) {
                     if (!equalityFn(prev[key], current[key])) {
@@ -95,7 +95,7 @@ class Store {
             ? args[1].equalityFn
             : exports.shallowEqual;
         const [state, set] = react_1.useState(pick_1.pick(this.state, keys));
-        react_1.useLayoutEffect(() => {
+        react_1.useEffect(() => {
             const setter = this.subscribe((prev, current) => {
                 const currentSlice = pick_1.pick(current, keys);
                 if (!areEqual(pick_1.pick(prev, keys), currentSlice)) {
@@ -109,7 +109,7 @@ class Store {
     useSelector(selector, { equalityFn = exports.shallowEqual, selectorDeps = [], } = {}) {
         const [state, set] = react_1.useState(selector(this.state));
         const isFirstRender = react_1.useRef(true);
-        react_1.useLayoutEffect(() => {
+        react_1.useEffect(() => {
             const setterSubscriber = this.subscribe((prev, current) => {
                 const currentSelection = selector(current);
                 if (equalityFn) {
