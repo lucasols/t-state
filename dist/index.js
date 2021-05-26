@@ -135,7 +135,9 @@ class Store {
     }
     /** set a new state mutanting the state with Immer produce function */
     produceState(recipe) {
-        this.setState(immer_1.produce(this.state, recipe));
+        this.setState(immer_1.produce(this.state, recipe), {
+            type: 'produceState',
+        });
     }
 }
 exports.default = Store;

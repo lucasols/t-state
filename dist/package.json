@@ -1,6 +1,6 @@
 {
   "name": "t-state",
-  "version": "6.2.1",
+  "version": "6.2.2",
   "description": "Global state manager for React hooks written in Typescript",
   "main": "index.js",
   "types": "index.d.ts",
