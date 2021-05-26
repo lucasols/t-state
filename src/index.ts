@@ -6,7 +6,7 @@ import { anyObj } from '@lucasols/utils/typings';
 import { shallowEqual as shallowEqualFn } from '@lucasols/utils/shallowEqual';
 import { pick } from '@lucasols/utils/pick';
 import devtools, { Action } from './devTools';
-import { useState, useLayoutEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { dequal } from 'dequal/lite';
 import { produce } from 'immer';
 
@@ -133,7 +133,7 @@ export default class Store<
   ) {
     const [state, set] = useState<Readonly<T[K]>>(this.state[key]);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
       const setter = this.subscribe((prev, current) => {
         if (equalityFn) {
           if (!equalityFn(prev[key], current[key])) {
@@ -177,7 +177,7 @@ export default class Store<
 
     const [state, set] = useState(pick(this.state, keys));
 
-    useLayoutEffect(() => {
+    useEffect(() => {
       const setter = this.subscribe((prev, current) => {
         const currentSlice = pick(current, keys);
 
@@ -205,7 +205,7 @@ export default class Store<
     const [state, set] = useState(selector(this.state));
     const isFirstRender = useRef(true);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
       const setterSubscriber = this.subscribe((prev, current) => {
         const currentSelection = selector(current);
         if (equalityFn) {
