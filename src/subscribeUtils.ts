@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/lines-between-class-members */
-import { anyFunction } from '@lucasols/utils/typings';
 import Store, { State, EqualityFn, deepEqual } from '.';
-import { shallowEqual } from '@lucasols/utils/shallowEqual';
-import { pick } from '@lucasols/utils/pick';
 import { useEffect, useLayoutEffect, useRef } from 'react';
+import { shallowEqual } from './shallowEqual';
+import { pick } from './utils';
 
 /**
  * @deprecated use `observeChanges` instead
@@ -11,13 +10,13 @@ import { useEffect, useLayoutEffect, useRef } from 'react';
 export function getIfKeysChange<T extends State>(prev: T, current: T) {
   return <K extends keyof T>(
     keys: K[] | Pick<T, K>,
-    callback: anyFunction,
+    callback: () => any,
     areEqual: EqualityFn<Pick<T, K>> = shallowEqual,
   ) => {
     const verifyIfChangesOnly = Array.isArray(keys);
-    const changeToObjKeys = (verifyIfChangesOnly
-      ? keys
-      : Object.keys(keys)) as K[];
+    const changeToObjKeys = (
+      verifyIfChangesOnly ? keys : Object.keys(keys)
+    ) as K[];
     const currentSlice = pick(current, changeToObjKeys);
 
     if (!areEqual(pick(prev, changeToObjKeys), currentSlice)) {
@@ -68,9 +67,7 @@ interface SelectorThen<R, P = R> {
 interface ChangeMethods<T extends State> {
   ifKeysChange<K extends keyof T>(...keys: K[]): Then;
   ifKeysChangeTo<K extends keyof T>(target: Pick<T, K>): Then;
-  ifSelector<R>(
-    selector: (state: T) => R,
-  ): {
+  ifSelector<R>(selector: (state: T) => R): {
     change: SelectorThen<R>;
     changeTo<CT extends R>(target: CT): SelectorThen<CT, R>;
   };
@@ -89,7 +86,7 @@ export function observeChanges<T extends State>(
   const methods: ChangeMethods<T> = {
     ifKeysChange: (...keys) => ({
       then(callback) {
-        if (keys.some(key => !equalityFn(prev[key], current[key]))) {
+        if (keys.some((key) => !equalityFn(prev[key], current[key]))) {
           callback();
         }
       },
@@ -101,7 +98,7 @@ export function observeChanges<T extends State>(
       return {
         then(callback) {
           if (
-            targetKeys.some(key => !equalityFn(prev[key], current[key])) &&
+            targetKeys.some((key) => !equalityFn(prev[key], current[key])) &&
             equalityFn(currentSlice, target)
           ) {
             callback();
@@ -109,7 +106,7 @@ export function observeChanges<T extends State>(
         },
       };
     },
-    ifSelector: selector => {
+    ifSelector: (selector) => {
       const currentSelection = selector(current);
       const prevSelection = selector(prev);
       const isDiff = !equalityFn(currentSelection, prevSelection);

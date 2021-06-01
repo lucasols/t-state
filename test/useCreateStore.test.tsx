@@ -1,5 +1,4 @@
 import '@testing-library/jest-dom/extend-expect';
-import { anyFunction } from '@lucasols/utils/typings';
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { useCreateStore } from '../src/useCreateStore';
@@ -80,7 +79,7 @@ describe('useCreateStore', () => {
   });
 
   test('only render the correct components', () =>
-    new Promise<void>(done => {
+    new Promise<void>((done) => {
       const consoleError = jest.spyOn(global.console, 'error');
 
       const onRenderChild = jest.fn();

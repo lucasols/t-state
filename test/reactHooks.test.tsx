@@ -1,9 +1,10 @@
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import '@testing-library/jest-dom/extend-expect';
 import { act, fireEvent, render } from '@testing-library/react';
-import Store from '../src';
-import { anyFunction } from '@lucasols/utils/typings';
-import { shallowEqual } from '@lucasols/utils';
+import Store, { shallowEqual } from '../src';
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+type anyFunction = () => any;
 
 describe('hooks', () => {
   describe('useKey', () => {
@@ -95,7 +96,7 @@ describe('hooks', () => {
     });
 
     test('when a component unmounts, the store removes its reference', () =>
-      new Promise<void>(done => {
+      new Promise<void>((done) => {
         const consoleError = jest.spyOn(global.console, 'error');
 
         const { getByRole, unmount } = render(<Component />);
@@ -267,7 +268,7 @@ describe('hooks', () => {
     });
 
     test('when a component unmounts, the store removes its reference', () =>
-      new Promise<void>(done => {
+      new Promise<void>((done) => {
         const consoleError = jest.spyOn(global.console, 'error');
 
         const { getByRole, unmount } = render(<Component />);
@@ -401,7 +402,7 @@ describe('hooks', () => {
       useShallowEqual?: boolean;
       children?: ReactNode;
     }) => {
-      const sum = testState.useSelector(state => state.key1 + state.key3[0], {
+      const sum = testState.useSelector((state) => state.key1 + state.key3[0], {
         equalityFn: useShallowEqual ? undefined : false,
       });
 
@@ -504,7 +505,7 @@ describe('hooks', () => {
       testState.subscribe(mockSubscriber);
 
       const Component2 = () => {
-        const state = testState.useSelector(s => s, { equalityFn: false });
+        const state = testState.useSelector((s) => s, { equalityFn: false });
 
         onRender(state.key1, state.key2, state.key3);
 
@@ -553,7 +554,7 @@ describe('hooks', () => {
       const mockSubscriber = jest.fn();
 
       const Component2 = () => {
-        const state = testState.useSelector(s => s, {
+        const state = testState.useSelector((s) => s, {
           equalityFn: (_, current) => current.key1 === 1,
         });
 
@@ -611,7 +612,7 @@ describe('hooks', () => {
 
         const id = useRef(idCounter++);
         const state = testState.useSelector(
-          s => ({ value: selectorDep + s.key1 }),
+          (s) => ({ value: selectorDep + s.key1 }),
           { selectorDeps: [selectorDep] },
         );
 
@@ -652,7 +653,7 @@ describe('hooks', () => {
       const Component3 = () => {
         const [selectorDep, setselectorDep] = useState(1);
 
-        const state = testState.useSelector(s => ({
+        const state = testState.useSelector((s) => ({
           value: selectorDep + s.key1,
         }));
 
@@ -693,14 +694,22 @@ describe('hooks', () => {
       const mockSubscriber = jest.fn();
 
       function useTestState() {
-        return testState.useSelector(state => state.key1 + state.key3[0]);
+        return testState.useSelector((state) => state.key1 + state.key3[0]);
       }
 
       const Parent = () => {
-        const sum = testState.useSelector(state => state.key1 + state.key3[0]);
-        const sum2 = testState.useSelector(state => state.key1 + state.key3[1]);
-        const sum3 = testState.useSelector(state => state.key1 + state.key3[2]);
-        const sum4 = testState.useSelector(state => state.key1 + state.key3[0]);
+        const sum = testState.useSelector(
+          (state) => state.key1 + state.key3[0],
+        );
+        const sum2 = testState.useSelector(
+          (state) => state.key1 + state.key3[1],
+        );
+        const sum3 = testState.useSelector(
+          (state) => state.key1 + state.key3[2],
+        );
+        const sum4 = testState.useSelector(
+          (state) => state.key1 + state.key3[0],
+        );
         const sum5 = useTestState();
 
         onRenderParent();

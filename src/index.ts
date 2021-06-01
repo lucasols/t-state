@@ -2,21 +2,21 @@
  * forked from v1 of https://github.com/jhonnymichel/react-hookstore
  */
 // TODO: remove fork comment and add credit to readme
-import { anyObj } from '@lucasols/utils/typings';
-import { shallowEqual as shallowEqualFn } from '@lucasols/utils/shallowEqual';
-import { pick } from '@lucasols/utils/pick';
 import devtools, { Action } from './devTools';
 import { useState, useEffect, useRef } from 'react';
 import { dequal } from 'dequal/lite';
 import { produce } from 'immer';
 
+import { shallowEqual as _sw } from './shallowEqual';
+import { pick } from './utils';
+
+export const deepEqual = dequal;
+export const shallowEqual = _sw;
+
 const isDev = process.env.NODE_ENV === 'development';
 
-export const shallowEqual = shallowEqualFn;
-export const deepEqual = dequal;
-
 // TODO: allow state to be any serializable value
-export type State = anyObj;
+export type State = Record<string, any>;
 
 export type Subscriber<T extends State> = {
   (prev: T, current: T, action?: Action): void;
@@ -44,7 +44,7 @@ export type StoreProps<T, R> = {
 export default class Store<
   T extends State,
   P extends ReducersPayloads = ReducersPayloads,
-  R extends Reducers<T, P> = Reducers<T, P>
+  R extends Reducers<T, P> = Reducers<T, P>,
 > {
   readonly name?: string;
 
@@ -228,7 +228,7 @@ export default class Store<
   }
 
   useState(equalityFn?: EqualityFn<T>) {
-    return this.useSelector(s => s, { equalityFn });
+    return this.useSelector((s) => s, { equalityFn });
   }
 
   /** set a new state mutanting the state with Immer produce function */
