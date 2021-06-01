@@ -1,9 +1,8 @@
-import { anyFunction } from '@lucasols/utils/typings';
 import Store, { State, EqualityFn } from '.';
 /**
  * @deprecated use `observeChanges` instead
  */
-export declare function getIfKeysChange<T extends State>(prev: T, current: T): <K extends keyof T>(keys: Pick<T, K> | K[], callback: anyFunction, areEqual?: EqualityFn<Pick<T, K>>) => void;
+export declare function getIfKeysChange<T extends State>(prev: T, current: T): <K extends keyof T>(keys: Pick<T, K> | K[], callback: () => any, areEqual?: EqualityFn<Pick<T, K>>) => void;
 /**
  * @deprecated use `observeChanges` instead
  */

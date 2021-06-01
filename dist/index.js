@@ -3,16 +3,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deepEqual = exports.shallowEqual = void 0;
-const shallowEqual_1 = require("@lucasols/utils/shallowEqual");
-const pick_1 = require("@lucasols/utils/pick");
+exports.shallowEqual = exports.deepEqual = void 0;
+/**
+ * forked from v1 of https://github.com/jhonnymichel/react-hookstore
+ */
+// TODO: remove fork comment and add credit to readme
 const devTools_1 = __importDefault(require("./devTools"));
 const react_1 = require("react");
 const lite_1 = require("dequal/lite");
 const immer_1 = require("immer");
-const isDev = process.env.NODE_ENV === 'development';
-exports.shallowEqual = shallowEqual_1.shallowEqual;
+const shallowEqual_1 = require("./shallowEqual");
+const utils_1 = require("./utils");
 exports.deepEqual = lite_1.dequal;
+exports.shallowEqual = shallowEqual_1.shallowEqual;
+const isDev = process.env.NODE_ENV === 'development';
 class Store {
     constructor({ name, state, reducers }) {
         this.subscribers = [];
@@ -94,11 +98,11 @@ class Store {
         const areEqual = typeof args[1] === 'object' && args[1].equalityFn
             ? args[1].equalityFn
             : exports.shallowEqual;
-        const [state, set] = react_1.useState(pick_1.pick(this.state, keys));
+        const [state, set] = react_1.useState(utils_1.pick(this.state, keys));
         react_1.useEffect(() => {
             const setter = this.subscribe((prev, current) => {
-                const currentSlice = pick_1.pick(current, keys);
-                if (!areEqual(pick_1.pick(prev, keys), currentSlice)) {
+                const currentSlice = utils_1.pick(current, keys);
+                if (!areEqual(utils_1.pick(prev, keys), currentSlice)) {
                     set(currentSlice);
                 }
             });
@@ -131,7 +135,7 @@ class Store {
         return state;
     }
     useState(equalityFn) {
-        return this.useSelector(s => s, { equalityFn });
+        return this.useSelector((s) => s, { equalityFn });
     }
     /** set a new state mutanting the state with Immer produce function */
     produceState(recipe) {

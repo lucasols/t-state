@@ -1,21 +1,20 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.useSubscribeToStore = exports.observeChanges = exports.getIfSelectorChange = exports.getIfKeysChange = void 0;
+/* eslint-disable @typescript-eslint/lines-between-class-members */
 const _1 = require(".");
-const shallowEqual_1 = require("@lucasols/utils/shallowEqual");
-const pick_1 = require("@lucasols/utils/pick");
 const react_1 = require("react");
+const shallowEqual_1 = require("./shallowEqual");
+const utils_1 = require("./utils");
 /**
  * @deprecated use `observeChanges` instead
  */
 function getIfKeysChange(prev, current) {
     return (keys, callback, areEqual = shallowEqual_1.shallowEqual) => {
         const verifyIfChangesOnly = Array.isArray(keys);
-        const changeToObjKeys = (verifyIfChangesOnly
-            ? keys
-            : Object.keys(keys));
-        const currentSlice = pick_1.pick(current, changeToObjKeys);
-        if (!areEqual(pick_1.pick(prev, changeToObjKeys), currentSlice)) {
+        const changeToObjKeys = (verifyIfChangesOnly ? keys : Object.keys(keys));
+        const currentSlice = utils_1.pick(current, changeToObjKeys);
+        if (!areEqual(utils_1.pick(prev, changeToObjKeys), currentSlice)) {
             if (verifyIfChangesOnly) {
                 callback();
             }
@@ -52,24 +51,24 @@ function observeChanges(prev, current) {
     const methods = {
         ifKeysChange: (...keys) => ({
             then(callback) {
-                if (keys.some(key => !equalityFn(prev[key], current[key]))) {
+                if (keys.some((key) => !equalityFn(prev[key], current[key]))) {
                     callback();
                 }
             },
         }),
         ifKeysChangeTo(target) {
             const targetKeys = Object.keys(target);
-            const currentSlice = pick_1.pick(current, targetKeys);
+            const currentSlice = utils_1.pick(current, targetKeys);
             return {
                 then(callback) {
-                    if (targetKeys.some(key => !equalityFn(prev[key], current[key])) &&
+                    if (targetKeys.some((key) => !equalityFn(prev[key], current[key])) &&
                         equalityFn(currentSlice, target)) {
                         callback();
                     }
                 },
             };
         },
-        ifSelector: selector => {
+        ifSelector: (selector) => {
             const currentSelection = selector(current);
             const prevSelection = selector(prev);
             const isDiff = !equalityFn(currentSelection, prevSelection);

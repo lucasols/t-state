@@ -1,13 +1,12 @@
 /**
  * forked from v1 of https://github.com/jhonnymichel/react-hookstore
  */
-import { anyObj } from '@lucasols/utils/typings';
-import { shallowEqual as shallowEqualFn } from '@lucasols/utils/shallowEqual';
 import { Action } from './devTools';
 import { dequal } from 'dequal/lite';
-export declare const shallowEqual: typeof shallowEqualFn;
+import { shallowEqual as _sw } from './shallowEqual';
 export declare const deepEqual: typeof dequal;
-export declare type State = anyObj;
+export declare const shallowEqual: typeof _sw;
+export declare type State = Record<string, any>;
 export declare type Subscriber<T extends State> = {
     (prev: T, current: T, action?: Action): void;
 };
