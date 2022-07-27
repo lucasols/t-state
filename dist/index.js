@@ -18,8 +18,11 @@ exports.deepEqual = lite_1.dequal;
 exports.shallowEqual = shallowEqual_1.shallowEqual;
 const isDev = process.env.NODE_ENV === 'development';
 class Store {
+    name;
+    state;
+    reducers;
+    subscribers = [];
     constructor({ name, state, reducers }) {
-        this.subscribers = [];
         this.name = name;
         this.state = state;
         this.reducers = reducers;
@@ -47,8 +50,7 @@ class Store {
         this.setState(newState, { type: `${this.name}.set.${key}`, key, value });
     }
     dispatch(type, ...payload) {
-        var _a;
-        if (!((_a = this.reducers) === null || _a === void 0 ? void 0 : _a[type])) {
+        if (!this.reducers?.[type]) {
             if (process.env.NODE_ENV !== 'production') {
                 throw new Error(`Action ${type} does not exist on store ${this.name}`);
             }
@@ -72,8 +74,8 @@ class Store {
         };
     }
     useKey(key, { equalityFn } = {}) {
-        const [state, set] = react_1.useState(this.state[key]);
-        react_1.useEffect(() => {
+        const [state, set] = (0, react_1.useState)(this.state[key]);
+        (0, react_1.useEffect)(() => {
             const setter = this.subscribe((prev, current) => {
                 if (equalityFn) {
                     if (!equalityFn(prev[key], current[key])) {
@@ -98,11 +100,11 @@ class Store {
         const areEqual = typeof args[1] === 'object' && args[1].equalityFn
             ? args[1].equalityFn
             : exports.shallowEqual;
-        const [state, set] = react_1.useState(utils_1.pick(this.state, keys));
-        react_1.useEffect(() => {
+        const [state, set] = (0, react_1.useState)((0, utils_1.pick)(this.state, keys));
+        (0, react_1.useEffect)(() => {
             const setter = this.subscribe((prev, current) => {
-                const currentSlice = utils_1.pick(current, keys);
-                if (!areEqual(utils_1.pick(prev, keys), currentSlice)) {
+                const currentSlice = (0, utils_1.pick)(current, keys);
+                if (!areEqual((0, utils_1.pick)(prev, keys), currentSlice)) {
                     set(currentSlice);
                 }
             });
@@ -111,9 +113,9 @@ class Store {
         return state;
     }
     useSelector(selector, { equalityFn = exports.shallowEqual, selectorDeps = [], } = {}) {
-        const [state, set] = react_1.useState(selector(this.state));
-        const isFirstRender = react_1.useRef(true);
-        react_1.useEffect(() => {
+        const [state, set] = (0, react_1.useState)(selector(this.state));
+        const isFirstRender = (0, react_1.useRef)(true);
+        (0, react_1.useLayoutEffect)(() => {
             const setterSubscriber = this.subscribe((prev, current) => {
                 const currentSelection = selector(current);
                 if (equalityFn) {
@@ -139,7 +141,7 @@ class Store {
     }
     /** set a new state mutanting the state with Immer produce function */
     produceState(recipe) {
-        this.setState(immer_1.produce(this.state, recipe), {
+        this.setState((0, immer_1.produce)(this.state, recipe), {
             type: 'produceState',
         });
     }

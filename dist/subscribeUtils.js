@@ -13,8 +13,8 @@ function getIfKeysChange(prev, current) {
     return (keys, callback, areEqual = shallowEqual_1.shallowEqual) => {
         const verifyIfChangesOnly = Array.isArray(keys);
         const changeToObjKeys = (verifyIfChangesOnly ? keys : Object.keys(keys));
-        const currentSlice = utils_1.pick(current, changeToObjKeys);
-        if (!areEqual(utils_1.pick(prev, changeToObjKeys), currentSlice)) {
+        const currentSlice = (0, utils_1.pick)(current, changeToObjKeys);
+        if (!areEqual((0, utils_1.pick)(prev, changeToObjKeys), currentSlice)) {
             if (verifyIfChangesOnly) {
                 callback();
             }
@@ -58,7 +58,7 @@ function observeChanges(prev, current) {
         }),
         ifKeysChangeTo(target) {
             const targetKeys = Object.keys(target);
-            const currentSlice = utils_1.pick(current, targetKeys);
+            const currentSlice = (0, utils_1.pick)(current, targetKeys);
             return {
                 then(callback) {
                     if (targetKeys.some((key) => !equalityFn(prev[key], current[key])) &&
@@ -102,11 +102,11 @@ function observeChanges(prev, current) {
 }
 exports.observeChanges = observeChanges;
 function useSubscribeToStore(store, onChange) {
-    const callbackRef = react_1.useRef(onChange);
-    react_1.useLayoutEffect(() => {
+    const callbackRef = (0, react_1.useRef)(onChange);
+    (0, react_1.useLayoutEffect)(() => {
         callbackRef.current = onChange;
     });
-    react_1.useEffect(() => {
+    (0, react_1.useEffect)(() => {
         const unsubscribe = store.subscribe((prev, current) => {
             const observe = observeChanges(prev, current);
             callbackRef.current({ prev, current, observe });

@@ -7,7 +7,7 @@ exports.useCreateStore = void 0;
 const react_1 = require("react");
 const _1 = __importDefault(require("."));
 function useCreateStore(storeProps) {
-    const store = react_1.useRef();
+    const store = (0, react_1.useRef)();
     if (!store.current) {
         store.current = new _1.default(typeof storeProps === 'function' ? storeProps() : storeProps);
     }
