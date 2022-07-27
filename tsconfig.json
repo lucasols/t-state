@@ -1,19 +1,24 @@
 {
+  "compileOnSave": false,
   "compilerOptions": {
-    "target": "es2018",
-    "declaration": true,
+    "target": "ESNext",
     "moduleResolution": "node",
     "module": "CommonJS",
+    "jsx": "preserve",
+    "skipLibCheck": true,
+    "types": [
+      "node"
+    ],
     "noEmit": true,
+    "esModuleInterop": true,
     "strictNullChecks": true,
     "noImplicitReturns": true,
     "noImplicitAny": true,
-    "jsx": "react",
-    "skipLibCheck": true,
-    // "noUnusedLocals": true,
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "keyofStringsOnly": true
-  },
-  "include": ["src", "test"]
+    "alwaysStrict": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "forceConsistentCasingInFileNames": true,
+    "keyofStringsOnly": true,
+    "strictPropertyInitialization": true
+  }
 }

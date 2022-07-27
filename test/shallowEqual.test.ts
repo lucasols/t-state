@@ -1,5 +1,6 @@
 /* eslint-disable jest/valid-title */
 import { shallowEqual } from '../src/shallowEqual';
+import { expect, describe, test } from 'vitest';
 
 const obj1 = {
   foo: 'bar',

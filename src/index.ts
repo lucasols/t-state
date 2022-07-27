@@ -3,7 +3,7 @@
  */
 // TODO: remove fork comment and add credit to readme
 import devtools, { Action } from './devTools';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { dequal } from 'dequal/lite';
 import { produce } from 'immer';
 
@@ -66,7 +66,7 @@ export default class Store<
 
     if (devToolsMiddeware && name) {
       this.subscribers.push(
-        devToolsMiddeware(name, state, (newState: T) => {
+        (devToolsMiddeware as any)(name, state, (newState: T) => {
           this.setState(newState);
         }),
       );
@@ -82,7 +82,7 @@ export default class Store<
     this.state = newState;
 
     for (let i = 0; i < this.subscribers.length; i++) {
-      this.subscribers[i](prevState, newState, action);
+      this.subscribers[i]!(prevState, newState, action);
     }
   }
 
@@ -205,7 +205,7 @@ export default class Store<
     const [state, set] = useState(selector(this.state));
     const isFirstRender = useRef(true);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
       const setterSubscriber = this.subscribe((prev, current) => {
         const currentSelection = selector(current);
         if (equalityFn) {

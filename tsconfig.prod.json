@@ -1,8 +1,9 @@
 {
-  "extends": "./tsconfig",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
     "noEmit": false,
+    "declaration": true
   },
-  "include": ["src"]
+  "include": ["src/vite-plugin-linaria.ts"]
 }

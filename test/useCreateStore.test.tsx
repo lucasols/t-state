@@ -1,8 +1,12 @@
-import '@testing-library/jest-dom/extend-expect';
-import { fireEvent, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { useCreateStore } from '../src/useCreateStore';
 import Store from '../src';
+import { expect, describe, test, vi, afterEach } from 'vitest';
+
+afterEach(() => {
+  cleanup();
+});
 
 describe('useCreateStore', () => {
   type TestState = {
@@ -80,10 +84,10 @@ describe('useCreateStore', () => {
 
   test('only render the correct components', () =>
     new Promise<void>((done) => {
-      const consoleError = jest.spyOn(global.console, 'error');
+      const consoleError = vi.spyOn(global.console, 'error');
 
-      const onRenderChild = jest.fn();
-      const onRenderParent = jest.fn();
+      const onRenderChild = vi.fn();
+      const onRenderParent = vi.fn();
 
       const Child = ({ testState }: { testState: Store<TestState> }) => {
         onRenderChild();

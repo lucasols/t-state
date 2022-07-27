@@ -1,10 +1,14 @@
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
-import '@testing-library/jest-dom/extend-expect';
-import { act, fireEvent, render } from '@testing-library/react';
+import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import Store, { shallowEqual } from '../src';
+import { expect, describe, test, beforeEach, vi, afterEach } from 'vitest';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 type anyFunction = () => any;
+
+afterEach(() => {
+  cleanup();
+});
 
 describe('hooks', () => {
   describe('useKey', () => {
@@ -97,7 +101,7 @@ describe('hooks', () => {
 
     test('when a component unmounts, the store removes its reference', () =>
       new Promise<void>((done) => {
-        const consoleError = jest.spyOn(global.console, 'error');
+        const consoleError = vi.spyOn(global.console, 'error');
 
         const { getByRole, unmount } = render(<Component />);
 
@@ -118,8 +122,8 @@ describe('hooks', () => {
       }));
 
     test('not render when the new key value is the same (shallow equality)', () => {
-      const onRender = jest.fn();
-      const mockSubscriber = jest.fn();
+      const onRender = vi.fn();
+      const mockSubscriber = vi.fn();
 
       testState.subscribe(mockSubscriber);
 
@@ -269,7 +273,7 @@ describe('hooks', () => {
 
     test('when a component unmounts, the store removes its reference', () =>
       new Promise<void>((done) => {
-        const consoleError = jest.spyOn(global.console, 'error');
+        const consoleError = vi.spyOn(global.console, 'error');
 
         const { getByRole, unmount } = render(<Component />);
 
@@ -294,8 +298,8 @@ describe('hooks', () => {
       }));
 
     test('not render when the new key values are the same (shallow equality)', () => {
-      const onRender = jest.fn();
-      const mockSubscriber = jest.fn();
+      const onRender = vi.fn();
+      const mockSubscriber = vi.fn();
 
       testState.subscribe(mockSubscriber);
 
@@ -331,8 +335,8 @@ describe('hooks', () => {
     });
 
     test('reducer triggers only one render', () => {
-      const onRender = jest.fn();
-      const mockSubscriber = jest.fn();
+      const onRender = vi.fn();
+      const mockSubscriber = vi.fn();
 
       testState.subscribe(mockSubscriber);
 
@@ -402,9 +406,12 @@ describe('hooks', () => {
       useShallowEqual?: boolean;
       children?: ReactNode;
     }) => {
-      const sum = testState.useSelector((state) => state.key1 + state.key3[0], {
-        equalityFn: useShallowEqual ? undefined : false,
-      });
+      const sum = testState.useSelector(
+        (state) => state.key1 + state.key3[0]!,
+        {
+          equalityFn: useShallowEqual ? undefined : false,
+        },
+      );
 
       useEffect(() => {
         if (onRender) {
@@ -456,8 +463,8 @@ describe('hooks', () => {
     });
 
     test('not render when the the returned values are the same', () => {
-      const onRender = jest.fn();
-      const mockSubscriber = jest.fn();
+      const onRender = vi.fn();
+      const mockSubscriber = vi.fn();
 
       testState.subscribe(mockSubscriber);
 
@@ -499,8 +506,8 @@ describe('hooks', () => {
     });
 
     test('shallow equality check disabled', () => {
-      const onRender = jest.fn();
-      const mockSubscriber = jest.fn();
+      const onRender = vi.fn();
+      const mockSubscriber = vi.fn();
 
       testState.subscribe(mockSubscriber);
 
@@ -550,8 +557,8 @@ describe('hooks', () => {
     });
 
     test('not render when the equality function return true', () => {
-      const onRender = jest.fn();
-      const mockSubscriber = jest.fn();
+      const onRender = vi.fn();
+      const mockSubscriber = vi.fn();
 
       const Component2 = () => {
         const state = testState.useSelector((s) => s, {
@@ -603,7 +610,7 @@ describe('hooks', () => {
     });
 
     test('update selector if selector deps change', () => {
-      const mockSubscriber = jest.fn();
+      const mockSubscriber = vi.fn();
       testState.subscribe(mockSubscriber);
       let idCounter = 1;
 
@@ -646,8 +653,8 @@ describe('hooks', () => {
     });
 
     test.skip('update selector function is allways refreshed', () => {
-      const mockSubscriber = jest.fn();
-      const onRender = jest.fn();
+      const mockSubscriber = vi.fn();
+      const onRender = vi.fn();
       testState.subscribe(mockSubscriber);
 
       const Component3 = () => {
@@ -689,26 +696,26 @@ describe('hooks', () => {
     });
 
     test('bailout batched updates', () => {
-      const onRenderParent = jest.fn();
-      const onRenderChild = jest.fn();
-      const mockSubscriber = jest.fn();
+      const onRenderParent = vi.fn();
+      const onRenderChild = vi.fn();
+      const mockSubscriber = vi.fn();
 
       function useTestState() {
-        return testState.useSelector((state) => state.key1 + state.key3[0]);
+        return testState.useSelector((state) => state.key1 + state.key3[0]!);
       }
 
       const Parent = () => {
         const sum = testState.useSelector(
-          (state) => state.key1 + state.key3[0],
+          (state) => state.key1 + state.key3[0]!,
         );
         const sum2 = testState.useSelector(
-          (state) => state.key1 + state.key3[1],
+          (state) => state.key1 + state.key3[1]!,
         );
         const sum3 = testState.useSelector(
-          (state) => state.key1 + state.key3[2],
+          (state) => state.key1 + state.key3[2]!,
         );
         const sum4 = testState.useSelector(
-          (state) => state.key1 + state.key3[0],
+          (state) => state.key1 + state.key3[0]!,
         );
         const sum5 = useTestState();
 
@@ -741,6 +748,29 @@ describe('hooks', () => {
       expect(onRenderParent).toHaveBeenCalledTimes(2);
       expect(onRenderChild).toHaveBeenCalledTimes(2);
       expect(mockSubscriber).toHaveBeenCalledTimes(1);
+    });
+
+    test('update while render is reflected in component', () => {
+      const Component2 = () => {
+        useEffect(() => {
+          testState.produceState((state) => {
+            state.key1 = 98;
+          });
+        }, []);
+
+        return <div />;
+      };
+
+      const { getByRole } = render(
+        <>
+          <Component2 />
+          <Component />
+        </>,
+      );
+
+      const button = getByRole('button');
+
+      expect(button).toHaveTextContent('98');
     });
   });
 });

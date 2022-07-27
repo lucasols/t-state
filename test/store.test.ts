@@ -1,4 +1,5 @@
 import Store from '../src';
+import { expect, describe, test, vi } from 'vitest';
 
 type TestState = {
   items: {
@@ -101,7 +102,7 @@ describe('create and manipulate store', () => {
     test('add subscriber', () => {
       const testState = createTestStore();
 
-      const mockSubscriber = jest.fn();
+      const mockSubscriber = vi.fn();
 
       testState.subscribe(mockSubscriber);
 
@@ -118,7 +119,7 @@ describe('create and manipulate store', () => {
       const firstCall = mockSubscriber.mock.calls[0];
       const secondCall = mockSubscriber.mock.calls[1];
 
-      expect(firstCall[0]).toStrictEqual({
+      expect(firstCall![0]).toStrictEqual({
         items: [
           {
             id: 1,
@@ -127,20 +128,7 @@ describe('create and manipulate store', () => {
         ],
       });
 
-      expect(firstCall[1]).toStrictEqual({
-        items: [
-          {
-            id: 1,
-            text: 'Hello',
-          },
-          {
-            id: 2,
-            text: 'new item added',
-          },
-        ],
-      });
-
-      expect(secondCall[0]).toStrictEqual({
+      expect(firstCall![1]).toStrictEqual({
         items: [
           {
             id: 1,
@@ -153,7 +141,20 @@ describe('create and manipulate store', () => {
         ],
       });
 
-      expect(secondCall[1]).toStrictEqual({
+      expect(secondCall![0]).toStrictEqual({
+        items: [
+          {
+            id: 1,
+            text: 'Hello',
+          },
+          {
+            id: 2,
+            text: 'new item added',
+          },
+        ],
+      });
+
+      expect(secondCall![1]).toStrictEqual({
         items: [
           {
             id: 1,
@@ -174,7 +175,7 @@ describe('create and manipulate store', () => {
     test('remove subscriber', () => {
       const testState = createTestStore();
 
-      const mockSubscriber = jest.fn();
+      const mockSubscriber = vi.fn();
 
       const removeSubscriber = testState.subscribe(mockSubscriber);
 
@@ -204,7 +205,7 @@ describe('create and manipulate store', () => {
       const testState = createTestStore();
 
       testState.produceState(state => {
-        state.items[0].text = 'change text';
+        state.items[0]!.text = 'change text';
       });
 
       expect(testState.getState()).toStrictEqual({

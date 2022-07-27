@@ -1,5 +1,6 @@
 import Store from '../src';
 import { observeChanges } from '../src/subscribeUtils';
+import { expect, describe, test, beforeEach, vi } from 'vitest';
 
 type TestState = {
   key1: number;
@@ -37,7 +38,7 @@ beforeEach(() => {
 
 describe('getIfKeysChange', () => {
   test('call callback when keys change', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
 
     testState.subscribe((prev, current) => {
       const observe = observeChanges(prev, current);
@@ -56,7 +57,7 @@ describe('getIfKeysChange', () => {
   });
 
   test('call callback when keys change to', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
 
     testState.subscribe((prev, current) => {
       const observe = observeChanges(prev, current);
@@ -77,7 +78,7 @@ describe('getIfKeysChange', () => {
   });
 
   test('call callback when keys change with deepEquality', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
 
     testState.subscribe((prev, current) => {
       const observe = observeChanges(prev, current);
@@ -109,7 +110,7 @@ describe('getIfKeysChange', () => {
 
 describe('getIfSelectorChange', () => {
   test('call callback when keys change', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
 
     testState.subscribe((prev, current) => {
       const observe = observeChanges(prev, current);
@@ -128,7 +129,7 @@ describe('getIfSelectorChange', () => {
   });
 
   test('call callback when keys change to', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
 
     testState.subscribe((prev, current) => {
       const observe = observeChanges(prev, current);
@@ -152,7 +153,7 @@ describe('getIfSelectorChange', () => {
   });
 
   test('call callback when keys change with default shallowEqual', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
 
     testState.subscribe((prev, current) => {
       const observe = observeChanges(prev, current);
@@ -184,7 +185,7 @@ describe('getIfSelectorChange', () => {
   });
 
   test('call callback when keys change with deepEquality', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
 
     testState.subscribe((prev, current) => {
       const observe = observeChanges(prev, current);
