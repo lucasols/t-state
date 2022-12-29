@@ -4,7 +4,7 @@
     "target": "ESNext",
     "moduleResolution": "node",
     "module": "CommonJS",
-    "jsx": "react",
+    "jsx": "react-jsx",
     "skipLibCheck": true,
     "types": [
       "node"

@@ -11,7 +11,7 @@ type TestState = {
 
 function createTestStore() {
   const store = new Store<TestState>({
-    name: 'test',
+    debugName: 'test',
     state: {
       string: 'Hello',
       items: [
@@ -48,7 +48,7 @@ test('get the initial props', () => {
     string: 'Hello',
   });
 
-  expect(store.name).toBe('test');
+  expect(store.debugName_).toBe('test');
 });
 
 test('set key', () => {

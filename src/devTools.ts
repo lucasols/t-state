@@ -1,54 +1,105 @@
 import { State } from './main';
 
-let id = 0;
-
 export type Action = {
   type: string;
   [k: string]: any;
 };
 
-export default (
+export function startDevTools(
   storeName: string,
   initialState: State,
   setState: (state: State) => void,
-) => {
+) {
   const reduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION__;
 
-  const instanceID = id;
-  id += 1;
+  if (!(window as any).__tStateCreatedStores) {
+    (window as any).__tStateCreatedStores = [];
+  }
+
+  const createdInstances = (window as any).__tStateCreatedStores as {
+    name: string;
+    instance: any;
+    unsubscribe: () => void;
+  }[];
 
   const name = `t-state - ${storeName}`;
-  const features = {
-    jump: true,
-  };
 
-  const devTools = reduxDevTools.connect({ name, features });
+  let lastState = initialState;
+
+  const relatedInstance = createdInstances.find((i) => i.name === name);
+
+  let devTools: any;
+
+  if (relatedInstance) {
+    devTools = relatedInstance.instance;
+    relatedInstance.unsubscribe();
+  } else {
+    devTools = reduxDevTools.connect({
+      name,
+    });
+  }
 
   devTools.init(initialState);
 
-  devTools.subscribe((data: any) => {
+  const unsubscribe = devTools.subscribe((data: any) => {
     switch (data.type) {
-      case 'RESET':
-        setState(initialState);
+      case 'START':
         break;
-      case 'DISPATCH':
-        console.log('DevTools requested to change the state to', data.state);
+
+      case 'DISPATCH': {
         switch (data.payload.type) {
+          case 'RESET':
+            setState(initialState);
+            break;
+
           case 'JUMP_TO_STATE':
           case 'JUMP_TO_ACTION': {
             setState(JSON.parse(data.state));
             break;
           }
+
+          case 'COMMIT': {
+            devTools.init(lastState);
+            break;
+          }
+
           default:
+            console.error(
+              data.type,
+              data.payload.type,
+              'is not supported by t-state devtools',
+            );
             break;
         }
+
         break;
+      }
+
       default:
+        console.error(data.type, 'is not supported by t-state devtools');
         break;
     }
   });
 
-  return (_state: State, newState: State, action: Action) => {
-    devTools.send(action, newState, {}, instanceID);
+  if (relatedInstance) {
+    relatedInstance.unsubscribe = unsubscribe;
+  } else {
+    createdInstances.push({
+      name,
+      instance: devTools,
+      unsubscribe,
+    });
+  }
+
+  return ({
+    action,
+    current,
+  }: {
+    current: any;
+    prev: any;
+    action?: Action;
+  }) => {
+    lastState = current;
+    devTools.send(action ?? null, current);
   };
-};
+}

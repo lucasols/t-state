@@ -1,4 +1,4 @@
-import devtools, { Action } from './devTools';
+import { startDevTools, Action } from './devTools';
 import { dequal } from 'dequal/lite';
 import { produce } from 'immer';
 import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/with-selector';
@@ -10,6 +10,9 @@ import {
   unwrapValueSetter as unwrapValueArg,
   ValueArg,
 } from './utils';
+
+export { observeChanges, useSubscribeToStore } from './subscribeUtils';
+export { useCreateStore } from './useCreateStore';
 
 const deepEqual = dequal;
 
@@ -24,7 +27,7 @@ export type Subscriber<T extends State> = {
 export type EqualityFn = (prev: any, current: any) => boolean;
 
 export type StoreProps<T> = {
-  name?: string;
+  debugName?: string;
   state: T;
 };
 
@@ -33,14 +36,14 @@ type UseStateOptions = {
 };
 
 export class Store<T extends State> {
-  readonly name?: string;
+  readonly debugName_: string = '';
   private state_: T;
-  private subscribers: Subscriber<T>[] = [];
+  private subscribers_: Subscriber<T>[] = [];
   private batchUpdates_ = false;
   private lastState_: T;
 
-  constructor({ name, state }: StoreProps<T>) {
-    this.name = name;
+  constructor({ debugName, state }: StoreProps<T>) {
+    this.debugName_ = debugName || '';
     this.state_ =
       process.env.NODE_ENV === 'development' ? state : deepFreeze(state);
     this.lastState_ = state;
@@ -48,11 +51,11 @@ export class Store<T extends State> {
     const devToolsMiddeware =
       process.env.NODE_ENV === 'development' &&
       typeof window !== 'undefined' &&
-      ((window as any).__REDUX_DEVTOOLS_EXTENSION__ ? devtools : false);
+      ((window as any).__REDUX_DEVTOOLS_EXTENSION__ ? startDevTools : false);
 
-    if (devToolsMiddeware && name) {
-      this.subscribers.push(
-        (devToolsMiddeware as any)(name, state, (newState: T) => {
+    if (devToolsMiddeware && debugName) {
+      this.subscribers_.push(
+        devToolsMiddeware(debugName, state, (newState: T) => {
           this.setState(newState);
         }),
       );
@@ -64,8 +67,8 @@ export class Store<T extends State> {
   }
 
   private flush_(action: Action | undefined) {
-    for (let i = 0; i < this.subscribers.length; i++) {
-      this.subscribers[i]!({
+    for (let i = 0; i < this.subscribers_.length; i++) {
+      this.subscribers_[i]!({
         prev: this.lastState_,
         current: this.state_,
         action,
@@ -126,7 +129,9 @@ export class Store<T extends State> {
         ...current,
         [key]: unwrapValueArg(value, current[key]),
       }),
-      { action: action ?? { type: `${this.name}.set.${key}`, key, value } },
+      {
+        action: action ?? { type: `${this.debugName_}.set.${key}`, key, value },
+      },
     );
   }
 
@@ -151,7 +156,7 @@ export class Store<T extends State> {
     }
 
     this.setState((current) => ({ ...current, ...newState }), {
-      action: action ?? { type: `${this.name}.setPartial`, newState },
+      action: action ?? { type: `${this.debugName_}.setPartial`, newState },
     });
   }
 
@@ -187,8 +192,8 @@ export class Store<T extends State> {
     callback: Subscriber<T>,
     { initCall }: { initCall?: boolean } = {},
   ) {
-    if (!this.subscribers.includes(callback)) {
-      this.subscribers.push(callback);
+    if (!this.subscribers_.includes(callback)) {
+      this.subscribers_.push(callback);
     }
 
     if (initCall) {
@@ -200,7 +205,7 @@ export class Store<T extends State> {
     }
 
     return () => {
-      this.subscribers.splice(this.subscribers.indexOf(callback), 1);
+      this.subscribers_.splice(this.subscribers_.indexOf(callback), 1);
     };
   }
 

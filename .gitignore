@@ -12,3 +12,4 @@ stats.json
 resources
 coverage
 .yarn/cache
+dist

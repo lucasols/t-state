@@ -27,7 +27,7 @@ describe('hooks', () => {
     };
 
     let testState = new Store<TestState>({
-      name: 'test',
+      debugName: 'test',
       state: initialState,
     });
 
@@ -52,7 +52,7 @@ describe('hooks', () => {
 
     beforeEach(() => {
       testState = new Store<TestState>({
-        name: 'test',
+        debugName: 'test',
         state: initialState,
       });
     });
@@ -199,7 +199,7 @@ describe('hooks', () => {
 
     beforeEach(() => {
       testState = new Store<TestState>({
-        name: 'test',
+        debugName: 'test',
         state: initialState,
       });
     });
@@ -424,7 +424,7 @@ describe('hooks', () => {
 
     beforeEach(() => {
       testState = new Store<TestState>({
-        name: 'test',
+        debugName: 'test',
         state: initialState,
       });
     });

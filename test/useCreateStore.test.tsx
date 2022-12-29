@@ -19,7 +19,7 @@ describe('useCreateStore', () => {
   test('basic usage', () => {
     const Component = () => {
       const testState = useCreateStore<TestState>({
-        name: 'teste',
+        debugName: 'teste',
         state: {
           numOfClicks: 0,
           obj: {
@@ -55,7 +55,7 @@ describe('useCreateStore', () => {
   test('basic usag with lazy config', () => {
     const Component = () => {
       const testState = useCreateStore<TestState>(() => ({
-        name: 'teste',
+        debugName: 'teste',
         state: {
           numOfClicks: 0,
           obj: {
@@ -105,7 +105,7 @@ describe('useCreateStore', () => {
 
       const Component = () => {
         const testState = useCreateStore<TestState>({
-          name: 'teste',
+          debugName: 'teste',
           state: {
             numOfClicks: 0,
             obj: {
@@ -152,7 +152,7 @@ describe('useCreateStore', () => {
   test('when a component unmounts, the store removes its reference', () => {
     const Component = () => {
       const testState = useCreateStore<TestState>({
-        name: 'teste',
+        debugName: 'teste',
         state: {
           numOfClicks: 0,
           obj: {

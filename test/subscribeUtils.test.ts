@@ -20,7 +20,7 @@ let testState: Store<TestState>;
 
 beforeEach(() => {
   testState = new Store<TestState>({
-    name: 'test',
+    debugName: 'test',
     state: initialState,
   });
 });
