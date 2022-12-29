@@ -1,11 +1,10 @@
-import { State } from '.';
-import { Serializable } from './typings/utils';
+import { State } from './main';
 
 let id = 0;
 
 export type Action = {
   type: string;
-  [k: string]: Serializable;
+  [k: string]: any;
 };
 
 export default (

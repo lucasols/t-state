@@ -1,6 +1,6 @@
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import { act, cleanup, fireEvent, render } from '@testing-library/react';
-import Store, { shallowEqual } from '../src';
+import { Store, shallowEqual } from '../src/main';
 import { expect, describe, test, beforeEach, vi, afterEach } from 'vitest';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -32,14 +32,19 @@ describe('hooks', () => {
     });
 
     const Component = ({ onRender }: { onRender?: anyFunction }) => {
-      const [numOfClicks, setNumOfClicks] = testState.useKey('numOfClicks');
+      const numOfClicks = testState.useKey('numOfClicks');
 
       if (onRender) {
         onRender();
       }
 
       return (
-        <button type="button" onClick={() => setNumOfClicks(numOfClicks + 1)}>
+        <button
+          type="button"
+          onClick={() =>
+            testState.setKey('numOfClicks', (current) => current + 1)
+          }
+        >
           Num of clicks: {numOfClicks}
         </button>
       );
@@ -64,12 +69,12 @@ describe('hooks', () => {
       fireEvent.click(button);
       expect(button).toHaveTextContent('Num of clicks: 2');
 
-      expect(testState.getState().numOfClicks).toBe(2);
+      expect(testState.state.numOfClicks).toBe(2);
     });
 
     test('update all components if setState is called from anywhere', () => {
       const AnotherComponent = () => {
-        const [numOfClicks] = testState.useKey('numOfClicks');
+        const numOfClicks = testState.useKey('numOfClicks');
 
         return <div data-testid="another-component">{numOfClicks}</div>;
       };
@@ -151,11 +156,11 @@ describe('hooks', () => {
       });
 
       expect(onRender).toHaveBeenCalledTimes(2);
-      expect(mockSubscriber).toHaveBeenCalledTimes(5);
+      expect(mockSubscriber).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('useGetSlice', () => {
+  describe('useSlice', () => {
     type TestState = {
       key1: number;
       key2: string;
@@ -170,11 +175,7 @@ describe('hooks', () => {
       key4: [0, 1, 2],
     };
 
-    type Reducers = {
-      changeMultipleKeys: Pick<TestState, 'key1' | 'key2'>;
-    };
-
-    let testState: Store<TestState, Reducers>;
+    let testState: Store<TestState>;
 
     const Component = ({ onRender }: { onRender?: anyFunction }) => {
       const { key1, key2, key3 } = testState.useSlice(
@@ -197,16 +198,9 @@ describe('hooks', () => {
     };
 
     beforeEach(() => {
-      testState = new Store<TestState, Reducers>({
+      testState = new Store<TestState>({
         name: 'test',
         state: initialState,
-        reducers: {
-          changeMultipleKeys: (state, { key1, key2 }) => ({
-            ...state,
-            key1,
-            key2,
-          }),
-        },
       });
     });
 
@@ -324,17 +318,17 @@ describe('hooks', () => {
       });
 
       act(() => {
-        testState.dispatch('changeMultipleKeys', {
-          key2: '👍',
-          key1: 1,
+        testState.produceState((draft) => {
+          draft.key1 = 1;
+          draft.key2 = '👍';
         });
       });
 
       expect(onRender).toHaveBeenCalledTimes(1);
-      expect(mockSubscriber).toHaveBeenCalledTimes(5);
+      expect(mockSubscriber).toHaveBeenCalledTimes(0);
     });
 
-    test('reducer triggers only one render', () => {
+    test('produceState only result in one render', () => {
       const onRender = vi.fn();
       const mockSubscriber = vi.fn();
 
@@ -347,9 +341,9 @@ describe('hooks', () => {
       expect(button).toHaveTextContent('number: 1, string: 👍, array: [0,1,2]');
 
       act(() => {
-        testState.dispatch('changeMultipleKeys', {
-          key2: 'new text',
-          key1: 42,
+        testState.produceState((draft) => {
+          draft.key2 = 'new text';
+          draft.key1 = 42;
         });
       });
 
@@ -358,25 +352,25 @@ describe('hooks', () => {
       );
 
       act(() => {
-        testState.dispatch('changeMultipleKeys', {
-          key2: 'new text',
-          key1: 42,
+        testState.produceState((draft) => {
+          draft.key2 = 'new text';
+          draft.key1 = 42;
         });
       });
 
       act(() => {
-        testState.dispatch('changeMultipleKeys', {
-          key2: 'new text',
-          key1: 42,
+        testState.produceState((draft) => {
+          draft.key2 = 'new text';
+          draft.key1 = 42;
         });
       });
 
       expect(onRender).toHaveBeenCalledTimes(2);
-      expect(mockSubscriber).toHaveBeenCalledTimes(3);
+      expect(mockSubscriber).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('useSelect', () => {
+  describe('useSelector', () => {
     type TestState = {
       key1: number;
       key2: string;
@@ -391,11 +385,7 @@ describe('hooks', () => {
       key4: [0, 1, 2],
     };
 
-    type Reducers = {
-      changeMultipleKeys: Pick<TestState, 'key1' | 'key2'>;
-    };
-
-    let testState: Store<TestState, Reducers>;
+    let testState: Store<TestState>;
 
     const Component = ({
       onRender,
@@ -433,16 +423,9 @@ describe('hooks', () => {
     };
 
     beforeEach(() => {
-      testState = new Store<TestState, Reducers>({
+      testState = new Store<TestState>({
         name: 'test',
         state: initialState,
-        reducers: {
-          changeMultipleKeys: (state, { key1, key2 }) => ({
-            ...state,
-            key1,
-            key2,
-          }),
-        },
       });
     });
 
@@ -495,14 +478,14 @@ describe('hooks', () => {
       });
 
       act(() => {
-        testState.dispatch('changeMultipleKeys', {
-          key2: '👍',
-          key1: 1,
+        testState.produceState((draft) => {
+          draft.key2 = '👍';
+          draft.key1 = 1;
         });
       });
 
       expect(onRender).toHaveBeenCalledTimes(1);
-      expect(mockSubscriber).toHaveBeenCalledTimes(7);
+      expect(mockSubscriber).toHaveBeenCalledTimes(2);
     });
 
     test('shallow equality check disabled', () => {
@@ -546,14 +529,14 @@ describe('hooks', () => {
       });
 
       act(() => {
-        testState.dispatch('changeMultipleKeys', {
-          key2: '👍',
-          key1: 1,
+        testState.produceState((draft) => {
+          draft.key2 = '👍';
+          draft.key1 = 1;
         });
       });
 
-      expect(onRender).toHaveBeenCalledTimes(8);
-      expect(mockSubscriber).toHaveBeenCalledTimes(7);
+      expect(onRender).toHaveBeenCalledTimes(3);
+      expect(mockSubscriber).toHaveBeenCalledTimes(2);
     });
 
     test('not render when the equality function return true', () => {
@@ -599,14 +582,14 @@ describe('hooks', () => {
       });
 
       act(() => {
-        testState.dispatch('changeMultipleKeys', {
-          key2: '👍',
-          key1: 1,
+        testState.produceState((draft) => {
+          draft.key2 = '👍';
+          draft.key1 = 1;
         });
       });
 
       expect(onRender).toHaveBeenCalledTimes(1);
-      expect(mockSubscriber).toHaveBeenCalledTimes(7);
+      expect(mockSubscriber).toHaveBeenCalledTimes(2);
     });
 
     test('update selector if selector deps change', () => {
@@ -618,10 +601,9 @@ describe('hooks', () => {
         const [selectorDep, setselectorDep] = useState(1);
 
         const id = useRef(idCounter++);
-        const state = testState.useSelector(
-          (s) => ({ value: selectorDep + s.key1 }),
-          { selectorDeps: [selectorDep] },
-        );
+        const state = testState.useSelector((s) => ({
+          value: selectorDep + s.key1,
+        }));
 
         return (
           <div>
@@ -649,50 +631,7 @@ describe('hooks', () => {
       expect(getByTestId('another-component')).toHaveTextContent('4');
       expect(getByTestId('id-component')).toHaveTextContent('1');
 
-      expect(mockSubscriber).toHaveBeenCalledTimes(2);
-    });
-
-    test.skip('update selector function is allways refreshed', () => {
-      const mockSubscriber = vi.fn();
-      const onRender = vi.fn();
-      testState.subscribe(mockSubscriber);
-
-      const Component3 = () => {
-        const [selectorDep, setselectorDep] = useState(1);
-
-        const state = testState.useSelector((s) => ({
-          value: selectorDep + s.key1,
-        }));
-
-        onRender();
-
-        return (
-          <div>
-            <span data-testid="another-component">{state.value}</span>
-            <span
-              data-testid="id-component"
-              onClick={() => setselectorDep(3)}
-            />
-          </div>
-        );
-      };
-
-      const { getByTestId } = render(<Component3 />);
-      expect(getByTestId('another-component')).toHaveTextContent('2');
-
-      fireEvent.click(getByTestId('id-component'));
-
-      act(() => {
-        testState.setKey('key1', 2);
-      });
-      act(() => {
-        testState.setKey('key1', 2);
-      });
-
-      expect(getByTestId('another-component')).toHaveTextContent('5');
-
-      expect(mockSubscriber).toHaveBeenCalledTimes(2);
-      expect(onRender).toHaveBeenCalledTimes(3);
+      expect(mockSubscriber).toHaveBeenCalledTimes(1);
     });
 
     test('bailout batched updates', () => {

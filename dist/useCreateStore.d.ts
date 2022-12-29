@@ -1,2 +1,2 @@
-import Store, { Reducers, ReducersPayloads, State, StoreProps } from '.';
-export declare function useCreateStore<T extends State, P extends ReducersPayloads = ReducersPayloads, R extends Reducers<T, P> = Reducers<T, P>>(storeProps: StoreProps<T, R> | (() => StoreProps<T, R>)): Store<T, P, Reducers<T, P>>;
+import { State, Store, StoreProps } from './t-state';
+export declare function useCreateStore<T extends State>(storeProps: StoreProps<T> | (() => StoreProps<T>)): Store<T>;

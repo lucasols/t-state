@@ -1,67 +1,14 @@
 /* eslint-disable @typescript-eslint/lines-between-class-members */
-import Store, { State, EqualityFn, deepEqual } from '.';
 import { useEffect, useLayoutEffect, useRef } from 'react';
-import { shallowEqual } from './shallowEqual';
+import { Store, EqualityFn, shallowEqual, State } from './main';
 import { pick } from './utils';
-
-/**
- * @deprecated use `observeChanges` instead
- */
-export function getIfKeysChange<T extends State>(prev: T, current: T) {
-  return <K extends keyof T>(
-    keys: K[] | Pick<T, K>,
-    callback: () => any,
-    areEqual: EqualityFn<Pick<T, K>> = shallowEqual,
-  ) => {
-    const verifyIfChangesOnly = Array.isArray(keys);
-    const changeToObjKeys = (
-      verifyIfChangesOnly ? keys : Object.keys(keys)
-    ) as K[];
-    const currentSlice = pick(current, changeToObjKeys);
-
-    if (!areEqual(pick(prev, changeToObjKeys), currentSlice)) {
-      if (verifyIfChangesOnly) {
-        callback();
-      } else if (areEqual(keys as Pick<T, K>, currentSlice)) {
-        callback();
-      }
-    }
-  };
-}
-
-/**
- * @deprecated use `observeChanges` instead
- */
-export function getIfSelectorChange<T extends State>(prev: T, current: T) {
-  return <S extends (state: T) => any>(
-    selector: S | [S, ReturnType<S>],
-    callback: (currentSelection: ReturnType<S>) => any,
-    areEqual: EqualityFn<ReturnType<S>> = shallowEqual,
-  ) => {
-    const verifyIfChangesTo = Array.isArray(selector);
-    const selectorFn = verifyIfChangesTo
-      ? (selector as [S, any])[0]
-      : (selector as S);
-    const currentSelection = selectorFn(current);
-
-    if (!areEqual(selectorFn(prev), currentSelection)) {
-      if (!verifyIfChangesTo) {
-        callback(currentSelection);
-      } else if (
-        areEqual(currentSelection, (selector as [S, ReturnType<S>])[1])
-      ) {
-        callback(currentSelection);
-      }
-    }
-  };
-}
 
 interface Then {
   then: (callback: () => any) => any;
 }
 
 interface SelectorThen<R, P = R> {
-  then: (callback: (currentSelection: R, previousSelection: P) => any) => any;
+  then: (callback: (selection: { current: R; prev: P }) => any) => any;
 }
 
 interface ChangeMethods<T extends State> {
@@ -74,14 +21,14 @@ interface ChangeMethods<T extends State> {
 }
 
 interface ObserveChangesReturn<T extends State> extends ChangeMethods<T> {
-  withEqualityFn(equalityFn: EqualityFn<any>): ChangeMethods<T>;
+  withEqualityFn(equalityFn: EqualityFn): ChangeMethods<T>;
 }
 
 export function observeChanges<T extends State>(
   prev: T,
   current: T,
 ): ObserveChangesReturn<T> {
-  let equalityFn = deepEqual;
+  let equalityFn = shallowEqual;
 
   const methods: ChangeMethods<T> = {
     ifKeysChange: (...keys) => ({
@@ -115,7 +62,7 @@ export function observeChanges<T extends State>(
         change: {
           then(callback) {
             if (isDiff) {
-              callback(currentSelection, prevSelection);
+              callback({ current: currentSelection, prev: prevSelection });
             }
           },
         },
@@ -123,7 +70,7 @@ export function observeChanges<T extends State>(
           return {
             then(callback) {
               if (isDiff && equalityFn(currentSelection, target)) {
-                callback(target, prevSelection);
+                callback({ current: target, prev: prevSelection });
               }
             },
           };
@@ -142,7 +89,7 @@ export function observeChanges<T extends State>(
   };
 }
 
-export function useSubscribeToStore<T>(
+export function useSubscribeToStore<T extends State>(
   store: Store<T>,
   onChange: ({
     prev,
@@ -160,7 +107,7 @@ export function useSubscribeToStore<T>(
   });
 
   useEffect(() => {
-    const unsubscribe = store.subscribe((prev, current) => {
+    const unsubscribe = store.subscribe(({ prev, current }) => {
       const observe = observeChanges(prev, current);
 
       callbackRef.current({ prev, current, observe });

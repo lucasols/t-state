@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-import { vi, expect } from 'vitest';
+import { expect } from 'vitest';
 import matchers, {
   TestingLibraryMatchers,
 } from '@testing-library/jest-dom/matchers';

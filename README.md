@@ -14,25 +14,11 @@ type TestState = {
   lastName: string;
 };
 
-type ReducersPayloads = {
-  setName: string;
-};
-
-const testStore = new Store<TestState, ReducersPayloads>({
+const testStore = new Store<TestState>({
   name: 'test',
   state: {
     firstName: 'Hello',
     lastName: 'World',
-  },
-  reducers: {
-    setName: (currentState, name) => {
-      const [firstName, lastName] = name.split(' ');
-
-      return {
-        firstName,
-        lastName,
-      };
-    },
   },
 });
 ```
@@ -92,13 +78,13 @@ Use key funciona de forma similar ao hook `React.useState`
 
 ```tsx
 const Component = () => {
-  const [firstName, setFirstName] = testStore.useKey('firstName');
+  const firstName = testStore.useKey('firstName');
 
   return (
     <>
       <div>Name: {firstName}</div>
 
-      <input onChange={(e) => setFirstName(e.currentTarget.value)} />
+      <input onChange={(e) => testStore.setKey('firstName', e.currentTarget.value)} />
     </>
   );
 };
@@ -106,15 +92,7 @@ const Component = () => {
 
 ## Alterando estado
 
-A alteração de estado pode ser feita por meio de reducers, ou por meio de mutação usando [immer](https://immerjs.github.io/immer/)
-
-### Alterando via reducers
-
-Reducers são usados por meio da função `dispatch`, passando id do reducer e o payload
-
-```tsx
-testStore.dispatch('setName', 'John Doe');
-```
+A alteração de estado pode ser feita por meio dos métodos `setKey`, `setState` e `setPartialState`, ou por meio de mutação usando [immer](https://immerjs.github.io/immer/)
 
 ### Alterando via immer
 
@@ -216,4 +194,3 @@ No exemplo acima cada child component só é renderizado quando a parte que ele 
 ## TODO:
 
 - [ ] Traduzir documentação para o inglês
-- [ ] v7 com suporte a react 18

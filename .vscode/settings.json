@@ -13,7 +13,8 @@
     "titleBar.activeForeground": "#e7e7e7",
     "titleBar.inactiveForeground": "#e7e7e799",
     "activityBar.activeBackground": "#540d4a",
-    "sash.hoverBorder": "#540d4a"
+    "sash.hoverBorder": "#540d4a",
+    "commandCenter.border": "#e7e7e799"
   },
   "peacock.color": "#280623"
 }

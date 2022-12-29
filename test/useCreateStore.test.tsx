@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { useCreateStore } from '../src/useCreateStore';
-import Store from '../src';
+import { Store } from '../src/main';
 import { expect, describe, test, vi, afterEach } from 'vitest';
 
 afterEach(() => {
@@ -28,10 +28,13 @@ describe('useCreateStore', () => {
         },
       });
 
-      const [numOfClicks, setNumOfClicks] = testState.useKey('numOfClicks');
+      const numOfClicks = testState.useKey('numOfClicks');
 
       return (
-        <button type="button" onClick={() => setNumOfClicks(numOfClicks + 1)}>
+        <button
+          type="button"
+          onClick={() => testState.setKey('numOfClicks', numOfClicks + 1)}
+        >
           Num of clicks: {numOfClicks}
         </button>
       );
@@ -61,10 +64,13 @@ describe('useCreateStore', () => {
         },
       }));
 
-      const [numOfClicks, setNumOfClicks] = testState.useKey('numOfClicks');
+      const numOfClicks = testState.useKey('numOfClicks');
 
       return (
-        <button type="button" onClick={() => setNumOfClicks(numOfClicks + 1)}>
+        <button
+          type="button"
+          onClick={() => testState.setKey('numOfClicks', numOfClicks + 1)}
+        >
           Num of clicks: {numOfClicks}
         </button>
       );
@@ -92,7 +98,7 @@ describe('useCreateStore', () => {
       const Child = ({ testState }: { testState: Store<TestState> }) => {
         onRenderChild();
 
-        const [numOfClicks] = testState.useKey('numOfClicks');
+        const numOfClicks = testState.useKey('numOfClicks');
 
         return <div data-testid="show-state">Num of clicks: {numOfClicks}</div>;
       };
@@ -114,10 +120,7 @@ describe('useCreateStore', () => {
           <button
             type="button"
             onClick={() =>
-              testState.setKey(
-                'numOfClicks',
-                testState.getState().numOfClicks + 1,
-              )
+              testState.setKey('numOfClicks', testState.state.numOfClicks + 1)
             }
           >
             <Child testState={testState} />
@@ -158,10 +161,13 @@ describe('useCreateStore', () => {
         },
       });
 
-      const [numOfClicks, setNumOfClicks] = testState.useKey('numOfClicks');
+      const numOfClicks = testState.useKey('numOfClicks');
 
       return (
-        <button type="button" onClick={() => setNumOfClicks(numOfClicks + 1)}>
+        <button
+          type="button"
+          onClick={() => testState.setKey('numOfClicks', numOfClicks + 1)}
+        >
           Num of clicks: {numOfClicks}
         </button>
       );

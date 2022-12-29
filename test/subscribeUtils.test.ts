@@ -1,4 +1,4 @@
-import Store from '../src';
+import { deepEqual, Store } from '../src/main';
 import { observeChanges } from '../src/subscribeUtils';
 import { expect, describe, test, beforeEach, vi } from 'vitest';
 
@@ -16,23 +16,12 @@ const initialState = {
   key4: [0, 1, 2],
 };
 
-type Reducers = {
-  changeMultipleKeys: Pick<TestState, 'key1' | 'key2'>;
-};
-
-let testState: Store<TestState, Reducers>;
+let testState: Store<TestState>;
 
 beforeEach(() => {
-  testState = new Store<TestState, Reducers>({
+  testState = new Store<TestState>({
     name: 'test',
     state: initialState,
-    reducers: {
-      changeMultipleKeys: (state, { key1, key2 }) => ({
-        ...state,
-        key1,
-        key2,
-      }),
-    },
   });
 });
 
@@ -40,7 +29,7 @@ describe('getIfKeysChange', () => {
   test('call callback when keys change', () => {
     const mockCallback = vi.fn();
 
-    testState.subscribe((prev, current) => {
+    testState.subscribe(({ prev, current }) => {
       const observe = observeChanges(prev, current);
 
       observe.ifKeysChange('key1').then(mockCallback);
@@ -59,7 +48,7 @@ describe('getIfKeysChange', () => {
   test('call callback when keys change to', () => {
     const mockCallback = vi.fn();
 
-    testState.subscribe((prev, current) => {
+    testState.subscribe(({ prev, current }) => {
       const observe = observeChanges(prev, current);
 
       observe.ifKeysChangeTo({ key1: 5 }).then(mockCallback);
@@ -80,7 +69,7 @@ describe('getIfKeysChange', () => {
   test('call callback when keys change with deepEquality', () => {
     const mockCallback = vi.fn();
 
-    testState.subscribe((prev, current) => {
+    testState.subscribe(({ prev, current }) => {
       const observe = observeChanges(prev, current);
 
       observe.ifKeysChange('key3', 'key4').then(() => {
@@ -112,10 +101,10 @@ describe('getIfSelectorChange', () => {
   test('call callback when keys change', () => {
     const mockCallback = vi.fn();
 
-    testState.subscribe((prev, current) => {
+    testState.subscribe(({ prev, current }) => {
       const observe = observeChanges(prev, current);
 
-      observe.ifSelector(s => s.key1).change.then(mockCallback);
+      observe.ifSelector((s) => s.key1).change.then(mockCallback);
     });
 
     testState.setKey('key1', 3);
@@ -131,13 +120,13 @@ describe('getIfSelectorChange', () => {
   test('call callback when keys change to', () => {
     const mockCallback = vi.fn();
 
-    testState.subscribe((prev, current) => {
+    testState.subscribe(({ prev, current }) => {
       const observe = observeChanges(prev, current);
 
       observe
-        .ifSelector(s => s.key1)
+        .ifSelector((s) => s.key1)
         .changeTo(5)
-        .then((newValue, prevValue) => mockCallback());
+        .then(() => mockCallback());
     });
 
     testState.setKey('key1', 2);
@@ -155,12 +144,12 @@ describe('getIfSelectorChange', () => {
   test('call callback when keys change with default shallowEqual', () => {
     const mockCallback = vi.fn();
 
-    testState.subscribe((prev, current) => {
+    testState.subscribe(({ prev, current }) => {
       const observe = observeChanges(prev, current);
 
       observe
-        .ifSelector(s => [s.key3.join(', '), s.key4.join(', ')])
-        .change.then((returnValue) => {
+        .ifSelector((s) => [s.key3.join(', '), s.key4.join(', ')])
+        .change.then(() => {
           mockCallback(current.key3.join(', '), current.key4.join(', '));
         });
     });
@@ -187,12 +176,13 @@ describe('getIfSelectorChange', () => {
   test('call callback when keys change with deepEquality', () => {
     const mockCallback = vi.fn();
 
-    testState.subscribe((prev, current) => {
+    testState.subscribe(({ prev, current }) => {
       const observe = observeChanges(prev, current);
 
       observe
-        .ifSelector(s => ({ a: s.key3, b: s.key4 }))
-        .change.then((selection) => {
+        .withEqualityFn(deepEqual)
+        .ifSelector((s) => ({ a: s.key3, b: s.key4 }))
+        .change.then(() => {
           mockCallback(current.key3.join(', '), current.key4.join(', '));
         });
     });
