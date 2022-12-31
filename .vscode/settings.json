@@ -16,5 +16,8 @@
     "sash.hoverBorder": "#540d4a",
     "commandCenter.border": "#e7e7e799"
   },
-  "peacock.color": "#280623"
+  "peacock.color": "#280623",
+  "git.branchProtection": [
+    "none"
+  ]
 }
