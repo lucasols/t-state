@@ -24,6 +24,7 @@ module.exports = {
     'no-constant-binary-expression': ERROR,
     'object-shorthand': ERROR,
     'no-useless-rename': ERROR,
+    'no-param-reassign': ERROR,
 
     'no-prototype-builtins': OFF,
 

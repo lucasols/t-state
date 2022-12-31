@@ -13,3 +13,4 @@ resources
 coverage
 .yarn/cache
 dist
+.DS_Store
