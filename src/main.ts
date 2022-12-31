@@ -38,7 +38,7 @@ type UseStateOptions = {
 export class Store<T extends State> {
   readonly debugName_: string = '';
   private state_: T;
-  private subscribers_: Subscriber<T>[] = [];
+  private subscribers_ = new Set<Subscriber<T>>();
   private batchUpdates_ = false;
   private lastState_: T;
 
@@ -54,7 +54,7 @@ export class Store<T extends State> {
       ((window as any).__REDUX_DEVTOOLS_EXTENSION__ ? startDevTools : false);
 
     if (devToolsMiddeware && debugName) {
-      this.subscribers_.push(
+      this.subscribers_.add(
         devToolsMiddeware(debugName, state, (newState: T) => {
           this.setState(newState);
         }),
@@ -67,12 +67,8 @@ export class Store<T extends State> {
   }
 
   private flush_(action: Action | undefined) {
-    for (let i = 0; i < this.subscribers_.length; i++) {
-      this.subscribers_[i]!({
-        prev: this.lastState_,
-        current: this.state_,
-        action,
-      });
+    for (const subscriber of this.subscribers_) {
+      subscriber({ prev: this.lastState_, current: this.state_, action });
     }
   }
 
@@ -192,8 +188,8 @@ export class Store<T extends State> {
     callback: Subscriber<T>,
     { initCall }: { initCall?: boolean } = {},
   ) {
-    if (!this.subscribers_.includes(callback)) {
-      this.subscribers_.push(callback);
+    if (!this.subscribers_.has(callback)) {
+      this.subscribers_.add(callback);
     }
 
     if (initCall) {
@@ -205,7 +201,7 @@ export class Store<T extends State> {
     }
 
     return () => {
-      this.subscribers_.splice(this.subscribers_.indexOf(callback), 1);
+      this.subscribers_.delete(callback);
     };
   }
 
