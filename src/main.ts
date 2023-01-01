@@ -1,7 +1,7 @@
 import { startDevTools, Action } from './devTools';
 import { dequal } from 'dequal/lite';
 import { produce } from 'immer';
-import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/with-selector';
+import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/with-selector.js';
 
 import { shallowEqual } from './shallowEqual';
 import {

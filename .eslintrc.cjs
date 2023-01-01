@@ -27,6 +27,7 @@ module.exports = {
     'no-param-reassign': ERROR,
 
     'no-prototype-builtins': OFF,
+    'no-undef': OFF,
 
     /* typescript */
     '@typescript-eslint/no-explicit-any': OFF,
