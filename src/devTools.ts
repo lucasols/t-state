@@ -1,9 +1,11 @@
 import { State } from './main';
 
-export type Action = {
-  type: string;
-  [k: string]: any;
-};
+export type Action =
+  | {
+      type: string;
+      [k: string]: any;
+    }
+  | string;
 
 export function startDevTools(
   storeName: string,
