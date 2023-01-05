@@ -10,6 +10,7 @@ import {
   unwrapValueSetter as unwrapValueArg,
   ValueArg,
 } from './utils';
+import { useCallback, useRef } from 'react';
 
 export { observeChanges, useSubscribeToStore } from './subscribeUtils';
 export { useCreateStore } from './useCreateStore';
@@ -33,6 +34,7 @@ export type StoreProps<T> = {
 
 type UseStateOptions = {
   equalityFn?: EqualityFn | false;
+  selectorDeps?: any[];
 };
 
 export class Store<T extends State> {
@@ -205,15 +207,27 @@ export class Store<T extends State> {
     };
   }
 
+  private getState_ = () => {
+    return this.state_;
+  };
+
   useSelector<S>(
     selector: (state: T) => S,
-    { equalityFn = shallowEqual }: UseStateOptions = {},
+    { equalityFn = shallowEqual, selectorDeps = [] }: UseStateOptions = {},
   ): Readonly<S> {
+    const selectorRef = useRef(selector);
+    selectorRef.current = selector;
+
+    const memoizedSelector = useCallback(
+      (s: T) => selectorRef.current(s),
+      selectorDeps,
+    );
+
     return useSyncExternalStoreWithSelector(
       this.subscribe.bind(this),
-      () => this.state_,
+      this.getState_,
       null,
-      selector,
+      memoizedSelector,
       equalityFn === false ? undefined : equalityFn,
     );
   }

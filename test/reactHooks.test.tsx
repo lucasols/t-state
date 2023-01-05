@@ -601,9 +601,12 @@ describe('hooks', () => {
         const [selectorDep, setselectorDep] = useState(1);
 
         const id = useRef(idCounter++);
-        const state = testState.useSelector((s) => ({
-          value: selectorDep + s.key1,
-        }));
+        const state = testState.useSelector(
+          (s) => ({
+            value: selectorDep + s.key1,
+          }),
+          { selectorDeps: [selectorDep] },
+        );
 
         return (
           <div>
@@ -630,6 +633,59 @@ describe('hooks', () => {
 
       expect(getByTestId('another-component')).toHaveTextContent('4');
       expect(getByTestId('id-component')).toHaveTextContent('1');
+
+      expect(mockSubscriber).toHaveBeenCalledTimes(1);
+    });
+
+    test('update selector refs if store update', () => {
+      const mockSubscriber = vi.fn();
+      testState.subscribe(mockSubscriber);
+      let idCounter = 1;
+
+      const Component3 = () => {
+        const [selectorDep, setselectorDep] = useState(1);
+
+        const id = useRef(idCounter++);
+
+        const state = testState.useSelector((s) => ({
+          // key1 is === 1
+          value: selectorDep + s.key1,
+        }));
+
+        return (
+          <div>
+            <span data-testid="value">{state.value}</span>
+            <span data-testid="dep">{selectorDep}</span>
+
+            <button
+              type="button"
+              data-testid="btn"
+              onClick={() => setselectorDep((c) => c + 1)}
+            >
+              {id.current}
+            </button>
+          </div>
+        );
+      };
+
+      const { getByTestId } = render(<Component3 />);
+      expect(getByTestId('value')).toHaveTextContent('2');
+      expect(getByTestId('dep')).toHaveTextContent('1');
+
+      act(() => {
+        fireEvent.click(getByTestId('btn'));
+      });
+
+      expect(getByTestId('dep')).toHaveTextContent('2');
+      // value is not updated because selector has no deps
+      expect(getByTestId('value')).toHaveTextContent('2');
+
+      act(() => {
+        testState.setKey('key1', 2);
+      });
+
+      // value should be dep (2) + key1 (2)
+      expect(getByTestId('value')).toHaveTextContent('4');
 
       expect(mockSubscriber).toHaveBeenCalledTimes(1);
     });
@@ -710,6 +766,39 @@ describe('hooks', () => {
       const button = getByRole('button');
 
       expect(button).toHaveTextContent('98');
+    });
+
+    test('selector is not called when store does not change', () => {
+      const selector = vi.fn((state: TestState) => state.key1);
+
+      const Component2 = () => {
+        const [count, setCount] = useState(0);
+
+        const value = testState.useSelector((state) => selector(state));
+
+        return (
+          <>
+            <div data-testid="another-component">{value}</div>
+            <button type="button" onClick={() => setCount(count + 1)}>
+              render
+            </button>
+          </>
+        );
+      };
+
+      const { getByRole } = render(<Component2 />);
+
+      act(() => {
+        getByRole('button').click();
+      });
+      act(() => {
+        getByRole('button').click();
+      });
+      act(() => {
+        getByRole('button').click();
+      });
+
+      expect(selector).toHaveBeenCalledTimes(1);
     });
   });
 });
