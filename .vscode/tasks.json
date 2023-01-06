@@ -5,19 +5,8 @@
   "tasks": [
     {
       "type": "npm",
-      "script": "build",
-      "problemMatcher": [],
-      "presentation": {
-        "clear": true
-      },
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
-    },
-    {
-      "type": "npm",
       "script": "test",
+      "label": "run tests",
       "problemMatcher": [],
       "presentation": {
         "clear": true

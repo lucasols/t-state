@@ -34,7 +34,7 @@ export type StoreProps<T> = {
 
 type UseStateOptions = {
   equalityFn?: EqualityFn | false;
-  selectorDeps?: any[];
+  useExternalDeps?: boolean;
 };
 
 export class Store<T extends State> {
@@ -213,14 +213,11 @@ export class Store<T extends State> {
 
   useSelector<S>(
     selector: (state: T) => S,
-    { equalityFn = shallowEqual, selectorDeps = [] }: UseStateOptions = {},
+    { equalityFn = shallowEqual, useExternalDeps }: UseStateOptions = {},
   ): Readonly<S> {
-    const selectorRef = useRef(selector);
-    selectorRef.current = selector;
-
     const memoizedSelector = useCallback(
-      (s: T) => selectorRef.current(s),
-      selectorDeps,
+      (s: T) => selector(s),
+      useExternalDeps ? [selector] : [],
     );
 
     return useSyncExternalStoreWithSelector(
