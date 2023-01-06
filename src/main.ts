@@ -10,7 +10,7 @@ import {
   unwrapValueSetter as unwrapValueArg,
   ValueArg,
 } from './utils';
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 
 export { observeChanges, useSubscribeToStore } from './subscribeUtils';
 export { useCreateStore } from './useCreateStore';
