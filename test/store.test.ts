@@ -240,6 +240,34 @@ describe('change state using producState', () => {
     });
   });
 
+  test('dont do nothing when state is not updated', () => {
+    const { store } = createTestStore();
+
+    const mockSubscriber = vi.fn();
+
+    store.subscribe(mockSubscriber);
+
+    const wasUpdated = store.produceState(() => {
+      return undefined;
+    });
+
+    expect(wasUpdated).toBe(false);
+
+    const wasUpdated2 = store.produceState((draft) => {
+      const item = draft.items[1];
+
+      if (item) {
+        item.text = 'Hello';
+      }
+    });
+
+    expect(wasUpdated2).toBe(false);
+
+    expect(mockSubscriber).toHaveBeenCalledTimes(0);
+  });
+});
+
+describe('change state using setPartialState', () => {
   test('change state using setPartialState', () => {
     const { store } = createTestStore();
 
@@ -258,22 +286,6 @@ describe('change state using producState', () => {
     });
   });
 
-  test('dont do nothing when state is not updated', () => {
-    const { store } = createTestStore();
-
-    const mockSubscriber = vi.fn();
-
-    store.subscribe(mockSubscriber);
-
-    store.produceState(() => {
-      return undefined;
-    });
-
-    expect(mockSubscriber).toHaveBeenCalledTimes(0);
-  });
-});
-
-describe('change state using setPartialState', () => {
   test('set state', () => {
     const { store } = createTestStore();
 

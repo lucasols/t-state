@@ -85,10 +85,11 @@ export class Store<T extends State> {
        * value, you can pass false to ignore the check or pass a custom equality function */
       equalityCheck?: EqualityFn | false;
     } = {},
-  ) {
+  ): boolean {
     const unwrapedNewState = unwrapValueArg(newState, this.state_);
 
-    if (equalityCheck && equalityCheck(unwrapedNewState, this.state_)) return;
+    if (equalityCheck && equalityCheck(unwrapedNewState, this.state_))
+      return false;
 
     this.lastState_ = { ...this.state_ };
     this.state_ =
@@ -99,6 +100,8 @@ export class Store<T extends State> {
     if (!this.batchUpdates_) {
       this.flush_(action);
     }
+
+    return true;
   }
 
   setKey<K extends keyof T>(
@@ -173,7 +176,7 @@ export class Store<T extends State> {
       equalityCheck?: EqualityFn | false;
     } = {},
   ) {
-    this.setState((current) => produce(current, recipe), {
+    return this.setState((current) => produce(current, recipe), {
       action: action ?? { type: 'produceState' },
       equalityCheck,
     });

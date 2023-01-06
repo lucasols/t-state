@@ -31,6 +31,7 @@ module.exports = {
 
     /* typescript */
     '@typescript-eslint/no-explicit-any': OFF,
+    '@typescript-eslint/no-empty-function': OFF,
     '@typescript-eslint/naming-convention': [
       'error',
       {
