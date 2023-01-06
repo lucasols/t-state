@@ -1,6 +1,6 @@
 {
   "name": "t-state",
-  "version": "7.4.0",
+  "version": "7.5.0",
   "description": "Global state manager for Typescript projects",
   "license": "MIT",
   "author": "Lucas Santos",
@@ -31,7 +31,8 @@
     "test:run": "vitest run",
     "build": "pnpm test:run && pnpm lint && pnpm build:no-test",
     "build:no-test": "tsup --minify --dts",
-    "npm-publish": "./scripts/check-if-is-sync.sh && pnpm build && npm publish"
+    "npm-publish": "./scripts/check-if-is-sync.sh && pnpm build && npm publish",
+    "npm-publish-beta": "pnpm build && npm publish --tag beta"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.5",
