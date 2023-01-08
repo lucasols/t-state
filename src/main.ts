@@ -47,7 +47,7 @@ export class Store<T extends State> {
   constructor({ debugName, state }: StoreProps<T>) {
     this.debugName_ = debugName || '';
     this.state_ =
-      process.env.NODE_ENV === 'development' ? state : deepFreeze(state);
+      process.env.NODE_ENV === 'development' ? deepFreeze(state) : state;
     this.lastState_ = state;
 
     const devToolsMiddeware =

@@ -388,6 +388,12 @@ test('freeze state', () => {
   expect(() => {
     store.state.items[0]!.text = 'change text';
   }).toThrowError();
+
+  store.setState({ items: [{ id: 1, text: 'Freeze' }], string: 'Freeze' });
+
+  expect(() => {
+    store.state.string = 'change text';
+  }).toThrowError();
 });
 
 test('batched updates', () => {
