@@ -383,6 +383,8 @@ describe('disable default equality check on set methods', () => {
 });
 
 test('freeze state', () => {
+  process.env.NODE_ENV = 'development';
+
   const { store } = createTestStore();
 
   expect(() => {
