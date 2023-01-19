@@ -30,6 +30,7 @@ export type EqualityFn = (prev: any, current: any) => boolean;
 export type StoreProps<T> = {
   debugName?: string;
   state: T;
+  disableDeepFreezeInDev?: boolean;
 };
 
 type UseStateOptions = {
@@ -43,12 +44,16 @@ export class Store<T extends State> {
   private subscribers_ = new Set<Subscriber<T>>();
   private batchUpdates_ = false;
   private lastState_: T;
+  private disableDeepFreezeInDev_: boolean;
 
-  constructor({ debugName, state }: StoreProps<T>) {
+  constructor({ debugName, state, disableDeepFreezeInDev }: StoreProps<T>) {
     this.debugName_ = debugName || '';
     this.state_ =
-      process.env.NODE_ENV === 'development' ? deepFreeze(state) : state;
+      process.env.NODE_ENV === 'development' && !disableDeepFreezeInDev
+        ? deepFreeze(state)
+        : state;
     this.lastState_ = state;
+    this.disableDeepFreezeInDev_ = disableDeepFreezeInDev || false;
 
     const devToolsMiddeware =
       process.env.NODE_ENV === 'development' &&
@@ -93,7 +98,7 @@ export class Store<T extends State> {
 
     this.lastState_ = { ...this.state_ };
     this.state_ =
-      process.env.NODE_ENV === 'development'
+      process.env.NODE_ENV === 'development' && !this.disableDeepFreezeInDev_
         ? deepFreeze(unwrapedNewState)
         : unwrapedNewState;
 
