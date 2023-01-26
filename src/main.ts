@@ -4,12 +4,7 @@ import { produce } from 'immer';
 import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/with-selector.js';
 
 import { shallowEqual } from './shallowEqual';
-import {
-  deepFreeze,
-  pick,
-  unwrapValueSetter as unwrapValueArg,
-  ValueArg,
-} from './utils';
+import { pick, unwrapValueSetter as unwrapValueArg, ValueArg } from './utils';
 import { useCallback } from 'react';
 
 export { observeChanges, useSubscribeToStore } from './subscribeUtils';
@@ -31,6 +26,7 @@ export type StoreProps<T> = {
   debugName?: string;
   state: T;
   disableDeepFreezeInDev?: boolean;
+  ignoreValueInDeepFreeze?: (value: unknown) => boolean;
 };
 
 type UseStateOptions = {
@@ -45,15 +41,22 @@ export class Store<T extends State> {
   private batchUpdates_ = false;
   private lastState_: T;
   private disableDeepFreezeInDev_: boolean;
+  private ignoreValueInDeepFreeze_?: (value: unknown) => boolean;
 
-  constructor({ debugName, state, disableDeepFreezeInDev }: StoreProps<T>) {
+  constructor({
+    debugName,
+    state,
+    disableDeepFreezeInDev,
+    ignoreValueInDeepFreeze,
+  }: StoreProps<T>) {
     this.debugName_ = debugName || '';
     this.state_ =
       process.env.NODE_ENV === 'development' && !disableDeepFreezeInDev
-        ? deepFreeze(state)
+        ? deepFreeze(state, ignoreValueInDeepFreeze)
         : state;
     this.lastState_ = state;
     this.disableDeepFreezeInDev_ = disableDeepFreezeInDev || false;
+    this.ignoreValueInDeepFreeze_ = ignoreValueInDeepFreeze;
 
     const devToolsMiddeware =
       process.env.NODE_ENV === 'development' &&
@@ -99,7 +102,7 @@ export class Store<T extends State> {
     this.lastState_ = { ...this.state_ };
     this.state_ =
       process.env.NODE_ENV === 'development' && !this.disableDeepFreezeInDev_
-        ? deepFreeze(unwrapedNewState)
+        ? deepFreeze(unwrapedNewState, this.ignoreValueInDeepFreeze_)
         : unwrapedNewState;
 
     if (!this.batchUpdates_) {
@@ -264,4 +267,29 @@ export class Store<T extends State> {
 
     return this.useSelector((s) => pick(s, keys), { equalityFn });
   }
+}
+
+export function deepFreeze<T>(
+  obj: T,
+  ignore: ((value: unknown) => boolean) | undefined,
+): T {
+  if (
+    obj === null ||
+    typeof obj !== 'object' ||
+    Object.isFrozen(obj) ||
+    obj instanceof Store ||
+    (ignore && ignore(obj))
+  ) {
+    return obj;
+  }
+
+  Object.freeze(obj);
+
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      deepFreeze(obj[key], ignore);
+    }
+  }
+
+  return obj;
 }

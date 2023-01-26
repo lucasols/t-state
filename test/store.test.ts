@@ -382,20 +382,44 @@ describe('disable default equality check on set methods', () => {
   });
 });
 
-test('freeze state', () => {
+describe('freeze state', () => {
   process.env.NODE_ENV = 'development';
 
-  const { store } = createTestStore();
+  test('prevent direct mutation of the state', () => {
+    const { store } = createTestStore();
 
-  expect(() => {
-    store.state.items[0]!.text = 'change text';
-  }).toThrowError();
+    expect(() => {
+      store.state.items[0]!.text = 'change text';
+    }).toThrowError();
 
-  store.setState({ items: [{ id: 1, text: 'Freeze' }], string: 'Freeze' });
+    store.setState({ items: [{ id: 1, text: 'Freeze' }], string: 'Freeze' });
 
-  expect(() => {
-    store.state.string = 'change text';
-  }).toThrowError();
+    expect(() => {
+      store.state.string = 'change text';
+    }).toThrowError();
+  });
+
+  test('allow custom classes', () => {
+    const customClass = new Store({
+      state: { text: 'Hello' },
+    });
+
+    const baseStore = new Store({
+      state: { store: customClass, text: 'Hello' },
+    });
+
+    console.log(String(baseStore.state.store));
+
+    expect(() => {
+      baseStore.state.store.state.text = 'change text';
+    }).toThrowError();
+
+    expect(() => {
+      baseStore.state.store.subscribe(() => {});
+
+      baseStore.state.store.setState({ text: 'change text' });
+    }).not.toThrowError();
+  });
 });
 
 test('batched updates', () => {
