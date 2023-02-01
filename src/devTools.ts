@@ -46,6 +46,7 @@ export function startDevTools(
   const unsubscribe = devTools.subscribe((data: any) => {
     switch (data.type) {
       case 'START':
+      case 'STOP':
         break;
 
       case 'DISPATCH': {

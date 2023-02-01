@@ -399,7 +399,29 @@ describe('freeze state', () => {
     }).toThrowError();
   });
 
-  test('allow custom classes', () => {
+  test('allow Store instances', () => {
+    const customClass = new Store({
+      state: { text: 'Hello' },
+    });
+
+    const baseStore = new Store({
+      state: { store: customClass, text: 'Hello' },
+    });
+
+    console.log(String(baseStore.state.store));
+
+    expect(() => {
+      baseStore.state.store.state.text = 'change text';
+    }).toThrowError();
+
+    expect(() => {
+      baseStore.state.store.subscribe(() => {});
+
+      baseStore.state.store.setState({ text: 'change text' });
+    }).not.toThrowError();
+  });
+
+  test('allow custom instances', () => {
     const customClass = new Store({
       state: { text: 'Hello' },
     });
