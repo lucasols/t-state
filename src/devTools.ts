@@ -8,6 +8,9 @@ export type Action =
     }
   | string;
 
+let tabId: string | null = null;
+let tabIdWasLogged = false;
+
 export function startDevTools(
   storeName: string,
   initialState: State,
@@ -15,7 +18,7 @@ export function startDevTools(
 ) {
   const reduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION__;
 
-  const tabId = nanoid(4);
+  tabId = tabId || nanoid(4);
 
   if (!(window as any).__tStateCreatedStores) {
     (window as any).__tStateCreatedStores = [];
@@ -49,7 +52,10 @@ export function startDevTools(
   const unsubscribe = devTools.subscribe((data: any) => {
     switch (data.type) {
       case 'START':
-        console.log('t-state devtools started, tabId:', tabId);
+        if (!tabIdWasLogged) {
+          tabIdWasLogged = true;
+          console.log('t-state devtools started, tabId:', tabId);
+        }
         break;
 
       case 'STOP':
