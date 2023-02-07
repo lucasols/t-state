@@ -1,4 +1,5 @@
 import { State } from './main';
+import { nanoid } from 'nanoid';
 
 export type Action =
   | {
@@ -14,6 +15,8 @@ export function startDevTools(
 ) {
   const reduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION__;
 
+  const tabId = nanoid(4);
+
   if (!(window as any).__tStateCreatedStores) {
     (window as any).__tStateCreatedStores = [];
   }
@@ -24,7 +27,7 @@ export function startDevTools(
     unsubscribe: () => void;
   }[];
 
-  const name = `t-state - ${storeName}`;
+  const name = `t-state - ${storeName} - ${tabId}`;
 
   let lastState = initialState;
 
@@ -46,6 +49,9 @@ export function startDevTools(
   const unsubscribe = devTools.subscribe((data: any) => {
     switch (data.type) {
       case 'START':
+        console.log('t-state devtools started, tabId:', tabId);
+        break;
+
       case 'STOP':
         break;
 
