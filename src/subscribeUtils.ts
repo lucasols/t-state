@@ -24,10 +24,13 @@ interface ObserveChangesReturn<T extends State> extends ChangeMethods<T> {
   withEqualityFn(equalityFn: EqualityFn): ChangeMethods<T>;
 }
 
-export function observeChanges<T extends State>(
-  prev: T,
-  current: T,
-): ObserveChangesReturn<T> {
+export function observeChanges<T extends State>({
+  prev,
+  current,
+}: {
+  prev: T;
+  current: T;
+}): ObserveChangesReturn<T> {
   let equalityFn = shallowEqual;
 
   const methods: ChangeMethods<T> = {
@@ -108,7 +111,7 @@ export function useSubscribeToStore<T extends State>(
 
   useEffect(() => {
     const unsubscribe = store.subscribe(({ prev, current }) => {
-      const observe = observeChanges(prev, current);
+      const observe = observeChanges({ prev, current });
 
       callbackRef.current({ prev, current, observe });
     });

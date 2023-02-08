@@ -30,7 +30,7 @@ describe('getIfKeysChange', () => {
     const mockCallback = vi.fn();
 
     testState.subscribe(({ prev, current }) => {
-      const observe = observeChanges(prev, current);
+      const observe = observeChanges({ prev, current });
 
       observe.ifKeysChange('key1').then(mockCallback);
     });
@@ -49,7 +49,7 @@ describe('getIfKeysChange', () => {
     const mockCallback = vi.fn();
 
     testState.subscribe(({ prev, current }) => {
-      const observe = observeChanges(prev, current);
+      const observe = observeChanges({ prev, current });
 
       observe.ifKeysChangeTo({ key1: 5 }).then(mockCallback);
     });
@@ -70,7 +70,7 @@ describe('getIfKeysChange', () => {
     const mockCallback = vi.fn();
 
     testState.subscribe(({ prev, current }) => {
-      const observe = observeChanges(prev, current);
+      const observe = observeChanges({ prev, current });
 
       observe.ifKeysChange('key3', 'key4').then(() => {
         mockCallback(current.key3.join(', '), current.key4.join(', '));
@@ -102,7 +102,7 @@ describe('getIfSelectorChange', () => {
     const mockCallback = vi.fn();
 
     testState.subscribe(({ prev, current }) => {
-      const observe = observeChanges(prev, current);
+      const observe = observeChanges({ prev, current });
 
       observe.ifSelector((s) => s.key1).change.then(mockCallback);
     });
@@ -121,7 +121,7 @@ describe('getIfSelectorChange', () => {
     const mockCallback = vi.fn();
 
     testState.subscribe(({ prev, current }) => {
-      const observe = observeChanges(prev, current);
+      const observe = observeChanges({ prev, current });
 
       observe
         .ifSelector((s) => s.key1)
@@ -145,7 +145,7 @@ describe('getIfSelectorChange', () => {
     const mockCallback = vi.fn();
 
     testState.subscribe(({ prev, current }) => {
-      const observe = observeChanges(prev, current);
+      const observe = observeChanges({ prev, current });
 
       observe
         .ifSelector((s) => [s.key3.join(', '), s.key4.join(', ')])
@@ -177,7 +177,7 @@ describe('getIfSelectorChange', () => {
     const mockCallback = vi.fn();
 
     testState.subscribe(({ prev, current }) => {
-      const observe = observeChanges(prev, current);
+      const observe = observeChanges({ prev, current });
 
       observe
         .withEqualityFn(deepEqual)
