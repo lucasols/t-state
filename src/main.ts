@@ -137,7 +137,11 @@ export class Store<T extends State> {
         [key]: unwrapValueArg(value, current[key]),
       }),
       {
-        action: action ?? { type: `${this.debugName_}.set.${String(key)}`, key, value },
+        action: action ?? {
+          type: `${this.debugName_}.set.${String(key)}`,
+          key,
+          value,
+        },
       },
     );
   }
