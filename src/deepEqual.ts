@@ -1,24 +1,26 @@
-/* eslint-disable */
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-var */
+/** forked from https://github.com/lukeed/dequal to conside invalid dates as equal */
+
 var has = Object.prototype.hasOwnProperty;
 
 function find(iter: any[], tar: any, key?: any) {
   for (key of iter.keys()) {
-    if (key === tar) return key;
+    if (deepEqual(key, tar)) return key;
   }
 }
 
-/** shallow equal version of https://github.com/lukeed/dequal */
-export function shallowEqual(foo: any, bar: any): boolean {
+export function deepEqual(foo: any, bar: any): boolean {
   var ctor, len, tmp;
   if (foo === bar) return true;
 
   if (foo && bar && (ctor = foo.constructor) === bar.constructor) {
-    if (ctor === Date) return shallowEqual(foo.getTime(), bar.getTime());
+    if (ctor === Date) return deepEqual(foo.getTime(), bar.getTime());
     if (ctor === RegExp) return foo.toString() === bar.toString();
 
     if (ctor === Array) {
       if ((len = foo.length) === bar.length) {
-        while (len-- && foo[len] === bar[len]);
+        while (len-- && deepEqual(foo[len], bar[len]));
       }
       return len === -1;
     }
@@ -48,7 +50,7 @@ export function shallowEqual(foo: any, bar: any): boolean {
           tmp = find(bar, tmp);
           if (!tmp) return false;
         }
-        if (len[1] !== bar.get(tmp)) {
+        if (!deepEqual(len[1], bar.get(tmp))) {
           return false;
         }
       }
@@ -59,7 +61,7 @@ export function shallowEqual(foo: any, bar: any): boolean {
       len = 0;
       for (ctor in foo) {
         if (has.call(foo, ctor) && ++len && !has.call(bar, ctor)) return false;
-        if (!(ctor in bar) || !(foo[ctor] === bar[ctor])) return false;
+        if (!(ctor in bar) || !deepEqual(foo[ctor], bar[ctor])) return false;
       }
       return Object.keys(bar).length === len;
     }

@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { useCreateStore } from '../src/useCreateStore';
+import { useCreateStore } from '../src/hooks';
 import { Store } from '../src/main';
 import { expect, describe, test, vi, afterEach } from 'vitest';
 

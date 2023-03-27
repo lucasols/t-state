@@ -8,7 +8,7 @@ import { pick, unwrapValueSetter as unwrapValueArg, ValueArg } from './utils';
 import { useCallback } from 'react';
 
 export { observeChanges, useSubscribeToStore } from './subscribeUtils';
-export { useCreateStore } from './useCreateStore';
+export { useCreateStore, createStoreContext, useStoreSnapshot } from './hooks';
 
 const deepEqual = dequal;
 

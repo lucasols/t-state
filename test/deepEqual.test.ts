@@ -1,5 +1,5 @@
 /* eslint-disable jest/valid-title */
-import { shallowEqual } from '../src/shallowEqual';
+import { deepEqual } from '../src/deepEqual';
 import { expect, describe, test } from 'vitest';
 
 const obj1 = {
@@ -150,7 +150,7 @@ const cases: [
           a: 1,
           b: {},
         },
-        result: false,
+        result: true,
       },
       {
         name: 'Simple one level - 2',
@@ -235,17 +235,17 @@ describe('shallow equal', () => {
   cases.forEach(([name, tests]) => {
     describe(name, () => {
       tests.forEach(({ name: testName, a, b, result }) =>
-        test(testName, () => expect(shallowEqual(a, b)).toBe(result)),
+        test(testName, () => expect(deepEqual(a, b)).toBe(result)),
       );
     });
   });
 
   test('single values, tests from dequal/lite', () => {
     function same(a: any, b: any) {
-      expect(shallowEqual(a, b)).toBe(true);
+      expect(deepEqual(a, b)).toBe(true);
     }
     function different(a: any, b: any) {
-      expect(shallowEqual(a, b)).toBe(false);
+      expect(deepEqual(a, b)).toBe(false);
     }
 
     different(1, 2);
