@@ -173,7 +173,7 @@ const cases: [
         name: 'Simple one level - 1',
         a: [1, []],
         b: [1, []],
-        result: false,
+        result: true,
       },
       {
         name: 'Simple one level - 2',
@@ -196,7 +196,7 @@ const cases: [
           ['a', 1],
           ['b', {}],
         ]),
-        result: false,
+        result: true,
       },
       {
         name: 'Simple one level - 2',
@@ -219,7 +219,7 @@ const cases: [
         name: 'Simple one level - 1',
         a: new Set([1, {}]),
         b: new Set([1, {}]),
-        result: false,
+        result: true,
       },
       {
         name: 'Simple one level - 2',
@@ -231,7 +231,14 @@ const cases: [
   ],
 ];
 
-describe('shallow equal', () => {
+describe('deep equal', () => {
+  function same(a: any, b: any) {
+    expect(deepEqual(a, b)).toBe(true);
+  }
+  function different(a: any, b: any) {
+    expect(deepEqual(a, b)).toBe(false);
+  }
+
   cases.forEach(([name, tests]) => {
     describe(name, () => {
       tests.forEach(({ name: testName, a, b, result }) =>
@@ -241,13 +248,6 @@ describe('shallow equal', () => {
   });
 
   test('single values, tests from dequal/lite', () => {
-    function same(a: any, b: any) {
-      expect(deepEqual(a, b)).toBe(true);
-    }
-    function different(a: any, b: any) {
-      expect(deepEqual(a, b)).toBe(false);
-    }
-
     different(1, 2);
     different(1, []);
     different(1, '1');
@@ -274,5 +274,63 @@ describe('shallow equal', () => {
     same(new Date('sdfsdf'), new Date('sdfsdf'));
 
     different(new Date('2019-01-01'), new Date('2019-01-02'));
+  });
+
+  test('objects', () => {
+    same({}, {});
+    same({ a: 1, b: 2 }, { a: 1, b: 2 });
+    same({ b: 2, a: 1 }, { a: 1, b: 2 });
+
+    different({ a: 1, b: 2, c: [] }, { a: 1, b: 2 });
+    different({ a: 1, b: 2 }, { a: 1, b: 2, c: [] });
+    different({ a: 1, c: 3 }, { a: 1, b: 2 });
+
+    same({ a: [{ b: 1 }] }, { a: [{ b: 1 }] });
+    different({ a: [{ b: 2 }] }, { a: [{ b: 1 }] });
+    different({ a: [{ c: 1 }] }, { a: [{ b: 1 }] });
+
+    different([], {});
+    different({}, []);
+    different({}, null);
+    different({}, undefined);
+
+    different({ a: void 0 }, {});
+    different({}, { a: undefined });
+    different({ a: undefined }, { b: undefined });
+  });
+
+  test('Arrays', () => {
+    same([], []);
+    same([1, 2, 3], [1, 2, 3]);
+    different([1, 2, 4], [1, 2, 3]);
+    different([1, 2], [1, 2, 3]);
+
+    same([{ a: 1 }, { b: 2 }], [{ a: 1 }, { b: 2 }]);
+    different([{ a: 2 }, { b: 2 }], [{ a: 1 }, { b: 2 }]);
+
+    different({ '0': 0, '1': 1, length: 2 }, [0, 1]);
+  });
+
+  test('maps nested', () => {
+    const hello = new Map([
+      ['foo', { a: 1 }],
+      ['bar', [1, 2, 3]],
+    ]);
+
+    const world = new Map([['foo', 'bar']]);
+
+    different(hello, world);
+
+    world.set('foo', { a: 1 });
+    different(hello, world);
+
+    world.set('bar', [1, 2, 3]);
+    same(hello, world);
+
+    hello.set('baz', new Map([['hello', 'world']]));
+    different(hello, world);
+
+    world.set('baz', new Map([['hello', 'world']]));
+    same(hello, world);
   });
 });

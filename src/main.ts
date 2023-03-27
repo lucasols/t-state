@@ -1,16 +1,14 @@
 import { startDevTools, Action } from './devTools';
-import { dequal } from 'dequal/lite';
 import { produce } from 'immer';
 import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/with-selector.js';
 
 import { shallowEqual } from './shallowEqual';
+import { deepEqual } from './deepEqual';
 import { pick, unwrapValueSetter as unwrapValueArg, ValueArg } from './utils';
 import { useCallback } from 'react';
 
 export { observeChanges, useSubscribeToStore } from './subscribeUtils';
 export { useCreateStore, createStoreContext, useStoreSnapshot } from './hooks';
-
-const deepEqual = dequal;
 
 export { shallowEqual, deepEqual };
 
