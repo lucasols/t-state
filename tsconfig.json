@@ -18,7 +18,6 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "forceConsistentCasingInFileNames": true,
-    "keyofStringsOnly": true,
     "strictPropertyInitialization": true
   }
 }
