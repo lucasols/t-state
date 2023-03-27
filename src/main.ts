@@ -63,8 +63,8 @@ export class Store<T extends State> {
 
     if (devToolsMiddeware && debugName) {
       this.subscribers_.add(
-        devToolsMiddeware(debugName, state, (newState: T) => {
-          this.setState(newState);
+        devToolsMiddeware(debugName, state, (newState) => {
+          this.setState(newState as T);
         }),
       );
     }
@@ -137,7 +137,7 @@ export class Store<T extends State> {
         [key]: unwrapValueArg(value, current[key]),
       }),
       {
-        action: action ?? { type: `${this.debugName_}.set.${key}`, key, value },
+        action: action ?? { type: `${this.debugName_}.set.${String(key)}`, key, value },
       },
     );
   }
