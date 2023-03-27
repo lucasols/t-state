@@ -3,7 +3,6 @@ import {
   ReactNode,
   useCallback,
   useContext,
-  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -65,21 +64,23 @@ export function createStoreContext<T extends State>() {
     value: T | (() => T),
     {
       equalityFn = shallowEqual,
+      enableDeepFreezeInDev = false,
+      debugName,
     }: {
       equalityFn?: (a: any, b: any) => boolean;
+      enableDeepFreezeInDev?: boolean;
+      debugName?: string;
     } = {},
   ) {
     const store = useCreateStore(() => ({
       state: typeof value === 'function' ? value() : value,
+      disableDeepFreezeInDev: !enableDeepFreezeInDev,
+      debugName,
     }));
 
-    useLayoutEffect(() => {
-      if (store && typeof value !== 'function') {
-        if (equalityFn(store.state, value)) return;
-
-        store.setState(value);
-      }
-    }, [value]);
+    if (typeof value !== 'function') {
+      store.setState(value, { equalityCheck: equalityFn });
+    }
 
     const Provider = useCallback(
       ({ children }: { children: ReactNode }): JSX.Element => {
