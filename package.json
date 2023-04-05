@@ -1,6 +1,6 @@
 {
   "name": "t-state",
-  "version": "8.2.0",
+  "version": "8.3.0",
   "description": "Global state manager for Typescript projects",
   "license": "MIT",
   "author": "Lucas Santos",
@@ -48,7 +48,6 @@
     "eslint": "^8.37.0",
     "eslint-plugin-jest": "^27.2.1",
     "jsdom": "^21.1.1",
-    "playwright": "^1.32.2",
     "prettier": "^2.8.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -64,7 +63,7 @@
     "use-sync-external-store": "^1.2.0"
   },
   "peerDependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
   }
 }
