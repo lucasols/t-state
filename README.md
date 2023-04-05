@@ -1,10 +1,10 @@
 # T-State
 
-Um gerenciador de estado global para React com Typescript em mente
+A global state manager for React with Typescript in mind
 
-## Criação de stores
+## Creating stores
 
-Stores podem ser fortemente tipadas passando o formato do estado e opcionalmente os payloads dos reducers. O estado deve ser passado como um objeto
+Stores can be strongly typed by passing the format of the state and optionally the reducers payloads. The state must be passed as an object
 
 ```tsx
 import Store from 't-state';
@@ -15,7 +15,7 @@ type TestState = {
 };
 
 const testStore = new Store<TestState>({
-  name: 'test',
+  debugName: 'test',
   state: {
     firstName: 'Hello',
     lastName: 'World',
@@ -23,13 +23,13 @@ const testStore = new Store<TestState>({
 });
 ```
 
-## Uso em componentes
+## Using in components
 
-Cada store tem hooks que podem ser usados para derivar/selecionar estado
+Each store has hooks that can be used to derive/select state
 
 ### `useSelector`
 
-Permite a seleção ou derivação de qualquer valor de uma store e dispara re-renders sempre que o valor do seletor é alterado eliminando rerenders desnecessários. P
+Allows for the selection or derivation of any value from a store and triggers re-renders whenever the selector value changes, eliminating unnecessary rerenders.
 
 ```tsx
 const Component = () => {
@@ -41,7 +41,7 @@ const Component = () => {
 };
 ```
 
-Por padrão os valores são comparados via shallow equality check, que compara valores com até um nível de profundidade. Para comparações mais complexas é possível usar `deepEqual` ou outra função de igualdade customizada para evitar re-renders
+By default, values are compared using shallow equality check, which compares values up to one level of depth. For more complex comparisons, you can use `deepEqual` or another custom equality function to avoid re-renders.
 
 ```tsx
 import { deepEqual } from 't-state';
@@ -74,7 +74,7 @@ const Component = () => {
 
 ### `useKey`
 
-Use key funciona de forma similar ao hook `React.useState`
+`useKey` is a hook that returns the value of a specific key.
 
 ```tsx
 const Component = () => {
@@ -84,19 +84,21 @@ const Component = () => {
     <>
       <div>Name: {firstName}</div>
 
-      <input onChange={(e) => testStore.setKey('firstName', e.currentTarget.value)} />
+      <input
+        onChange={(e) => testStore.setKey('firstName', e.currentTarget.value)}
+      />
     </>
   );
 };
 ```
 
-## Alterando estado
+## Changing state
 
-A alteração de estado pode ser feita por meio dos métodos `setKey`, `setState` e `setPartialState`, ou por meio de mutação usando [immer](https://immerjs.github.io/immer/)
+State changes can be made through the methods `setKey`, `setState`, and `setPartialState`, or by mutation using [immer](https://immerjs.github.io/immer/)
 
-### Alterando via immer
+### Updating state via immer
 
-Com o `produceState` é possível alterar o estado mutacionado o valores mantendo a imutabilidade da store, isso é especialmente útil para atualizar "deep nested values". Para mais detalhes e possibildades consulte a [documentação do immer](https://immerjs.github.io/immer/update-patterns)
+With `produceState`, it is possible to change the state by mutating the values while maintaining the store's immutability. This is especially useful for updating "deep nested values". For more details and possibilities, consult the [documentação do immer](https://immerjs.github.io/immer/update-patterns)
 
 ```tsx
 testStore.produceState((draftState) => {
@@ -111,11 +113,11 @@ testStore.produceState((draftState) => {
 
 ## Debug via Redux Dev Tools
 
-A extensão [Redux Dev Tools](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd?hl=en) permite a visualização de todas as alterações de cada store
+The [Redux Dev Tools](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd?hl=en) allows you to visualize all changes in each store.
 
-## Reagindo a mudanças de estado
+## Reacting to state changes
 
-Fora do react é possível reagir a mudanças de estado com o método subscribe. Que retorna uma função para desincrever a subscription
+Outside of React, you can react to state changes with the `subscribe` method. It returns a function to unsubscribe from the subscription.
 
 ```tsx
 const unsubscribe = testStore.subscribe((prev, current) => {
@@ -128,10 +130,10 @@ const unsubscribe = testStore.subscribe((prev, current) => {
 unsubscribe();
 ```
 
-Por meio do util `obseverChanges` é possível reagir de forma mais seletiva a mudanças
+Using the `observeChanges` util, you can react more selectively to changes.
 
 ```tsx
-import { observeChanges } from 't-state/subscribeUtils';
+import { observeChanges } from 't-state';
 
 testState.subscribe((prev, current) => {
   const observe = observeChanges(prev, current);
@@ -144,9 +146,9 @@ testState.subscribe((prev, current) => {
 });
 ```
 
-## Criando stores dentro de componentes
+## Creating stores inside components
 
-Stores podem também ser criadas dentro de componentes por meio do hook `useCreateStore` e pemitem a optimização por meito de updates atomicos
+Stores can also be created inside components using the `useCreateStore` hook allowing atomic updates optimization
 
 ```tsx
 import { useCreateStore } from 't-state/useCreateStore';
@@ -189,8 +191,25 @@ const Child = ({ store, id }: ChildProps) => {
 };
 ```
 
-No exemplo acima cada child component só é renderizado quando a parte que ele utiliza da store é alterada, diferente do que seria caso um simples `useState` fosse usado
+In the example above, each child component is only rendered when the part of the store it uses is changed, unlike what would happen if a simple `useState` was used.
 
-## TODO:
+## Using middlewares
 
-- [ ] Traduzir documentação para o inglês
+Middlewares can be used to intercept state change actions and block or modify the state.
+
+
+```ts
+const store = new Store({ state: { value: 0 } });
+
+store.addMiddleware(({ current, next, action }) => {
+  if (value < 0) {
+    return false; // block state changes
+  }
+
+  if (value > 10) {
+    return { value: 10 }; // return a new state to change the state
+  }
+
+  return true; // return true or `undefined` to do nothing
+});
+```

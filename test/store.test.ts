@@ -408,8 +408,6 @@ describe('freeze state', () => {
       state: { store: customClass, text: 'Hello' },
     });
 
-    console.log(String(baseStore.state.store));
-
     expect(() => {
       baseStore.state.store.state.text = 'change text';
     }).toThrowError();
@@ -429,8 +427,6 @@ describe('freeze state', () => {
     const baseStore = new Store({
       state: { store: customClass, text: 'Hello' },
     });
-
-    console.log(String(baseStore.state.store));
 
     expect(() => {
       baseStore.state.store.state.text = 'change text';
@@ -464,5 +460,51 @@ test('batched updates', () => {
   expect(store.state).toStrictEqual({
     items: [],
     string: 'new string 6',
+  });
+});
+
+describe('middlewares', () => {
+  test('ignore update', () => {
+    const store = new Store({
+      state: { text: 'Hello' },
+    });
+
+    store.addMiddleware(({ next }) => {
+      if (next.text === 'block') {
+        return false;
+      }
+
+      return true;
+    });
+
+    store.setState({ text: 'block' });
+
+    expect(store.state).toStrictEqual({ text: 'Hello' });
+
+    store.setState({ text: 'OK' });
+
+    expect(store.state).toStrictEqual({ text: 'OK' });
+  });
+
+  test('ignore action', () => {
+    const store = new Store({
+      state: { text: 'Hello' },
+    });
+
+    store.addMiddleware(({ action }) => {
+      if (action === 'block') {
+        return false;
+      }
+
+      return true;
+    });
+
+    store.setState({ text: 'OK' }, { action: 'block' });
+
+    expect(store.state).toStrictEqual({ text: 'Hello' });
+
+    store.setState({ text: 'OK' });
+
+    expect(store.state).toStrictEqual({ text: 'OK' });
   });
 });

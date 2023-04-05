@@ -1,5 +1,5 @@
 import { startDevTools, Action } from './devTools';
-import { produce } from 'immer';
+import { isDraftable, produce } from 'immer';
 import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/with-selector.js';
 
 import { shallowEqual } from './shallowEqual';
@@ -32,14 +32,23 @@ type UseStateOptions = {
   useExternalDeps?: boolean;
 };
 
+type StoreMiddleware<T extends State> = (props: {
+  current: T;
+  next: T;
+  action: Action | undefined;
+}) => T | boolean | void;
+
+type UnsubscribeFn = () => void;
+
 export class Store<T extends State> {
   readonly debugName_: string = '';
-  private state_: T;
   private subscribers_ = new Set<Subscriber<T>>();
   private batchUpdates_ = false;
+  private state_: T;
   private lastState_: T;
   private disableDeepFreezeInDev_: boolean;
   private ignoreValueInDeepFreeze_?: (value: unknown) => boolean;
+  private middlewares_ = new Set<StoreMiddleware<T>>();
 
   constructor({
     debugName,
@@ -92,10 +101,24 @@ export class Store<T extends State> {
       equalityCheck?: EqualityFn | false;
     } = {},
   ): boolean {
-    const unwrapedNewState = unwrapValueArg(newState, this.state_);
+    let unwrapedNewState = unwrapValueArg(newState, this.state_);
 
     if (equalityCheck && equalityCheck(unwrapedNewState, this.state_))
       return false;
+
+    for (const middleware of this.middlewares_) {
+      const result = middleware({
+        current: this.state_,
+        next: unwrapedNewState,
+        action,
+      });
+
+      if (!result) return false;
+
+      if (typeof result === 'object' && result !== unwrapedNewState) {
+        unwrapedNewState = result;
+      }
+    }
 
     this.lastState_ = { ...this.state_ };
     this.state_ =
@@ -202,7 +225,7 @@ export class Store<T extends State> {
   subscribe(
     callback: Subscriber<T>,
     { initCall }: { initCall?: boolean } = {},
-  ) {
+  ): UnsubscribeFn {
     if (!this.subscribers_.has(callback)) {
       this.subscribers_.add(callback);
     }
@@ -217,6 +240,14 @@ export class Store<T extends State> {
 
     return () => {
       this.subscribers_.delete(callback);
+    };
+  }
+
+  addMiddleware(middleware: StoreMiddleware<T>): UnsubscribeFn {
+    this.middlewares_.add(middleware);
+
+    return () => {
+      this.middlewares_.delete(middleware);
     };
   }
 
@@ -279,7 +310,7 @@ export function deepFreeze<T>(
     obj === null ||
     typeof obj !== 'object' ||
     Object.isFrozen(obj) ||
-    obj instanceof Store ||
+    !isDraftable(obj) ||
     (ignore && ignore(obj))
   ) {
     return obj;
