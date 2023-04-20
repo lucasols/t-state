@@ -12,15 +12,13 @@ interface SelectorThen<R, P = R> {
 }
 
 interface ChangeMethods<T extends State> {
+  withInitCall(): ChangeMethods<T>;
   ifKeysChange<K extends keyof T>(...keys: K[]): Then;
   ifKeysChangeTo<K extends keyof T>(target: Pick<T, K>): Then;
   ifSelector<R>(selector: (state: T) => R): {
     change: SelectorThen<R>;
     changeTo<CT extends R>(target: CT): SelectorThen<CT, R>;
   };
-}
-
-interface ObserveChangesReturn<T extends State> extends ChangeMethods<T> {
   withEqualityFn(equalityFn: EqualityFn): ChangeMethods<T>;
 }
 
@@ -30,10 +28,22 @@ export function observeChanges<T extends State>({
 }: {
   prev: T;
   current: T;
-}): ObserveChangesReturn<T> {
+}): ChangeMethods<T> {
   let equalityFn = shallowEqual;
+  let initCall = false;
+  let isFirstCall = true;
 
   const methods: ChangeMethods<T> = {
+    withEqualityFn(newEqualityFn) {
+      equalityFn = newEqualityFn;
+
+      return methods;
+    },
+    withInitCall() {
+      initCall = true;
+
+      return methods;
+    },
     ifKeysChange: (...keys) => ({
       then(callback) {
         if (keys.some((key) => !equalityFn(prev[key], current[key]))) {
@@ -66,15 +76,25 @@ export function observeChanges<T extends State>({
           then(callback) {
             if (isDiff) {
               callback({ current: currentSelection, prev: prevSelection });
+            } else if (isFirstCall && initCall) {
+              callback({ current: currentSelection, prev: prevSelection });
             }
+
+            isFirstCall = false;
           },
         },
         changeTo(target) {
           return {
             then(callback) {
-              if (isDiff && equalityFn(currentSelection, target)) {
-                callback({ current: target, prev: prevSelection });
+              if (equalityFn(currentSelection, target)) {
+                if (isDiff) {
+                  callback({ current: target, prev: prevSelection });
+                } else if (isFirstCall && initCall) {
+                  callback({ current: target, prev: prevSelection });
+                }
               }
+
+              isFirstCall = false;
             },
           };
         },
@@ -82,14 +102,7 @@ export function observeChanges<T extends State>({
     },
   };
 
-  return {
-    withEqualityFn(newEqualityFn) {
-      equalityFn = newEqualityFn;
-
-      return methods;
-    },
-    ...methods,
-  };
+  return methods;
 }
 
 export function useSubscribeToStore<T extends State>(
@@ -101,7 +114,7 @@ export function useSubscribeToStore<T extends State>(
   }: {
     prev: T;
     current: T;
-    observe: ObserveChangesReturn<T>;
+    observe: ChangeMethods<T>;
   }) => any,
 ) {
   const callbackRef = useRef(onChange);

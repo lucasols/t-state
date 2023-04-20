@@ -205,4 +205,41 @@ describe('getIfSelectorChange', () => {
       ['3', '4'],
     ]);
   });
+
+  test('with init call in .change', () => {
+    const mockCallback = vi.fn();
+
+    testState.subscribe(
+      ({ prev, current }) => {
+        const observe = observeChanges({ prev, current });
+
+        observe
+          .withInitCall()
+          .ifSelector((s) => s.key1)
+          .change.then(() => mockCallback());
+      },
+      { initCall: true },
+    );
+
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+  });
+
+  test('with init call in .changeTo', () => {
+    const mockCallback = vi.fn();
+
+    testState.subscribe(
+      ({ prev, current }) => {
+        const observe = observeChanges({ prev, current });
+
+        observe
+          .withInitCall()
+          .ifSelector((s) => s.key1)
+          .changeTo(1)
+          .then(() => mockCallback());
+      },
+      { initCall: true },
+    );
+
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+  });
 });
