@@ -1,6 +1,13 @@
 /* eslint-disable @typescript-eslint/lines-between-class-members */
 import { useEffect, useLayoutEffect, useRef } from 'react';
-import { Store, EqualityFn, shallowEqual, State } from './main';
+import {
+  Store,
+  EqualityFn,
+  shallowEqual,
+  State,
+  Action,
+  initCallAction,
+} from './main';
 import { pick } from './utils';
 
 interface Then {
@@ -12,8 +19,8 @@ interface SelectorThen<R, P = R> {
 }
 
 interface ChangeMethods<T extends State> {
-  withInitCall(): ChangeMethods<T>;
   ifKeysChange<K extends keyof T>(...keys: K[]): Then;
+  withInitCall(): ChangeMethods<T>;
   ifKeysChangeTo<K extends keyof T>(target: Pick<T, K>): Then;
   ifSelector<R>(selector: (state: T) => R): {
     change: SelectorThen<R>;
@@ -25,13 +32,21 @@ interface ChangeMethods<T extends State> {
 export function observeChanges<T extends State>({
   prev,
   current,
+  action,
 }: {
   prev: T;
   current: T;
+  action: Action | undefined;
 }): ChangeMethods<T> {
   let equalityFn = shallowEqual;
+  const isFirstCall = action === initCallAction;
   let initCall = false;
-  let isFirstCall = true;
+  console.log(action);
+
+  function resetConfig() {
+    equalityFn = shallowEqual;
+    initCall = false;
+  }
 
   const methods: ChangeMethods<T> = {
     withEqualityFn(newEqualityFn) {
@@ -49,6 +64,8 @@ export function observeChanges<T extends State>({
         if (keys.some((key) => !equalityFn(prev[key], current[key]))) {
           callback();
         }
+
+        resetConfig();
       },
     }),
     ifKeysChangeTo(target) {
@@ -63,6 +80,8 @@ export function observeChanges<T extends State>({
           ) {
             callback();
           }
+
+          resetConfig();
         },
       };
     },
@@ -80,7 +99,7 @@ export function observeChanges<T extends State>({
               callback({ current: currentSelection, prev: prevSelection });
             }
 
-            isFirstCall = false;
+            resetConfig();
           },
         },
         changeTo(target) {
@@ -94,7 +113,7 @@ export function observeChanges<T extends State>({
                 }
               }
 
-              isFirstCall = false;
+              resetConfig();
             },
           };
         },
@@ -123,8 +142,9 @@ export function useSubscribeToStore<T extends State>(
   });
 
   useEffect(() => {
-    const unsubscribe = store.subscribe(({ prev, current }) => {
-      const observe = observeChanges({ prev, current });
+    const unsubscribe = store.subscribe((prevAndCurrent) => {
+      const observe = observeChanges(prevAndCurrent);
+      const { prev, current } = prevAndCurrent;
 
       callbackRef.current({ prev, current, observe });
     });

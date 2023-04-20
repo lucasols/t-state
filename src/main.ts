@@ -1,4 +1,4 @@
-import { startDevTools, Action } from './devTools';
+import { startDevTools } from './devTools';
 import { isDraftable, produce } from 'immer';
 import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/with-selector.js';
 
@@ -15,10 +15,17 @@ export { shallowEqual, deepEqual };
 export type State = Record<string, any>;
 
 export type Subscriber<T extends State> = {
-  (props: { prev: T; current: T; action?: Action }): void;
+  (props: { prev: T; current: T; action: Action | undefined }): void;
 };
 
 export type EqualityFn = (prev: any, current: any) => boolean;
+
+export type Action =
+  | {
+      type: string;
+      [k: string]: any;
+    }
+  | string;
 
 export type StoreProps<T> = {
   debugName?: string;
@@ -39,6 +46,8 @@ type StoreMiddleware<T extends State> = (props: {
 }) => T | boolean | void;
 
 type UnsubscribeFn = () => void;
+
+export const initCallAction = { type: 'init.subscribe.call' };
 
 export class Store<T extends State> {
   readonly debugName_: string = '';
@@ -234,7 +243,7 @@ export class Store<T extends State> {
       callback({
         prev: this.state_,
         current: this.state_,
-        action: { type: 'init.subscribe.call' },
+        action: initCallAction,
       });
     }
 

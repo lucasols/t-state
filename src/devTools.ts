@@ -1,12 +1,5 @@
-import { State } from './main';
+import { Action, State } from './main';
 import { nanoid } from 'nanoid';
-
-export type Action =
-  | {
-      type: string;
-      [k: string]: any;
-    }
-  | string;
 
 let tabId: string | null = null;
 let tabIdWasLogged = false;

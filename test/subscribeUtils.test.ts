@@ -29,8 +29,8 @@ describe('getIfKeysChange', () => {
   test('call callback when keys change', () => {
     const mockCallback = vi.fn();
 
-    testState.subscribe(({ prev, current }) => {
-      const observe = observeChanges({ prev, current });
+    testState.subscribe((prevAndCurrent) => {
+      const observe = observeChanges(prevAndCurrent);
 
       observe.ifKeysChange('key1').then(mockCallback);
     });
@@ -48,8 +48,8 @@ describe('getIfKeysChange', () => {
   test('call callback when keys change to', () => {
     const mockCallback = vi.fn();
 
-    testState.subscribe(({ prev, current }) => {
-      const observe = observeChanges({ prev, current });
+    testState.subscribe((prevAndCurrent) => {
+      const observe = observeChanges(prevAndCurrent);
 
       observe.ifKeysChangeTo({ key1: 5 }).then(mockCallback);
     });
@@ -69,8 +69,9 @@ describe('getIfKeysChange', () => {
   test('call callback when keys change with deepEquality', () => {
     const mockCallback = vi.fn();
 
-    testState.subscribe(({ prev, current }) => {
-      const observe = observeChanges({ prev, current });
+    testState.subscribe((prevAndCurrent) => {
+      const observe = observeChanges(prevAndCurrent);
+      const { current } = prevAndCurrent;
 
       observe.ifKeysChange('key3', 'key4').then(() => {
         mockCallback(current.key3.join(', '), current.key4.join(', '));
@@ -101,8 +102,8 @@ describe('getIfSelectorChange', () => {
   test('call callback when keys change', () => {
     const mockCallback = vi.fn();
 
-    testState.subscribe(({ prev, current }) => {
-      const observe = observeChanges({ prev, current });
+    testState.subscribe((prevAndCurrent) => {
+      const observe = observeChanges(prevAndCurrent);
 
       observe.ifSelector((s) => s.key1).change.then(mockCallback);
     });
@@ -120,8 +121,8 @@ describe('getIfSelectorChange', () => {
   test('call callback when keys change to', () => {
     const mockCallback = vi.fn();
 
-    testState.subscribe(({ prev, current }) => {
-      const observe = observeChanges({ prev, current });
+    testState.subscribe((prevAndCurrent) => {
+      const observe = observeChanges(prevAndCurrent);
 
       observe
         .ifSelector((s) => s.key1)
@@ -144,8 +145,9 @@ describe('getIfSelectorChange', () => {
   test('call callback when keys change with default shallowEqual', () => {
     const mockCallback = vi.fn();
 
-    testState.subscribe(({ prev, current }) => {
-      const observe = observeChanges({ prev, current });
+    testState.subscribe((prevAndCurrent) => {
+      const observe = observeChanges(prevAndCurrent);
+      const { current } = prevAndCurrent;
 
       observe
         .ifSelector((s) => [s.key3.join(', '), s.key4.join(', ')])
@@ -176,8 +178,9 @@ describe('getIfSelectorChange', () => {
   test('call callback when keys change with deepEquality', () => {
     const mockCallback = vi.fn();
 
-    testState.subscribe(({ prev, current }) => {
-      const observe = observeChanges({ prev, current });
+    testState.subscribe((prevAndCurrent) => {
+      const observe = observeChanges(prevAndCurrent);
+      const { current } = prevAndCurrent;
 
       observe
         .withEqualityFn(deepEqual)
@@ -210,8 +213,8 @@ describe('getIfSelectorChange', () => {
     const mockCallback = vi.fn();
 
     testState.subscribe(
-      ({ prev, current }) => {
-        const observe = observeChanges({ prev, current });
+      (prevAndCurrent) => {
+        const observe = observeChanges(prevAndCurrent);
 
         observe
           .withInitCall()
@@ -228,8 +231,8 @@ describe('getIfSelectorChange', () => {
     const mockCallback = vi.fn();
 
     testState.subscribe(
-      ({ prev, current }) => {
-        const observe = observeChanges({ prev, current });
+      (prevAndCurrent) => {
+        const observe = observeChanges(prevAndCurrent);
 
         observe
           .withInitCall()
@@ -241,5 +244,28 @@ describe('getIfSelectorChange', () => {
     );
 
     expect(mockCallback).toHaveBeenCalledTimes(1);
+  });
+
+  test('with multiple init call in .change', () => {
+    const mockCallback = vi.fn();
+
+    testState.subscribe(
+      (prevAndCurrent) => {
+        const observe = observeChanges(prevAndCurrent);
+
+        observe
+          .withInitCall()
+          .ifSelector((s) => s.key1)
+          .change.then(() => mockCallback());
+
+        observe
+          .withInitCall()
+          .ifSelector((s) => s.key1)
+          .change.then(() => mockCallback());
+      },
+      { initCall: true },
+    );
+
+    expect(mockCallback).toHaveBeenCalledTimes(2);
   });
 });
