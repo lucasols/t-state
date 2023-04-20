@@ -25,6 +25,7 @@ module.exports = {
     'object-shorthand': ERROR,
     'no-useless-rename': ERROR,
     'no-param-reassign': ERROR,
+    'no-console': ERROR,
 
     'no-prototype-builtins': OFF,
     'no-undef': OFF,

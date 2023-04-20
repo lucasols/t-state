@@ -41,7 +41,6 @@ export function observeChanges<T extends State>({
   let equalityFn = shallowEqual;
   const isFirstCall = action === initCallAction;
   let initCall = false;
-  console.log(action);
 
   function resetConfig() {
     equalityFn = shallowEqual;
