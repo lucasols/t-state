@@ -220,6 +220,8 @@ describe('getIfSelectorChange', () => {
           .withInitCall()
           .ifSelector((s) => s.key1)
           .change.then(() => mockCallback());
+
+        observe.ifSelector((s) => s.key1).change.then(() => mockCallback());
       },
       { initCall: true },
     );
