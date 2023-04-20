@@ -47,7 +47,7 @@ export function startDevTools(
       case 'START':
         if (!tabIdWasLogged) {
           tabIdWasLogged = true;
-          console.log('t-state devtools started, tabId:', tabId);
+          console.info('t-state devtools started, tabId:', tabId);
         }
         break;
 
