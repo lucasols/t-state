@@ -1,6 +1,6 @@
 {
   "name": "t-state",
-  "version": "8.4.2",
+  "version": "8.5.0",
   "description": "Global state manager for Typescript projects",
   "license": "MIT",
   "author": "Lucas Santos",
