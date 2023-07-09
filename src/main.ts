@@ -29,7 +29,7 @@ export type Action =
 
 export type StoreProps<T> = {
   debugName?: string;
-  state: T;
+  state: T | (() => T);
   disableDeepFreezeInDev?: boolean;
   ignoreValueInDeepFreeze?: (value: unknown) => boolean;
 };
@@ -53,8 +53,9 @@ export class Store<T extends State> {
   readonly debugName_: string = '';
   private subscribers_ = new Set<Subscriber<T>>();
   private batchUpdates_ = false;
-  private state_: T;
-  private lastState_: T;
+  private state_: T | undefined;
+  private lazyInitialState_: (() => T) | undefined;
+  private lastState_: T | undefined;
   private disableDeepFreezeInDev_: boolean;
   private ignoreValueInDeepFreeze_?: (value: unknown) => boolean;
   private middlewares_ = new Set<StoreMiddleware<T>>();
@@ -65,12 +66,16 @@ export class Store<T extends State> {
     disableDeepFreezeInDev,
     ignoreValueInDeepFreeze,
   }: StoreProps<T>) {
+    const initialStateIsLazy = typeof state === 'function';
+
     this.debugName_ = debugName || '';
-    this.state_ =
-      process.env.NODE_ENV === 'development' && !disableDeepFreezeInDev
-        ? deepFreeze(state, ignoreValueInDeepFreeze)
-        : state;
-    this.lastState_ = state;
+    this.lazyInitialState_ = initialStateIsLazy ? state : undefined;
+    this.state_ = initialStateIsLazy
+      ? undefined
+      : process.env.NODE_ENV === 'development' && !disableDeepFreezeInDev
+      ? deepFreeze(state, ignoreValueInDeepFreeze)
+      : state;
+    this.lastState_ = initialStateIsLazy ? undefined : state;
     this.disableDeepFreezeInDev_ = disableDeepFreezeInDev || false;
     this.ignoreValueInDeepFreeze_ = ignoreValueInDeepFreeze;
 
@@ -88,13 +93,29 @@ export class Store<T extends State> {
     }
   }
 
-  get state() {
+  get state(): T {
+    if (this.state_ === undefined) {
+      this.state_ = this.lazyInitialState_!();
+      this.lazyInitialState_ = undefined;
+      this.lastState_ = this.state_;
+    }
+
     return this.state_;
+  }
+
+  private get lastState(): T {
+    if (this.lastState_ === undefined) {
+      this.state_ = this.lazyInitialState_!();
+      this.lazyInitialState_ = undefined;
+      this.lastState_ = this.state_;
+    }
+
+    return this.lastState_;
   }
 
   private flush_(action: Action | undefined) {
     for (const subscriber of this.subscribers_) {
-      subscriber({ prev: this.lastState_, current: this.state_, action });
+      subscriber({ prev: this.lastState, current: this.state, action });
     }
   }
 
@@ -110,14 +131,14 @@ export class Store<T extends State> {
       equalityCheck?: EqualityFn | false;
     } = {},
   ): boolean {
-    let unwrapedNewState = unwrapValueArg(newState, this.state_);
+    let unwrapedNewState = unwrapValueArg(newState, this.state);
 
-    if (equalityCheck && equalityCheck(unwrapedNewState, this.state_))
+    if (equalityCheck && equalityCheck(unwrapedNewState, this.state))
       return false;
 
     for (const middleware of this.middlewares_) {
       const result = middleware({
-        current: this.state_,
+        current: this.state,
         next: unwrapedNewState,
         action,
       });
@@ -129,7 +150,7 @@ export class Store<T extends State> {
       }
     }
 
-    this.lastState_ = { ...this.state_ };
+    this.lastState_ = { ...this.state };
     this.state_ =
       process.env.NODE_ENV === 'development' && !this.disableDeepFreezeInDev_
         ? deepFreeze(unwrapedNewState, this.ignoreValueInDeepFreeze_)
@@ -157,9 +178,9 @@ export class Store<T extends State> {
   ) {
     if (equalityCheck) {
       if (equalityCheck === true) {
-        if (this.state_[key] === value) return;
+        if (this.state[key] === value) return;
       } else {
-        if (equalityCheck(this.state_[key], value)) return;
+        if (equalityCheck(this.state[key], value)) return;
       }
     }
 
@@ -193,7 +214,7 @@ export class Store<T extends State> {
     } = {},
   ) {
     if (equalityCheck) {
-      if (equalityCheck(pick(this.state_, Object.keys(newState)), newState)) {
+      if (equalityCheck(pick(this.state, Object.keys(newState)), newState)) {
         return;
       }
     }
@@ -241,8 +262,8 @@ export class Store<T extends State> {
 
     if (initCall) {
       callback({
-        prev: this.state_,
-        current: this.state_,
+        prev: this.state,
+        current: this.state,
         action: initCallAction,
       });
     }
@@ -261,7 +282,7 @@ export class Store<T extends State> {
   }
 
   private getState_ = () => {
-    return this.state_;
+    return this.state;
   };
 
   useSelector<S>(

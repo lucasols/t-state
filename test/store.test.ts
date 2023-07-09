@@ -1,5 +1,6 @@
+import { describe, expect, test, vi } from 'vitest';
 import { Store } from '../src/main';
-import { expect, describe, test, vi } from 'vitest';
+import { fnCalls } from './utils';
 
 type TestState = {
   string: string;
@@ -506,5 +507,69 @@ describe('middlewares', () => {
     store.setState({ text: 'OK' });
 
     expect(store.state).toStrictEqual({ text: 'OK' });
+  });
+});
+
+describe('lazy initial state', () => {
+  const initialStateFnWasCalled = vi.fn();
+
+  test('lazy initial state', () => {
+    const store = new Store({
+      state: () => {
+        initialStateFnWasCalled();
+        return { text: 'Hello' };
+      },
+    });
+
+    expect(initialStateFnWasCalled).toHaveBeenCalledTimes(0);
+
+    expect(store.state).toStrictEqual({ text: 'Hello' });
+
+    expect(initialStateFnWasCalled).toHaveBeenCalledTimes(1);
+
+    expect(store.state).toStrictEqual({ text: 'Hello' });
+
+    expect(initialStateFnWasCalled).toHaveBeenCalledTimes(1);
+  });
+
+  test('add subscribers', () => {
+    const store = new Store({
+      state: () => ({ text: 'Hello' }),
+    });
+
+    const subscriberCalls = fnCalls();
+
+    store.subscribe((args) => {
+      subscriberCalls.add(args);
+    });
+
+    store.setState({ text: 'Hi' });
+
+    expect(subscriberCalls.calls).toEqual([
+      { action: undefined, current: { text: 'Hi' }, prev: { text: 'Hello' } },
+    ]);
+  });
+
+  test('add subscribers with initCall', () => {
+    const store = new Store({
+      state: () => ({ text: 'Hello' }),
+    });
+
+    const subscriberCalls = fnCalls();
+
+    store.subscribe(
+      (args) => {
+        subscriberCalls.add(args);
+      },
+      { initCall: true },
+    );
+
+    expect(subscriberCalls.calls).toEqual([
+      {
+        action: { type: 'init.subscribe.call' },
+        current: { text: 'Hello' },
+        prev: { text: 'Hello' },
+      },
+    ]);
   });
 });
