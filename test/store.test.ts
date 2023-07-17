@@ -1,6 +1,5 @@
 import { describe, expect, test, vi } from 'vitest';
 import { Store } from '../src/main';
-import { fnCalls } from './utils';
 
 type TestState = {
   string: string;
@@ -537,16 +536,16 @@ describe('lazy initial state', () => {
       state: () => ({ text: 'Hello' }),
     });
 
-    const subscriberCalls = fnCalls();
+    const subscriberCalls = vi.fn();
 
     store.subscribe((args) => {
-      subscriberCalls.add(args);
+      subscriberCalls(args);
     });
 
     store.setState({ text: 'Hi' });
 
-    expect(subscriberCalls.calls).toEqual([
-      { action: undefined, current: { text: 'Hi' }, prev: { text: 'Hello' } },
+    expect(subscriberCalls.mock.calls).toEqual([
+      [{ action: undefined, current: { text: 'Hi' }, prev: { text: 'Hello' } }],
     ]);
   });
 
@@ -555,21 +554,23 @@ describe('lazy initial state', () => {
       state: () => ({ text: 'Hello' }),
     });
 
-    const subscriberCalls = fnCalls();
+    const subscriberCalls = vi.fn();
 
     store.subscribe(
       (args) => {
-        subscriberCalls.add(args);
+        subscriberCalls(args);
       },
       { initCall: true },
     );
 
-    expect(subscriberCalls.calls).toEqual([
-      {
-        action: { type: 'init.subscribe.call' },
-        current: { text: 'Hello' },
-        prev: { text: 'Hello' },
-      },
+    expect(subscriberCalls.mock.calls).toEqual([
+      [
+        {
+          action: { type: 'init.subscribe.call' },
+          current: { text: 'Hello' },
+          prev: { text: 'Hello' },
+        },
+      ],
     ]);
   });
 });

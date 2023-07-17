@@ -4,7 +4,7 @@ A global state manager for React with Typescript in mind
 
 ## Creating stores
 
-Stores can be strongly typed by passing the format of the state and optionally the reducers payloads. The state must be passed as an object
+Stores can be strongly typed by passing the format of the state and optionally the reducers payloads.
 
 ```tsx
 import Store from 't-state';
@@ -197,7 +197,6 @@ In the example above, each child component is only rendered when the part of the
 
 Middlewares can be used to intercept state change actions and block or modify the state.
 
-
 ```ts
 const store = new Store({ state: { value: 0 } });
 
@@ -211,5 +210,31 @@ store.addMiddleware(({ current, next, action }) => {
   }
 
   return true; // return true or `undefined` to do nothing
+});
+```
+
+## Create computed states
+
+Computed states are states that are derived from other stores and are updated whenever the states they depend on change. The return of `computed` function is a store with some readonly methods like `subscribe` and `useState`
+
+```ts
+const store1 = new Store({ state: 2 });
+
+const doubledValue = computed(store1, (state) => state * 2);
+
+console.log(doubledValue.state); // 0
+```
+
+## Debounce state changes
+
+State changes can be throttled using the `debounceSideEffects` option
+
+```ts
+const store = new Store({
+  state: { value: 0 },
+  debounceSideEffects: {
+    wait: 1000,
+    maxWait: 2000,
+  }
 });
 ```

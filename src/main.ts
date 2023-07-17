@@ -12,13 +12,13 @@ export { useCreateStore, createStoreContext, useStoreSnapshot } from './hooks';
 
 export { shallowEqual, deepEqual };
 
-export type State = Record<string, any>;
-
-export type Subscriber<T extends State> = {
+export type Subscriber<T> = {
   (props: { prev: T; current: T; action: Action | undefined }): void;
 };
 
 export type EqualityFn = (prev: any, current: any) => boolean;
+
+type AnyObj = Record<string, unknown>;
 
 export type Action =
   | {
@@ -30,16 +30,20 @@ export type Action =
 export type StoreProps<T> = {
   debugName?: string;
   state: T | (() => T);
+  debounceSideEffects?: {
+    wait: number;
+    maxWait?: number;
+  };
   disableDeepFreezeInDev?: boolean;
   ignoreValueInDeepFreeze?: (value: unknown) => boolean;
 };
 
-type UseStateOptions = {
+export type UseStateOptions = {
   equalityFn?: EqualityFn | false;
   useExternalDeps?: boolean;
 };
 
-type StoreMiddleware<T extends State> = (props: {
+type StoreMiddleware<T> = (props: {
   current: T;
   next: T;
   action: Action | undefined;
@@ -49,13 +53,17 @@ type UnsubscribeFn = () => void;
 
 export const initCallAction = { type: 'init.subscribe.call' };
 
-export class Store<T extends State> {
+export class Store<T> {
   readonly debugName_: string = '';
   private subscribers_ = new Set<Subscriber<T>>();
   private batchUpdates_ = false;
   private state_: T | undefined;
   private lazyInitialState_: (() => T) | undefined;
   private lastState_: T | undefined;
+  private debounceSideEffects_?: { wait: number; maxWait?: number };
+  private lastFlushCallTimestamp_ = 0;
+  private lastFlushTimestamp_ = 0;
+  private debouncedFlushTimeout_?: NodeJS.Timeout;
   private disableDeepFreezeInDev_: boolean;
   private ignoreValueInDeepFreeze_?: (value: unknown) => boolean;
   private middlewares_ = new Set<StoreMiddleware<T>>();
@@ -64,9 +72,10 @@ export class Store<T extends State> {
     debugName,
     state,
     disableDeepFreezeInDev,
+    debounceSideEffects,
     ignoreValueInDeepFreeze,
   }: StoreProps<T>) {
-    const initialStateIsLazy = typeof state === 'function';
+    const initialStateIsLazy = isFunction(state);
 
     this.debugName_ = debugName || '';
     this.lazyInitialState_ = initialStateIsLazy ? state : undefined;
@@ -78,6 +87,7 @@ export class Store<T extends State> {
     this.lastState_ = initialStateIsLazy ? undefined : state;
     this.disableDeepFreezeInDev_ = disableDeepFreezeInDev || false;
     this.ignoreValueInDeepFreeze_ = ignoreValueInDeepFreeze;
+    this.debounceSideEffects_ = debounceSideEffects;
 
     const devToolsMiddeware =
       process.env.NODE_ENV === 'development' &&
@@ -91,6 +101,10 @@ export class Store<T extends State> {
         }),
       );
     }
+  }
+
+  get isInitialized(): boolean {
+    return this.state_ !== undefined;
   }
 
   get state(): T {
@@ -114,6 +128,30 @@ export class Store<T extends State> {
   }
 
   private flush_(action: Action | undefined) {
+    if (this.debounceSideEffects_) {
+      clearTimeout(this.debouncedFlushTimeout_);
+
+      const now = Date.now();
+      const timeSinceLastFlushCall = now - this.lastFlushCallTimestamp_;
+      const timeSinceLastFlush = now - this.lastFlushTimestamp_;
+      const shouldFlush =
+        timeSinceLastFlushCall >= this.debounceSideEffects_.wait ||
+        (this.debounceSideEffects_.maxWait &&
+          timeSinceLastFlush >= this.debounceSideEffects_.maxWait);
+
+      this.lastFlushCallTimestamp_ = now;
+
+      if (!shouldFlush) {
+        this.debouncedFlushTimeout_ = setTimeout(
+          () => this.flush_(action),
+          this.debounceSideEffects_.wait,
+        );
+        return;
+      }
+
+      this.lastFlushTimestamp_ = now;
+    }
+
     for (const subscriber of this.subscribers_) {
       subscriber({ prev: this.lastState, current: this.state, action });
     }
@@ -150,7 +188,7 @@ export class Store<T extends State> {
       }
     }
 
-    this.lastState_ = { ...this.state };
+    this.lastState_ = shallowCloneState(this.state);
     this.state_ =
       process.env.NODE_ENV === 'development' && !this.disableDeepFreezeInDev_
         ? deepFreeze(unwrapedNewState, this.ignoreValueInDeepFreeze_)
@@ -200,7 +238,7 @@ export class Store<T extends State> {
   }
 
   setPartialState(
-    newState: Partial<T>,
+    newState: T extends AnyObj ? Partial<T> : never,
     {
       action,
       equalityCheck = shallowEqual,
@@ -214,7 +252,12 @@ export class Store<T extends State> {
     } = {},
   ) {
     if (equalityCheck) {
-      if (equalityCheck(pick(this.state, Object.keys(newState)), newState)) {
+      if (
+        equalityCheck(
+          pick(this.state as AnyObj, Object.keys(newState)),
+          newState,
+        )
+      ) {
         return;
       }
     }
@@ -328,7 +371,10 @@ export class Store<T extends State> {
         ? args[1].equalityFn
         : shallowEqual;
 
-    return this.useSelector((s) => pick(s, keys), { equalityFn });
+    return this.useSelector(
+      (s) => pick(s as AnyObj, keys as string[]) as Pick<T, K>,
+      { equalityFn },
+    );
   }
 }
 
@@ -355,4 +401,20 @@ export function deepFreeze<T>(
   }
 
   return obj;
+}
+
+function isFunction(value: unknown): value is (...args: any[]) => any {
+  return typeof value === 'function';
+}
+
+function shallowCloneState<T>(state: T): T {
+  if (Array.isArray(state)) {
+    return [...state] as any;
+  }
+
+  if (typeof state === 'object' && state !== null) {
+    return { ...state };
+  }
+
+  return state;
 }

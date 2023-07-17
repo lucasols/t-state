@@ -4,11 +4,11 @@ import {
   Store,
   EqualityFn,
   shallowEqual,
-  State,
   Action,
   initCallAction,
 } from './main';
 import { pick } from './utils';
+import { ComputedStore } from './computed';
 
 interface Then {
   then: (callback: () => any) => any;
@@ -18,7 +18,7 @@ interface SelectorThen<R, P = R> {
   then: (callback: (selection: { current: R; prev: P }) => any) => any;
 }
 
-interface ChangeMethods<T extends State> {
+interface ChangeMethods<T> {
   ifKeysChange<K extends keyof T>(...keys: K[]): Then;
   withInitCall(): ChangeMethods<T>;
   ifKeysChangeTo<K extends keyof T>(target: Pick<T, K>): Then;
@@ -29,7 +29,7 @@ interface ChangeMethods<T extends State> {
   withEqualityFn(equalityFn: EqualityFn): ChangeMethods<T>;
 }
 
-export function observeChanges<T extends State>({
+export function observeChanges<T>({
   prev,
   current,
   action,
@@ -69,7 +69,10 @@ export function observeChanges<T extends State>({
     }),
     ifKeysChangeTo(target) {
       const targetKeys = Object.keys(target) as (keyof T)[];
-      const currentSlice = pick(current, targetKeys);
+      const currentSlice = pick(
+        current as Record<string, any>,
+        targetKeys as any,
+      );
 
       return {
         then(callback) {
@@ -123,8 +126,8 @@ export function observeChanges<T extends State>({
   return methods;
 }
 
-export function useSubscribeToStore<T extends State>(
-  store: Store<T>,
+export function useSubscribeToStore<T>(
+  store: Store<T> | ComputedStore<T>,
   onChange: ({
     prev,
     current,
