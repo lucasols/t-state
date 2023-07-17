@@ -403,7 +403,8 @@ export function deepFreeze<T>(
   return obj;
 }
 
-function isFunction(value: unknown): value is (...args: any[]) => any {
+/** @internal */
+export function isFunction(value: unknown): value is (...args: any[]) => any {
   return typeof value === 'function';
 }
 

@@ -17,6 +17,7 @@
     "alwaysStrict": true,
     "strict": true,
     "noUncheckedIndexedAccess": true,
+    "stripInternal": true,
     "forceConsistentCasingInFileNames": true,
     "strictPropertyInitialization": true
   }

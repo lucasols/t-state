@@ -1,4 +1,4 @@
-import { Action, State } from './main';
+import { Action } from './main';
 import { nanoid } from 'nanoid';
 
 let tabId: string | null = null;
@@ -6,8 +6,8 @@ let tabIdWasLogged = false;
 
 export function startDevTools(
   storeName: string,
-  initialState: State,
-  setState: (state: State) => void,
+  initialState: any,
+  setState: (state: any) => void,
 ) {
   const reduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION__;
 

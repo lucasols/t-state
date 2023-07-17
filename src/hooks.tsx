@@ -7,6 +7,7 @@ import {
   useState,
 } from 'react';
 import {
+  isFunction,
   shallowEqual,
   State,
   Store,
@@ -73,7 +74,7 @@ export function createStoreContext<T extends State>() {
     } = {},
   ) {
     const store = useCreateStore(() => ({
-      state: typeof value === 'function' ? value() : value,
+      state: isFunction(value) ? value() : value,
       disableDeepFreezeInDev: !enableDeepFreezeInDev,
       debugName,
     }));
