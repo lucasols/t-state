@@ -1,10 +1,4 @@
-import {
-  Store,
-  StoreProps,
-  Subscriber,
-  UseStateOptions,
-  shallowEqual,
-} from './main';
+import { Store, StoreProps, shallowEqual } from './main';
 
 type UnsubscribeFn = () => void;
 
@@ -94,14 +88,12 @@ function computedBasedOnMultipleStores(
           if (!storeEqualityFn(current, prev)) {
             if (!computedValuesStore.isInitialized) {
               getPrevStates = () =>
-                stores.map((store, i) => (i === index ? prev : store.state));
+                stores.map((s, i) => (i === index ? prev : s.state));
             }
 
             computedValuesStore.setState(
               computedValue(
-                ...stores.map((store, i) =>
-                  i === index ? current : store.state,
-                ),
+                ...stores.map((s, i) => (i === index ? current : s.state)),
               ),
             );
           }
