@@ -9,13 +9,12 @@ import {
 import {
   isFunction,
   shallowEqual,
-  State,
   Store,
   StoreProps,
   useSubscribeToStore,
 } from './main';
 
-export function useCreateStore<T extends State>(
+export function useCreateStore<T>(
   storeProps: StoreProps<T> | (() => StoreProps<T>),
 ) {
   const store = useRef<Store<T>>();
@@ -29,7 +28,7 @@ export function useCreateStore<T extends State>(
   return store.current;
 }
 
-export function useStoreSnapshot<T extends State, S>(
+export function useStoreSnapshot<T, S>(
   store: Store<T>,
   selector: (state: T) => S,
   snapshotWhen: (state: T) => boolean,
@@ -58,7 +57,7 @@ function assertIsNotUndefined<T>(
   }
 }
 
-export function createStoreContext<T extends State>() {
+export function createStoreContext<T>() {
   const Context = createContext<undefined | Store<T>>(undefined);
 
   function useCreate(
