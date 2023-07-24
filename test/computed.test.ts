@@ -290,7 +290,7 @@ describe('useComputed', () => {
     );
 
     expect(result.current).toEqual(3);
-    expect(baseStore.subscribers_.size).toEqual(2);
+    expect(baseStore.subscribers_.size).toEqual(1);
 
     act(() => {
       baseStore.setState(2);
@@ -318,11 +318,11 @@ describe('useComputed', () => {
     );
 
     expect(result.current).toEqual(3);
-    expect(baseStore.subscribers_.size).toEqual(2);
+    expect(baseStore.subscribers_.size).toEqual(1);
 
     unmount();
 
-    expect(baseStore.subscribers_.size).toEqual(1);
+    expect(baseStore.subscribers_.size).toEqual(0);
   });
 
   test('unmount useComputed ', () => {

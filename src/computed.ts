@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useInsertionEffect } from 'react';
 import { Store, StoreProps, shallowEqual } from './main';
 import { useConst } from './utils';
 
@@ -18,6 +18,7 @@ type ComputedOptions = {
   storeEqualityFn?: (a: any, b: any) => boolean;
   computedEqualityFn?: (a: any, b: any) => boolean;
   debugName?: string;
+  lazySubInitialization?: boolean;
 };
 
 type ComputedStoreInput<T> = Store<T> | ComputedStore<T>;
@@ -56,6 +57,7 @@ function computedBasedOnMultipleStores(
     computedEqualityFn = shallowEqual,
     debugName,
     debounceSideEffects,
+    lazySubInitialization,
   }: ComputedOptions = {},
 ): ComputedStore<unknown> {
   let getPrevStates = () => stores.map((store) => store.state);
@@ -68,7 +70,11 @@ function computedBasedOnMultipleStores(
 
   let unsubscribe: UnsubscribeFn[] | undefined;
 
+  let canInitialize = !lazySubInitialization;
+
   function initializeSubscriptions() {
+    if (!canInitialize) return;
+
     if (unsubscribe) return;
 
     if (stores.length === 1) {
@@ -115,7 +121,10 @@ function computedBasedOnMultipleStores(
 
       unsubscribe = undefined;
     },
-    initializeSubscriptions,
+    initializeSubscriptions() {
+      canInitialize = true;
+      initializeSubscriptions();
+    },
     get state() {
       return computedValuesStore.state;
     },
@@ -160,10 +169,13 @@ export function useComputed(
   options?: ComputedOptions,
 ): ComputedStore<unknown> {
   const computedStore = useConst(() => {
-    return computed(stores as any, computedValue, options);
+    return computed(stores as any, computedValue, {
+      ...options,
+      lazySubInitialization: true,
+    });
   });
 
-  useEffect(() => {
+  useInsertionEffect(() => {
     computedStore.initializeSubscriptions();
 
     return () => {

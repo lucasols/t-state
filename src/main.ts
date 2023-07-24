@@ -10,7 +10,7 @@ import { useCallback } from 'react';
 export { observeChanges, useSubscribeToStore } from './subscribeUtils';
 export { useCreateStore, createStoreContext, useStoreSnapshot } from './hooks';
 
-export { computed, ComputedStore } from './computed';
+export { computed, ComputedStore, useComputed } from './computed';
 
 export { shallowEqual, deepEqual };
 
