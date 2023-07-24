@@ -225,6 +225,20 @@ const doubledValue = computed(store1, (state) => state * 2);
 console.log(doubledValue.state); // 0
 ```
 
+Use `useComputed` for creating computed states stores inside components
+
+```tsx
+const Component = () => {
+  const store1 = new Store({ state: 2 });
+
+  const doubledValue = useComputed(store1, (state) => state * 2);
+
+  const value = doubledValue.useState();
+
+  return <div>{value}</div>;
+};
+```
+
 ## Debounce state changes
 
 State changes can be throttled using the `debounceSideEffects` option
@@ -235,6 +249,6 @@ const store = new Store({
   debounceSideEffects: {
     wait: 1000,
     maxWait: 2000,
-  }
+  },
 });
 ```
