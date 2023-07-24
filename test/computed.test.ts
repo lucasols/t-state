@@ -1,7 +1,8 @@
 import { describe, expect, test, vi } from 'vitest';
 import { Store } from '../src/main';
 import { act, renderHook } from '@testing-library/react';
-import { computed } from '../src/computed';
+import { computed, useComputed } from '../src/computed';
+import React from 'react';
 
 test('create computed values', () => {
   const baseStore = new Store({
@@ -248,5 +249,102 @@ describe('computed based on more than one store', () => {
       [4, 3],
       [5, 4],
     ]);
+  });
+});
+
+describe('useComputed', () => {
+  test('useComputed basic usage', () => {
+    const baseStore = new Store({
+      state: 1,
+    });
+
+    const { result } = renderHook(() => {
+      const computedStore = useComputed(baseStore, (state) => {
+        return state + 2;
+      });
+
+      const computedValue = computedStore.useState();
+
+      return computedValue;
+    });
+
+    expect(result.current).toEqual(3);
+  });
+
+  test('useComputed in strict mode', () => {
+    const baseStore = new Store({
+      state: 1,
+    });
+
+    const { result } = renderHook(
+      () => {
+        const computedStore = useComputed(baseStore, (state) => {
+          return state + 2;
+        });
+
+        const computedValue = computedStore.useState();
+
+        return computedValue;
+      },
+      { wrapper: React.StrictMode },
+    );
+
+    expect(result.current).toEqual(3);
+    expect(baseStore.subscribers_.size).toEqual(2);
+
+    act(() => {
+      baseStore.setState(2);
+    });
+
+    expect(result.current).toEqual(4);
+  });
+
+  test('unmount useComputed in strict mode', () => {
+    const baseStore = new Store({
+      state: 1,
+    });
+
+    const { result, unmount } = renderHook(
+      () => {
+        const computedStore = useComputed(baseStore, (state) => {
+          return state + 2;
+        });
+
+        const computedValue = computedStore.useState();
+
+        return computedValue;
+      },
+      { wrapper: React.StrictMode },
+    );
+
+    expect(result.current).toEqual(3);
+    expect(baseStore.subscribers_.size).toEqual(2);
+
+    unmount();
+
+    expect(baseStore.subscribers_.size).toEqual(1);
+  });
+
+  test('unmount useComputed ', () => {
+    const baseStore = new Store({
+      state: 1,
+    });
+
+    const { result, unmount } = renderHook(() => {
+      const computedStore = useComputed(baseStore, (state) => {
+        return state + 2;
+      });
+
+      const computedValue = computedStore.useState();
+
+      return computedValue;
+    });
+
+    expect(result.current).toEqual(3);
+    expect(baseStore.subscribers_.size).toEqual(1);
+
+    unmount();
+
+    expect(baseStore.subscribers_.size).toEqual(0);
   });
 });

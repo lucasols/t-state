@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { Store, StoreProps, shallowEqual } from './main';
+import { useConst } from './utils';
 
 type UnsubscribeFn = () => void;
 
@@ -8,6 +10,7 @@ export type ComputedStore<T> = {
   useState: Store<T>['useState'];
   useSelector: Store<T>['useSelector'];
   destroy(): void;
+  initializeSubscriptions(): void;
 };
 
 type ComputedOptions = {
@@ -66,6 +69,8 @@ function computedBasedOnMultipleStores(
   let unsubscribe: UnsubscribeFn[] | undefined;
 
   function initializeSubscriptions() {
+    if (unsubscribe) return;
+
     if (stores.length === 1) {
       unsubscribe = [
         stores[0]!.subscribe(({ current, prev }) => {
@@ -110,6 +115,7 @@ function computedBasedOnMultipleStores(
 
       unsubscribe = undefined;
     },
+    initializeSubscriptions,
     get state() {
       return computedValuesStore.state;
     },
@@ -129,4 +135,41 @@ function computedBasedOnMultipleStores(
       return computedValuesStore.useSelector(selector, options);
     },
   };
+}
+
+export function useComputed<
+  const T extends readonly ComputedStoreInput<any>[],
+  R,
+>(
+  stores: T,
+  computedValue: (
+    ...states: {
+      [K in keyof T]: T[K] extends Store<infer S> ? S : never;
+    }
+  ) => R,
+  options?: ComputedOptions,
+): ComputedStore<R>;
+export function useComputed<T, R>(
+  store: ComputedStoreInput<T>,
+  computedValue: (state: T) => R,
+  options?: ComputedOptions,
+): ComputedStore<R>;
+export function useComputed(
+  stores: ComputedStoreInput<unknown>[] | ComputedStoreInput<unknown>,
+  computedValue: (state: any) => unknown,
+  options?: ComputedOptions,
+): ComputedStore<unknown> {
+  const computedStore = useConst(() => {
+    return computed(stores as any, computedValue, options);
+  });
+
+  useEffect(() => {
+    computedStore.initializeSubscriptions();
+
+    return () => {
+      computedStore.destroy();
+    };
+  }, [computedStore]);
+
+  return computedStore;
 }

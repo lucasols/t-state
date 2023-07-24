@@ -57,7 +57,7 @@ export const initCallAction = { type: 'init.subscribe.call' };
 
 export class Store<T> {
   readonly debugName_: string = '';
-  private subscribers_ = new Set<Subscriber<T>>();
+  subscribers_ = new Set<Subscriber<T>>();
   private batchUpdates_ = false;
   private state_: T | undefined;
   private lazyInitialState_: (() => T) | undefined;
