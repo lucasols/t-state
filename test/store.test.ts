@@ -1,5 +1,6 @@
 import { describe, expect, test, vi } from 'vitest';
 import { Store } from '../src/main';
+import { sleep } from './test.utils';
 
 type TestState = {
   string: string;
@@ -440,26 +441,107 @@ describe('freeze state', () => {
   });
 });
 
-test('batched updates', () => {
-  const { store } = createTestStore();
+describe('batched updates', () => {
+  test('should work', () => {
+    const { store } = createTestStore();
 
-  const mockSubscriber = vi.fn();
+    const mockSubscriber = vi.fn();
 
-  store.subscribe(mockSubscriber);
+    store.subscribe(mockSubscriber);
 
-  store.batch(() => {
+    store.batch(() => {
+      store.setKey('string', 'new string');
+      store.setKey('string', 'new string 2');
+      store.setKey('string', 'new string 3');
+      store.setKey('string', 'new string 4');
+      store.setKey('string', 'new string 6');
+      store.setKey('items', []);
+    });
+
+    expect(mockSubscriber).toHaveBeenCalledTimes(1);
+    expect(store.state).toStrictEqual({
+      items: [],
+      string: 'new string 6',
+    });
+  });
+
+  test('do not flush if there was no updates', () => {
+    const { store } = createTestStore();
+
+    const mockSubscriber = vi.fn();
+
+    store.subscribe(mockSubscriber);
+
+    store.batch(() => {});
+
+    expect(mockSubscriber).toHaveBeenCalledTimes(0);
+
+    store.batch(() => {
+      store.setKey('string', 'Hello');
+      store.setKey('string', 'Hello');
+      store.setKey('string', 'Hello');
+    });
+
+    expect(mockSubscriber).toHaveBeenCalledTimes(0);
+  });
+
+  test('nested batched updates', () => {
+    const { store } = createTestStore();
+
+    const mockSubscriber = vi.fn();
+
+    store.subscribe(mockSubscriber);
+
+    store.batch(() => {
+      store.setKey('string', 'new string');
+
+      store.batch(() => {
+        store.setKey('string', 'new string 2');
+        store.setKey('string', 'new string 3');
+        store.setKey('string', 'new string 4');
+        store.setKey('string', 'new string 6');
+        store.setKey('items', []);
+      });
+
+      store.setKey('string', 'new string');
+    });
+
+    expect(mockSubscriber).toHaveBeenCalledTimes(1);
+
+    expect(store.state).toStrictEqual({
+      items: [],
+      string: 'new string',
+    });
+  });
+
+  test('stop and resume flush', async () => {
+    const { store } = createTestStore();
+
+    const mockSubscriber = vi.fn();
+
+    store.subscribe(mockSubscriber);
+
+    store.stopFlush();
+
+    await sleep(100);
+
     store.setKey('string', 'new string');
     store.setKey('string', 'new string 2');
     store.setKey('string', 'new string 3');
+
+    await sleep(100);
+
     store.setKey('string', 'new string 4');
     store.setKey('string', 'new string 6');
     store.setKey('items', []);
-  });
 
-  expect(mockSubscriber).toHaveBeenCalledTimes(1);
-  expect(store.state).toStrictEqual({
-    items: [],
-    string: 'new string 6',
+    store.resumeFlush();
+
+    expect(mockSubscriber).toHaveBeenCalledTimes(1);
+    expect(store.state).toStrictEqual({
+      items: [],
+      string: 'new string 6',
+    });
   });
 });
 

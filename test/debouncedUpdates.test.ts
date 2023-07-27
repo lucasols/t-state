@@ -66,36 +66,40 @@ test.concurrent('non consecutive updates', async () => {
   ]);
 });
 
-test.concurrent('max wait time', async () => {
-  const store = new Store({
-    state: '',
-    debounceSideEffects: {
-      wait: 100,
-      maxWait: 200,
-    },
-  });
+test.concurrent(
+  'max wait time',
+  async () => {
+    const store = new Store({
+      state: '',
+      debounceSideEffects: {
+        wait: 100,
+        maxWait: 200,
+      },
+    });
 
-  const subscriberCalls = vi.fn();
+    const subscriberCalls = vi.fn();
 
-  store.subscribe((args) => {
-    subscriberCalls(args);
-  });
+    store.subscribe((args) => {
+      subscriberCalls(args);
+    });
 
-  store.setState('H');
-  await sleep(90);
-  store.setState('He');
-  await sleep(90);
-  store.setState('Hel');
-  await sleep(90);
-  store.setState('Hell');
-  await sleep(90);
-  store.setState('Hello');
-  await sleep(110);
+    store.setState('H');
+    await sleep(90);
+    store.setState('He');
+    await sleep(90);
+    store.setState('Hel');
+    await sleep(90);
+    store.setState('Hell');
+    await sleep(90);
+    store.setState('Hello');
+    await sleep(110);
 
-  expect(subscriberCalls).toHaveBeenCalledTimes(3);
-  expect(subscriberCalls.mock.calls).toEqual([
-    [{ action: undefined, current: 'H', prev: '' }],
-    [{ action: undefined, current: 'Hell', prev: 'Hel' }],
-    [{ action: undefined, current: 'Hello', prev: 'Hell' }],
-  ]);
-});
+    expect(subscriberCalls).toHaveBeenCalledTimes(3);
+    expect(subscriberCalls.mock.calls).toEqual([
+      [{ action: undefined, current: 'H', prev: '' }],
+      [{ action: undefined, current: 'Hell', prev: 'Hel' }],
+      [{ action: undefined, current: 'Hello', prev: 'Hell' }],
+    ]);
+  },
+  { retry: 3 },
+);

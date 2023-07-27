@@ -69,6 +69,7 @@ export class Store<T> {
   private disableDeepFreezeInDev_: boolean;
   private ignoreValueInDeepFreeze_?: (value: unknown) => boolean;
   private middlewares_ = new Set<StoreMiddleware<T>>();
+  private hasPendingFlush_ = false;
 
   constructor({
     debugName,
@@ -130,6 +131,11 @@ export class Store<T> {
   }
 
   private flush_(action: Action | undefined) {
+    if (this.batchUpdates_) {
+      this.hasPendingFlush_ = true;
+      return;
+    }
+
     if (this.debounceSideEffects_) {
       clearTimeout(this.debouncedFlushTimeout_);
 
@@ -196,9 +202,7 @@ export class Store<T> {
         ? deepFreeze(unwrapedNewState, this.ignoreValueInDeepFreeze_)
         : unwrapedNewState;
 
-    if (!this.batchUpdates_) {
-      this.flush_(action);
-    }
+    this.flush_(action);
 
     return true;
   }
@@ -291,10 +295,32 @@ export class Store<T> {
   }
 
   batch(fn: () => void, action?: Action) {
+    if (this.batchUpdates_) {
+      fn();
+      return;
+    }
+
     this.batchUpdates_ = true;
     fn();
     this.batchUpdates_ = false;
-    this.flush_(action);
+
+    if (this.hasPendingFlush_) {
+      this.hasPendingFlush_ = false;
+      this.flush_(action);
+    }
+  }
+
+  stopFlush() {
+    this.batchUpdates_ = true;
+  }
+
+  resumeFlush() {
+    this.batchUpdates_ = false;
+
+    if (this.hasPendingFlush_) {
+      this.hasPendingFlush_ = false;
+      this.flush_(undefined);
+    }
   }
 
   subscribe(
