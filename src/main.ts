@@ -120,6 +120,10 @@ export class Store<T> {
     return this.state_;
   }
 
+  initializeStore() {
+    return this.state;
+  }
+
   private get lastState(): T {
     if (this.lastState_ === undefined) {
       this.state_ = this.lazyInitialState_!();
