@@ -366,7 +366,7 @@ export class Store<T> {
   ): Readonly<S> {
     const memoizedSelector = useCallback(
       (s: T) => selector(s),
-      useExternalDeps ? [selector] : [],
+      [useExternalDeps ? selector : 0],
     );
 
     return useSyncExternalStoreWithSelector(
