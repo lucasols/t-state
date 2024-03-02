@@ -1,11 +1,11 @@
 import { startDevTools } from './devTools';
 import { isDraftable, produce } from 'immer';
-import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/with-selector.js';
 
 import { shallowEqual } from './shallowEqual';
 import { deepEqual } from './deepEqual';
 import { pick, unwrapValueSetter as unwrapValueArg, ValueArg } from './utils';
 import { useCallback } from 'react';
+import { useSyncExternalStoreWithSelector } from './useSyncExternalStoreWithSelector';
 
 export { observeChanges, useSubscribeToStore } from './subscribeUtils';
 export { useCreateStore, createStoreContext, useStoreSnapshot } from './hooks';
