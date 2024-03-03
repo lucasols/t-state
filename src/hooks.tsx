@@ -1,18 +1,5 @@
-import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useContext,
-  useRef,
-  useState,
-} from 'react';
-import {
-  isFunction,
-  shallowEqual,
-  Store,
-  StoreProps,
-  useSubscribeToStore,
-} from './main';
+import { useRef, useState } from 'react';
+import { Store, StoreProps, useSubscribeToStore } from './main';
 
 export function useCreateStore<T>(
   storeProps: StoreProps<T> | (() => StoreProps<T>),
