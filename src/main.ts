@@ -8,7 +8,7 @@ import { useCallback } from 'react';
 import { useSyncExternalStoreWithSelector } from './useSyncExternalStoreWithSelector';
 
 export { observeChanges, useSubscribeToStore } from './subscribeUtils';
-export { useCreateStore, createStoreContext, useStoreSnapshot } from './hooks';
+export { useCreateStore, useStoreSnapshot } from './hooks';
 
 export { computed, ComputedStore, useComputed } from './computed';
 
@@ -82,10 +82,10 @@ export class Store<T> {
 
     this.debugName_ = debugName || '';
     this.lazyInitialState_ = initialStateIsLazy ? state : undefined;
-    this.state_ = initialStateIsLazy
-      ? undefined
-      : process.env.NODE_ENV === 'development' && !disableDeepFreezeInDev
-      ? deepFreeze(state, ignoreValueInDeepFreeze)
+    this.state_ =
+      initialStateIsLazy ? undefined
+      : process.env.NODE_ENV === 'development' && !disableDeepFreezeInDev ?
+        deepFreeze(state, ignoreValueInDeepFreeze)
       : state;
     this.lastState_ = initialStateIsLazy ? undefined : state;
     this.disableDeepFreezeInDev_ = disableDeepFreezeInDev || false;
@@ -202,9 +202,9 @@ export class Store<T> {
 
     this.lastState_ = shallowCloneState(this.state);
     this.state_ =
-      process.env.NODE_ENV === 'development' && !this.disableDeepFreezeInDev_
-        ? deepFreeze(unwrapedNewState, this.ignoreValueInDeepFreeze_)
-        : unwrapedNewState;
+      process.env.NODE_ENV === 'development' && !this.disableDeepFreezeInDev_ ?
+        deepFreeze(unwrapedNewState, this.ignoreValueInDeepFreeze_)
+      : unwrapedNewState;
 
     this.flush_(action);
 
@@ -399,9 +399,9 @@ export class Store<T> {
   ): Readonly<Pick<T, K>> {
     const keys = (typeof args[0] === 'string' ? args : args[0]) as K[];
     const equalityFn =
-      typeof args[1] === 'object' && args[1].equalityFn
-        ? args[1].equalityFn
-        : shallowEqual;
+      typeof args[1] === 'object' && args[1].equalityFn ?
+        args[1].equalityFn
+      : shallowEqual;
 
     return this.useSelector(
       (s) => pick(s as AnyObj, keys as string[]) as Pick<T, K>,
