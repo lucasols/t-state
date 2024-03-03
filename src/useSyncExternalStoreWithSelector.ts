@@ -2,8 +2,7 @@
  * Forked from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreWithSelector.js
  */
 
-import { useRef, useEffect, useMemo, useDebugValue } from 'react';
-import { useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 
 // Same as useSyncExternalStore, but supports selector and isEqual arguments.
 export function useSyncExternalStoreWithSelector<Snapshot, Selection>(
@@ -101,9 +100,9 @@ export function useSyncExternalStoreWithSelector<Snapshot, Selection>(
       getServerSnapshot === undefined ? null : getServerSnapshot;
     const getSnapshotWithSelector = () => memoizedSelector(getSnapshot());
     const getServerSnapshotWithSelector =
-      maybeGetServerSnapshot === null
-        ? undefined
-        : () => memoizedSelector(maybeGetServerSnapshot());
+      maybeGetServerSnapshot === null ? undefined : (
+        () => memoizedSelector(maybeGetServerSnapshot())
+      );
     return [getSnapshotWithSelector, getServerSnapshotWithSelector];
   }, [getSnapshot, getServerSnapshot, selector, isEqual]);
 
