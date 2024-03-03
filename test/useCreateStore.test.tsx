@@ -1,8 +1,7 @@
 import { cleanup, fireEvent, render } from '@testing-library/react';
-import React from 'react';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { useCreateStore } from '../src/hooks';
 import { Store } from '../src/main';
-import { expect, describe, test, vi, afterEach } from 'vitest';
 
 afterEach(() => {
   cleanup();

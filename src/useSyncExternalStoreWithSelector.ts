@@ -96,7 +96,7 @@ export function useSyncExternalStoreWithSelector<Snapshot, Selection>(
       memoizedSelection = nextSelection;
       return nextSelection;
     };
-    // Assigning this to a constant so that Flow knows it can't change.
+
     const maybeGetServerSnapshot =
       getServerSnapshot === undefined ? null : getServerSnapshot;
     const getSnapshotWithSelector = () => memoizedSelector(getSnapshot());

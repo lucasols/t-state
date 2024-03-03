@@ -12,7 +12,7 @@ export { useCreateStore, createStoreContext, useStoreSnapshot } from './hooks';
 
 export { computed, ComputedStore, useComputed } from './computed';
 
-export { shallowEqual, deepEqual };
+export { shallowEqual, deepEqual, useSyncExternalStoreWithSelector };
 
 export type Subscriber<T> = {
   (props: { prev: T; current: T; action: Action | undefined }): void;
