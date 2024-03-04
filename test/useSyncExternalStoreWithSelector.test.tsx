@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test } from 'vitest';
 import { useSyncExternalStoreWithSelector } from '../src/useSyncExternalStoreWithSelector';
 import { cleanup, fireEvent, render, act } from '@testing-library/react';
-import { Component, memo } from 'react';
+import { Component, memo, useCallback } from 'react';
 import { deepEqual } from '../src/deepEqual';
 
 // This tests shared behavior between the built-in and shim implementations of
@@ -393,5 +393,56 @@ describe('Shared useSyncExternalStore behavior (shim and built-in)', () => {
 
     expect(logger.getLogs()).toEqual(['Selector', 'isEqual', 'A1']);
     expect(container.textContent).toEqual('A1');
+  });
+
+  test('Selected result should change when selector changes', () => {
+    const store = createExternalStore({ b: 0 });
+    const logger = createLogger();
+
+    function App({ a }: { a: number }) {
+      const selector = useCallback(
+        (state: { b: number }) => {
+          logger.log('Selector');
+          return state.b + a;
+        },
+        [a],
+      );
+
+      const result = useSyncExternalStoreWithSelector(
+        store.subscribe,
+        store.getState,
+        null,
+        selector,
+      );
+      return <Text text={result.toString()} logger={logger} />;
+    }
+
+    const { container, rerender } = render(<App a={0} />);
+
+    expect(logger.getLogs()).toEqual(['Selector', '0']);
+
+    expect(container.textContent).toEqual('0');
+
+    logger.reset();
+
+    // Update b but not a
+
+    act(() => {
+      store.set({ b: 1 });
+    });
+
+    expect(logger.getLogs()).toEqual(['Selector', '1']);
+
+    expect(container.textContent).toEqual('1');
+
+    logger.reset();
+
+    // Update a but not b
+
+    rerender(<App a={1} />);
+
+    expect(logger.getLogs()).toEqual(['Selector', '2']);
+
+    expect(container.textContent).toEqual('2');
   });
 });
