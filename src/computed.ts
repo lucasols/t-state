@@ -11,7 +11,7 @@ export type ComputedStore<T> = {
   useSelector: Store<T>['useSelector'];
   destroy(): void;
   initializeSubscriptions(): void;
-  updateComputedValueFn: (fn: (...states: never[]) => T) => void;
+  updateComputedValueFn: (fn: (...states: any[]) => T) => void;
 };
 
 type ComputedOptions = {
