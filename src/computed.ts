@@ -11,6 +11,7 @@ export type ComputedStore<T> = {
   useSelector: Store<T>['useSelector'];
   destroy(): void;
   initializeSubscriptions(): void;
+  updateComputedValueFn: (fn: (...states: never[]) => T) => void;
 };
 
 type ComputedOptions = {
@@ -62,8 +63,10 @@ function computedBasedOnMultipleStores(
 ): ComputedStore<unknown> {
   let getPrevStates = () => stores.map((store) => store.state);
 
+  let computedValueFn = computedValue;
+
   const computedValuesStore = new Store({
-    state: () => computedValue(...getPrevStates()),
+    state: () => computedValueFn(...getPrevStates()),
     debugName,
     debounceSideEffects,
   });
@@ -85,7 +88,7 @@ function computedBasedOnMultipleStores(
               getPrevStates = () => [prev];
             }
 
-            computedValuesStore.setState(computedValue(current), {
+            computedValuesStore.setState(computedValueFn(current), {
               equalityCheck: computedEqualityFn,
             });
           }
@@ -103,7 +106,7 @@ function computedBasedOnMultipleStores(
             }
 
             computedValuesStore.setState(
-              computedValue(
+              computedValueFn(
                 ...stores.map((s, i) => (i === index ? current : s.state)),
               ),
             );
@@ -142,6 +145,10 @@ function computedBasedOnMultipleStores(
       if (!unsubscribe) initializeSubscriptions();
 
       return computedValuesStore.useSelector(selector, options);
+    },
+    updateComputedValueFn(fn) {
+      computedValueFn = fn;
+      computedValuesStore.setState(computedValueFn(...getPrevStates()));
     },
   };
 }

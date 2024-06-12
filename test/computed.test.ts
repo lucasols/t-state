@@ -1,8 +1,8 @@
-import { describe, expect, test, vi } from 'vitest';
-import { Store } from '../src/main';
 import { act, renderHook } from '@testing-library/react';
-import { computed, useComputed } from '../src/computed';
 import React from 'react';
+import { describe, expect, test, vi } from 'vitest';
+import { computed, useComputed } from '../src/computed';
+import { Store } from '../src/main';
 
 test('create computed values', () => {
   const baseStore = new Store({
@@ -347,4 +347,28 @@ describe('useComputed', () => {
 
     expect(baseStore.subscribers_.size).toEqual(0);
   });
+});
+
+test('update computed value fn', () => {
+  const baseStore = new Store({
+    state: 1,
+  });
+
+  const computedStore = computed(baseStore, (state) => {
+    return state + 2;
+  });
+
+  const { result } = renderHook(() => {
+    const value = computedStore.useState();
+
+    return value;
+  });
+
+  expect(result.current).toEqual(3);
+
+  act(() => {
+    computedStore.updateComputedValueFn((state: number) => state + 4);
+  });
+
+  expect(result.current).toEqual(5);
 });
