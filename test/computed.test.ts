@@ -348,27 +348,3 @@ describe('useComputed', () => {
     expect(baseStore.subscribers_.size).toEqual(0);
   });
 });
-
-test('update computed value fn', () => {
-  const baseStore = new Store({
-    state: 1,
-  });
-
-  const computedStore = computed(baseStore, (state) => {
-    return state + 2;
-  });
-
-  const { result } = renderHook(() => {
-    const value = computedStore.useState();
-
-    return value;
-  });
-
-  expect(result.current).toEqual(3);
-
-  act(() => {
-    computedStore.updateComputedValueFn((state: number) => state + 4);
-  });
-
-  expect(result.current).toEqual(5);
-});
