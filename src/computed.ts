@@ -63,7 +63,7 @@ function computedBasedOnMultipleStores(
 ): ComputedStore<unknown> {
   let getPrevStates = () => stores.map((store) => store.state);
 
-  let computedValueFn = computedValue;
+  const computedValueFn = computedValue;
 
   const computedValuesStore = new Store({
     state: () => computedValueFn(...getPrevStates()),
