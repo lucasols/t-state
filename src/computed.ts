@@ -11,6 +11,7 @@ export type ComputedStore<T> = {
   useSelector: Store<T>['useSelector'];
   destroy(): void;
   initializeSubscriptions(): void;
+  forceUpdate: () => void;
 };
 
 type ComputedOptions = {
@@ -144,6 +145,9 @@ function computedBasedOnMultipleStores(
       if (!unsubscribe) initializeSubscriptions();
 
       return computedValuesStore.useSelector(selector, options);
+    },
+    forceUpdate() {
+      computedValuesStore.setState(computedValueFn(...getPrevStates()));
     },
   };
 }
