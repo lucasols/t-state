@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, test, vi } from 'vitest';
 import { computed, useComputed } from '../src/computed';
-import { Store } from '../src/main';
+import { Store, deepEqual } from '../src/main';
 
 test('create computed values', () => {
   const baseStore = new Store({
@@ -347,4 +347,35 @@ describe('useComputed', () => {
 
     expect(baseStore.subscribers_.size).toEqual(0);
   });
+});
+
+test('equality checks', () => {
+  const baseStore1 = new Store({
+    state: { a: { b: 1 } },
+  });
+
+  const baseStore2 = new Store({
+    state: { a: { b: 1 } },
+  });
+
+  const computedStoreChanged: any[] = [];
+  const computedFnCalled: any[] = [];
+
+  const computedStore = computed(
+    [baseStore1, baseStore2],
+    (state1, state2) => {
+      computedFnCalled.push(state1.a.b + state2.a.b);
+      return { a: { b: state1.a.b + state2.a.b } };
+    },
+    { computedEqualityFn: deepEqual, storeEqualityFn: deepEqual },
+  );
+
+  computedStore.subscribe(({ current }) => {
+    computedStoreChanged.push(current);
+  });
+
+  baseStore1.setState({ a: { b: 1 } });
+
+  expect(computedStoreChanged).toEqual([]);
+  expect(computedFnCalled).toMatchInlineSnapshot(`[]`);
 });

@@ -109,6 +109,7 @@ function computedBasedOnMultipleStores(
               computedValueFn(
                 ...stores.map((s, i) => (i === index ? current : s.state)),
               ),
+              { equalityCheck: computedEqualityFn },
             );
           }
         }),
