@@ -28,7 +28,7 @@ export function computed<const T extends readonly ComputedStoreInput<any>[], R>(
   stores: T,
   computedValue: (
     ...states: {
-      [K in keyof T]: T[K] extends Store<infer S> ? S : never;
+      [K in keyof T]: T[K] extends ComputedStoreInput<infer S> ? S : never;
     }
   ) => R,
   options?: ComputedOptions,
