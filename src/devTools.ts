@@ -1,5 +1,5 @@
-import { Action } from './main';
 import { nanoid } from 'nanoid';
+import { Action } from './main';
 
 let tabId: string | null = null;
 let tabIdWasLogged = false;
@@ -70,22 +70,10 @@ export function startDevTools(
             devTools.init(lastState);
             break;
           }
-
-          default:
-            console.error(
-              data.type,
-              data.payload.type,
-              'is not supported by t-state devtools',
-            );
-            break;
         }
 
         break;
       }
-
-      default:
-        console.error(data.type, 'is not supported by t-state devtools');
-        break;
     }
   });
 
