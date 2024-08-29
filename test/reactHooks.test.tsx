@@ -1,13 +1,13 @@
-import React, {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
-import { act, cleanup, fireEvent, render } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  renderHook,
+} from '@testing-library/react';
+import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { Store, shallowEqual } from '../src/main';
-import { expect, describe, test, beforeEach, vi, afterEach } from 'vitest';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 type anyFunction = () => any;
@@ -758,6 +758,43 @@ describe('hooks', () => {
       });
 
       expect(selector).toHaveBeenCalledTimes(1);
+    });
+
+    test('selector callback the correct time', () => {
+      const testStore = new Store<{ key1: number }>({
+        debugName: 'test',
+        state: { key1: 1 },
+      });
+
+      let selectorCalls = 0;
+
+      const { rerender, result } = renderHook(() => {
+        const selector = useCallback((state: { key1: number }) => {
+          return state.key1;
+        }, []);
+
+        return testStore.useSelector(
+          useCallback((state: { key1: number }) => {
+            selectorCalls++;
+            return selector(state);
+          }, []),
+          { useExternalDeps: true },
+        );
+      });
+
+      expect(selectorCalls).toBe(1);
+
+      rerender();
+
+      // should not call selector again on component re-render
+      expect(selectorCalls).toBe(1);
+
+      act(() => {
+        testStore.setKey('key1', 3);
+      });
+
+      expect(result.current).toBe(3);
+      expect(selectorCalls).toBe(2);
     });
   });
 });
