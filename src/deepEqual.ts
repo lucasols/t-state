@@ -1,5 +1,4 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable no-var */
+/* eslint-disable */
 /** forked from https://github.com/lukeed/dequal to conside invalid dates as equal */
 
 var has = Object.prototype.hasOwnProperty;

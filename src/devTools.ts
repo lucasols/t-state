@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { nanoid } from 'nanoid';
 import { Action } from './main';
 
@@ -87,14 +90,7 @@ export function startDevTools(
     });
   }
 
-  return ({
-    action,
-    current,
-  }: {
-    current: any;
-    prev: any;
-    action?: Action;
-  }) => {
+  return ({ action, current }: { current: any; action?: Action }) => {
     lastState = current;
     devTools.send(action ?? null, current);
   };
