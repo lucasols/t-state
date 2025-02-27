@@ -33,11 +33,6 @@
   ],
   "inputs": [
     {
-      "id": "fileName",
-      "type": "promptString",
-      "description": "Enter the file name"
-    },
-    {
       "id": "version",
       "type": "pickString",
       "description": "Select version type",
