@@ -1,8 +1,9 @@
-import { beforeEach, describe, expect, test } from 'vitest';
-import { useSyncExternalStoreWithSelector } from '../src/useSyncExternalStoreWithSelector';
-import { cleanup, fireEvent, render, act } from '@testing-library/react';
+/* eslint-disable */
+import { act, render } from '@testing-library/react';
 import { Component, memo, useCallback } from 'react';
+import { beforeEach, describe, expect, test } from 'vitest';
 import { deepEqual } from '../src/deepEqual';
+import { useSyncExternalStoreWithSelector } from '../src/useSyncExternalStoreWithSelector';
 
 // This tests shared behavior between the built-in and shim implementations of
 // of useSyncExternalStore.
