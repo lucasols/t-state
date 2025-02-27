@@ -95,6 +95,7 @@ export class Store<T> {
     const devToolsMiddeware =
       process.env.NODE_ENV === 'development' &&
       typeof window !== 'undefined' &&
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       ((window as any).__REDUX_DEVTOOLS_EXTENSION__ ? startDevTools : false);
 
     if (devToolsMiddeware && debugName) {
