@@ -1,14 +1,13 @@
-/* eslint-disable @typescript-eslint/lines-between-class-members */
 import { useEffect, useLayoutEffect, useRef } from 'react';
+import { ComputedStore } from './computed';
 import {
-  Store,
-  EqualityFn,
-  shallowEqual,
   Action,
+  EqualityFn,
   initCallAction,
+  shallowEqual,
+  Store,
 } from './main';
 import { pick } from './utils';
-import { ComputedStore } from './computed';
 
 interface Then {
   then: (callback: () => any) => any;
@@ -68,11 +67,8 @@ export function observeChanges<T>({
       },
     }),
     ifKeysChangeTo(target) {
-      const targetKeys = Object.keys(target) as (keyof T)[];
-      const currentSlice = pick(
-        current as Record<string, any>,
-        targetKeys as any,
-      );
+      const targetKeys = Object.keys(target) as (keyof T & string)[];
+      const currentSlice = pick(current as Record<string, any>, targetKeys);
 
       return {
         then(callback) {

@@ -459,7 +459,7 @@ export function isFunction(value: unknown): value is (...args: any[]) => any {
 
 function shallowCloneState<T>(state: T): T {
   if (Array.isArray(state)) {
-    return [...state] as any;
+    return [...state] as T;
   }
 
   if (typeof state === 'object' && state !== null) {

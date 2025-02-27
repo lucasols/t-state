@@ -23,16 +23,16 @@
     "node": ">=16.0.0"
   },
   "scripts": {
-    "test": "vitest --ui",
     "lint": "pnpm tsc && pnpm eslint && pnpm format",
-    "eslint": "eslint --ext .jsx,.js,.ts,.tsx src/",
+    "eslint": "eslint src/",
     "format": "prettier --write src/**/*.ts",
     "tsc": "tsc -p tsconfig.prod.json",
-    "test:run": "vitest run",
-    "build": "pnpm test:run && pnpm lint && pnpm build:no-test",
+    "test:ui": "vitest --ui",
+    "test": "vitest run",
+    "build": "pnpm test && pnpm lint && pnpm build:no-test",
     "build:no-test": "tsup --minify --dts",
-    "npm-publish": "./scripts/check-if-is-sync.sh && pnpm build && npm publish",
-    "npm-publish-beta": "pnpm build && npm publish --tag beta"
+    "pre-publish": "./scripts/check-if-is-sync.sh && pnpm build",
+    "npm-publish": "pnpm publish --access=public"
   },
   "devDependencies": {
     "@ls-stack/eslint-cfg": "^0.1.3",

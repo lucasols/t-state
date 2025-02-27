@@ -4,10 +4,28 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "type": "npm",
-      "script": "test",
       "label": "run tests",
-      "problemMatcher": [],
+      "type": "npm",
+      "script": "test:ui"
+    },
+    {
+      "label": "bump version and deploy",
+      "type": "shell",
+      "command": "pnpm pre-publish && pnpm version ${input:version} && pnpm npm-publish",
+      "problemMatcher": []
+    },
+    {
+      "label": "run lint",
+      "type": "npm",
+      "script": "lint",
+      "presentation": {
+        "clear": true
+      }
+    },
+    {
+      "label": "tsc watch",
+      "type": "npm",
+      "script": "tsc:watch",
       "presentation": {
         "clear": true
       }
