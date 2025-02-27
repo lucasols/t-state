@@ -1,18 +1,18 @@
-import { startDevTools } from './devTools';
 import { isDraftable, produce } from 'immer';
+import { startDevTools } from './devTools';
 
-import { shallowEqual } from './shallowEqual';
-import { deepEqual } from './deepEqual';
-import { pick, unwrapValueSetter as unwrapValueArg, ValueArg } from './utils';
 import { useCallback } from 'react';
+import { deepEqual } from './deepEqual';
+import { shallowEqual } from './shallowEqual';
 import { useSyncExternalStoreWithSelector } from './useSyncExternalStoreWithSelector';
+import { pick, unwrapValueSetter as unwrapValueArg, ValueArg } from './utils';
 
-export { observeChanges, useSubscribeToStore } from './subscribeUtils';
 export { useCreateStore, useStoreSnapshot } from './hooks';
+export { observeChanges, useSubscribeToStore } from './subscribeUtils';
 
 export { computed, ComputedStore, useComputed } from './computed';
 
-export { shallowEqual, deepEqual, useSyncExternalStoreWithSelector };
+export { deepEqual, shallowEqual, useSyncExternalStoreWithSelector };
 
 export type Subscriber<T> = {
   (props: { prev: T; current: T; action: Action | undefined }): void;
@@ -374,6 +374,23 @@ export class Store<T> {
       this.getState_,
       null,
       memoizedSelector,
+      equalityFn === false ? undefined : equalityFn,
+    );
+  }
+
+  useSelectorRC<S>(
+    selector: (state: T) => S,
+    {
+      equalityFn = shallowEqual,
+    }: {
+      equalityFn?: EqualityFn | false;
+    } = {},
+  ): Readonly<S> {
+    return useSyncExternalStoreWithSelector(
+      this.subscribe.bind(this),
+      this.getState_,
+      null,
+      selector,
       equalityFn === false ? undefined : equalityFn,
     );
   }
