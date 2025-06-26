@@ -7,7 +7,7 @@ import { shallowEqual } from './shallowEqual';
 import { useSyncExternalStoreWithSelector } from './useSyncExternalStoreWithSelector';
 import { pick, unwrapValueSetter as unwrapValueArg, ValueArg } from './utils';
 
-export { useCreateStore, useStoreSnapshot } from './hooks';
+export { useCreateStore, useSelectFromStore, useStoreSnapshot } from './hooks';
 export { observeChanges, useSubscribeToStore } from './subscribeUtils';
 
 export { computed, ComputedStore, useComputed } from './computed';

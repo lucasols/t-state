@@ -34,3 +34,10 @@ export function useStoreSnapshot<T, S>(
 
   return state;
 }
+
+export function useSelectFromStore<T, S>(
+  store: Store<T>,
+  selector: (state: T) => S,
+) {
+  return store.useSelectorRC(selector);
+}
