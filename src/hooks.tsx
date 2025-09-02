@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Store, StoreProps, useSubscribeToStore } from './main';
+import { EqualityFn, Store, StoreProps, useSubscribeToStore } from './main';
 
 export function useCreateStore<T>(
   storeProps: StoreProps<T> | (() => StoreProps<T>),
@@ -38,6 +38,9 @@ export function useStoreSnapshot<T, S>(
 export function useSelectFromStore<T, S>(
   store: Store<T>,
   selector: (state: T) => S,
+  options?: {
+    equalityFn?: EqualityFn | false;
+  },
 ) {
-  return store.useSelectorRC(selector);
+  return store.useSelectorRC(selector, options);
 }
