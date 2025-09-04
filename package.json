@@ -30,7 +30,7 @@
     "test:ui": "vitest --ui",
     "test": "vitest run",
     "build": "pnpm test && pnpm lint && pnpm build:no-test",
-    "build:no-test": "tsup --minify --dts",
+    "build:no-test": "tsup --dts",
     "pre-publish": "./scripts/check-if-is-sync.sh && pnpm build",
     "npm-publish": "pnpm publish --access=public"
   },

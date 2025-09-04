@@ -687,11 +687,16 @@ describe('useSubscribeToStore', () => {
       state: { value: { a: 0 } },
     });
 
-    const changes: { current: StoreState; prev: StoreState }[] = [];
+    const changes: { current: { a: number }; prev: { a: number } }[] = [];
 
     renderHook(() => {
-      useSubscribeToStore(store, ({ prev, current }) => {
-        changes.push({ prev, current });
+      useSubscribeToStore(store, ({ observe }) => {
+        observe
+          .withEqualityFn(deepEqual)
+          .ifSelector((s) => s.value)
+          .change.then(({ prev, current }) => {
+            changes.push({ prev, current });
+          });
       });
     });
 
@@ -703,8 +708,8 @@ describe('useSubscribeToStore', () => {
 
     expect(changes).toHaveLength(1);
     expect(changes[0]).toEqual({
-      prev: { value: { a: 0 } },
-      current: { value: { a: 1 } },
+      prev: { a: 0 },
+      current: { a: 1 },
     });
 
     act(() => {
@@ -717,8 +722,8 @@ describe('useSubscribeToStore', () => {
 
     expect(changes).toHaveLength(2);
     expect(changes[1]).toEqual({
-      prev: { value: { a: 1 } },
-      current: { value: { a: 2 } },
+      prev: { a: 1 },
+      current: { a: 2 },
     });
   });
 });
