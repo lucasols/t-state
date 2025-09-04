@@ -49,7 +49,7 @@ type StoreMiddleware<T> = (props: {
   current: T;
   next: T;
   action: Action | undefined;
-}) => T | boolean | void;
+}) => T | false | void;
 
 type UnsubscribeFn = () => void;
 
@@ -215,7 +215,7 @@ export class Store<T> {
         action,
       });
 
-      if (!result) return false;
+      if (result === false) return false;
 
       if (typeof result === 'object' && result !== unwrappedNewState) {
         unwrappedNewState = result;
@@ -247,10 +247,11 @@ export class Store<T> {
     } = {},
   ) {
     if (equalityCheck) {
+      const nextValue = unwrapValueArg(value, this.state[key]);
       if (equalityCheck === true) {
-        if (this.state[key] === value) return;
+        if (this.state[key] === nextValue) return;
       } else {
-        if (equalityCheck(this.state[key], value)) return;
+        if (equalityCheck(this.state[key], nextValue)) return;
       }
     }
 
