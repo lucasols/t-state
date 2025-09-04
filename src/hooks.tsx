@@ -4,10 +4,10 @@ import { EqualityFn, Store, StoreProps, useSubscribeToStore } from './main';
 /**
  * Creates and returns a store instance within a React component.
  * The store is created only once and persists across component re-renders.
- * 
+ *
  * @param storeProps - Store configuration or a function that returns store configuration
  * @returns A Store instance
- * 
+ *
  * @example
  * ```tsx
  * const MyComponent = () => {
@@ -33,12 +33,12 @@ export function useCreateStore<T>(
 
 /**
  * Takes a snapshot of the store state when a condition is met and stops updating.
- * 
+ *
  * @param store - The store to snapshot
  * @param selector - Function to select/derive value from state
  * @param snapshotWhen - Condition function that determines when to take the snapshot
  * @returns The selected value at the time the snapshot was taken
- * 
+ *
  * @example
  * ```tsx
  * const snapshot = useStoreSnapshot(
@@ -70,13 +70,13 @@ export function useStoreSnapshot<T, S>(
 
 /**
  * Selects a value from an external store (a store not created in the current component).
- * 
+ *
  * @param store - The external store to select from
  * @param selector - Function to select/derive value from state
  * @param options - Configuration options
  * @param options.equalityFn - Custom equality function to prevent unnecessary re-renders
  * @returns The selected value
- * 
+ *
  * @example
  * ```tsx
  * const MyComponent = () => {

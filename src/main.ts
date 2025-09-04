@@ -57,9 +57,9 @@ export const initCallAction = { type: 'init.subscribe.call' };
 
 /**
  * A reactive store for managing application state with React integration.
- * 
+ *
  * @template T - The type of the state object
- * 
+ *
  * @example
  * ```ts
  * const store = new Store({
@@ -206,13 +206,13 @@ export class Store<T> {
 
   /**
    * Sets the entire state of the store.
-   * 
+   *
    * @param newState - The new state value or a function that receives the current state and returns the new state
    * @param options - Configuration options
    * @param options.action - Optional action to associate with this state change
    * @param options.equalityCheck - Equality check function to prevent unnecessary updates (default: Object.is)
    * @returns true if the state was changed, false if it was the same
-   * 
+   *
    * @example
    * ```ts
    * store.setState({ count: 5, name: 'updated' });
@@ -263,13 +263,13 @@ export class Store<T> {
 
   /**
    * Sets the value for a specific key in the state.
-   * 
+   *
    * @param key - The key to update
    * @param value - The new value or a function that receives the current value and returns the new value
    * @param options - Configuration options
    * @param options.action - Optional action to associate with this state change
    * @param options.equalityCheck - Whether to perform equality check (default: true)
-   * 
+   *
    * @example
    * ```ts
    * store.setKey('count', 10);
@@ -315,12 +315,12 @@ export class Store<T> {
 
   /**
    * Updates multiple keys in the state using partial update.
-   * 
+   *
    * @param newState - Partial state object with keys to update
    * @param options - Configuration options
    * @param options.action - Optional action to associate with this state change
    * @param options.equalityCheck - Equality check function (default: shallowEqual)
-   * 
+   *
    * @example
    * ```ts
    * store.setPartialState({ count: 5, name: 'updated' });
@@ -358,12 +358,12 @@ export class Store<T> {
 
   /**
    * Updates the state using Immer's produce function for immutable mutations.
-   * 
+   *
    * @param recipe - Function that receives a draft state and mutates it
    * @param options - Configuration options
    * @param options.action - Optional action to associate with this state change
    * @param options.equalityCheck - Equality check function (default: ===)
-   * 
+   *
    * @example
    * ```ts
    * store.produceState(draft => {
@@ -394,10 +394,10 @@ export class Store<T> {
 
   /**
    * Batches multiple state updates into a single notification to subscribers.
-   * 
+   *
    * @param fn - Function that contains multiple state updates
    * @param action - Optional action to associate with the batched updates
-   * 
+   *
    * @example
    * ```ts
    * store.batch(() => {
@@ -438,18 +438,18 @@ export class Store<T> {
 
   /**
    * Subscribes to state changes in the store.
-   * 
+   *
    * @param callback - Function called when state changes
    * @param options - Configuration options
    * @param options.initCall - Whether to call the callback immediately with current state
    * @returns Function to unsubscribe from the store
-   * 
+   *
    * @example
    * ```ts
    * const unsubscribe = store.subscribe(({ prev, current }) => {
    *   console.log('State changed:', prev, '->', current);
    * });
-   * 
+   *
    * // Later...
    * unsubscribe();
    * ```
