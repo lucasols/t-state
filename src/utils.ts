@@ -30,3 +30,7 @@ export function useConst<T>(value: () => T): T {
 
   return ref.current;
 }
+
+export function isFunction(value: unknown): value is (...args: any[]) => any {
+  return typeof value === 'function';
+}

@@ -5,7 +5,12 @@ import { useCallback } from 'react';
 import { deepEqual } from './deepEqual';
 import { shallowEqual } from './shallowEqual';
 import { useSyncExternalStoreWithSelector } from './useSyncExternalStoreWithSelector';
-import { pick, unwrapValueSetter as unwrapValueArg, ValueArg } from './utils';
+import {
+  isFunction,
+  pick,
+  unwrapValueSetter as unwrapValueArg,
+  ValueArg,
+} from './utils';
 
 export { useCreateStore, useSelectFromStore, useStoreSnapshot } from './hooks';
 export { observeChanges, useSubscribeToStore } from './subscribeUtils';
@@ -16,7 +21,7 @@ export { deepEqual, shallowEqual, useSyncExternalStoreWithSelector };
 
 /**
  * Function called when store state changes.
- * 
+ *
  * @template T - The type of the store state
  */
 export type Subscriber<T> = {
@@ -44,7 +49,7 @@ export type Action =
 
 /**
  * Configuration options for creating a new Store instance.
- * 
+ *
  * @template T - The type of the store state
  */
 export type StoreProps<T> = {
@@ -77,7 +82,7 @@ export type UseStateOptions = {
 
 /**
  * Middleware function that can intercept and modify state changes.
- * 
+ *
  * @template T - The type of the store state
  * @returns false to block the change, true to allow it, or a new state to replace it
  */
@@ -768,18 +773,6 @@ export function deepFreeze<T>(
   }
 
   return obj;
-}
-
-/**
- * Type guard to check if a value is a function.
- *
- * @param value - The value to check
- * @returns true if the value is a function
- *
- * @internal
- */
-export function isFunction(value: unknown): value is (...args: any[]) => any {
-  return typeof value === 'function';
 }
 
 function shallowCloneState<T>(state: T): T {
