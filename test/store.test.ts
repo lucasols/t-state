@@ -561,7 +561,7 @@ describe('middlewares', () => {
         return false;
       }
 
-      return true;
+      return undefined;
     });
 
     store.setState({ text: 'block' });
@@ -583,7 +583,7 @@ describe('middlewares', () => {
         return false;
       }
 
-      return true;
+      return undefined;
     });
 
     store.setState({ text: 'OK' }, { action: 'block' });

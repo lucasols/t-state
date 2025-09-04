@@ -49,7 +49,7 @@ type StoreMiddleware<T> = (props: {
   current: T;
   next: T;
   action: Action | undefined;
-}) => T | false | void;
+}) => T | false | undefined;
 
 type UnsubscribeFn = () => void;
 
@@ -217,7 +217,7 @@ export class Store<T> {
 
       if (result === false) return false;
 
-      if (typeof result === 'object' && result !== unwrappedNewState) {
+      if (result !== undefined && result !== unwrappedNewState) {
         unwrappedNewState = result;
       }
     }
