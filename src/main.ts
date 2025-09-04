@@ -14,14 +14,27 @@ export { computed, ComputedStore, useComputed } from './computed';
 
 export { deepEqual, shallowEqual, useSyncExternalStoreWithSelector };
 
+/**
+ * Function called when store state changes.
+ * 
+ * @template T - The type of the store state
+ */
 export type Subscriber<T> = {
   (props: { prev: T; current: T; action: Action | undefined }): void;
 };
 
+/**
+ * Function that compares two values for equality.
+ * Used to prevent unnecessary re-renders when values haven't actually changed.
+ */
 export type EqualityFn = (prev: any, current: any) => boolean;
 
 type AnyObj = Record<string, unknown>;
 
+/**
+ * Action object or string that describes a state change.
+ * Used for debugging, middleware, and Redux DevTools integration.
+ */
 export type Action =
   | {
       type: string;
@@ -29,30 +42,59 @@ export type Action =
     }
   | string;
 
+/**
+ * Configuration options for creating a new Store instance.
+ * 
+ * @template T - The type of the store state
+ */
 export type StoreProps<T> = {
+  /** Name for debugging and Redux DevTools integration */
   debugName?: string;
+  /** Initial state value or lazy initialization function */
   state: T | (() => T);
+  /** Configuration for debouncing state change notifications */
   debounceSideEffects?: {
+    /** Minimum wait time in milliseconds between notifications */
     wait: number;
+    /** Maximum wait time in milliseconds before forcing a notification */
     maxWait?: number;
   };
+  /** Whether to disable deep freezing in development mode */
   disableDeepFreezeInDev?: boolean;
+  /** Function to determine which values to skip during deep freezing */
   ignoreValueInDeepFreeze?: (value: unknown) => boolean;
 };
 
+/**
+ * Options for React hooks that subscribe to store state.
+ */
 export type UseStateOptions = {
+  /** Function to compare previous and current values, or false to disable equality checking */
   equalityFn?: EqualityFn | false;
+  /** Whether to update selector based on external dependencies */
   useExternalDeps?: boolean;
 };
 
+/**
+ * Middleware function that can intercept and modify state changes.
+ * 
+ * @template T - The type of the store state
+ * @returns false to block the change, true to allow it, or a new state to replace it
+ */
 type StoreMiddleware<T> = (props: {
+  /** Current state before the change */
   current: T;
+  /** Proposed next state */
   next: T;
+  /** Action that triggered the change */
   action: Action | undefined;
 }) => T | boolean;
 
 type UnsubscribeFn = () => void;
 
+/**
+ * Special action used when a subscriber is called immediately upon subscription.
+ */
 export const initCallAction = { type: 'init.subscribe.call' };
 
 /**
@@ -86,6 +128,16 @@ export class Store<T> {
   private isFlushing_ = false;
   private pendingFlushQueue_: Array<Action | undefined> = [];
 
+  /**
+   * Creates a new Store instance.
+   *
+   * @param options - Store configuration options
+   * @param options.state - Initial state value or lazy initialization function
+   * @param options.debugName - Name for debugging and Redux DevTools integration
+   * @param options.debounceSideEffects - Configuration for debouncing state change notifications
+   * @param options.disableDeepFreezeInDev - Whether to disable deep freezing in development mode
+   * @param options.ignoreValueInDeepFreeze - Function to determine which values to skip during deep freezing
+   */
   constructor({
     debugName,
     state,
@@ -122,10 +174,20 @@ export class Store<T> {
     }
   }
 
+  /**
+   * Whether the store has been initialized (state has been accessed at least once).
+   * For lazy-initialized stores, this returns false until the state is first accessed.
+   */
   get isInitialized(): boolean {
     return this.state_ !== undefined;
   }
 
+  /**
+   * Gets the current state of the store.
+   * For lazy-initialized stores, this will initialize the state on first access.
+   *
+   * @returns The current state
+   */
   get state(): T {
     if (this.state_ === undefined) {
       this.state_ = this.lazyInitialState_!();
@@ -136,6 +198,11 @@ export class Store<T> {
     return this.state_;
   }
 
+  /**
+   * Manually initializes the store (for lazy-initialized stores).
+   *
+   * @returns The initialized state
+   */
   initializeStore() {
     return this.state;
   }
@@ -423,10 +490,23 @@ export class Store<T> {
     }
   }
 
+  /**
+   * Temporarily stops flushing state changes to subscribers.
+   * Use this to prevent notifications during complex operations.
+   * Must be paired with resumeFlush().
+   *
+   * @see resumeFlush
+   */
   stopFlush() {
     this.batchUpdates_ = true;
   }
 
+  /**
+   * Resumes flushing state changes to subscribers after stopFlush().
+   * If there are pending changes, they will be flushed immediately.
+   *
+   * @see stopFlush
+   */
   resumeFlush() {
     this.batchUpdates_ = false;
 
@@ -475,6 +555,25 @@ export class Store<T> {
     };
   }
 
+  /**
+   * Adds middleware to intercept and modify state changes.
+   * Middleware can block, modify, or allow state updates.
+   *
+   * @param middleware - Function that receives current state, next state, and action
+   * @returns Function to remove the middleware
+   *
+   * @example
+   * ```ts
+   * const removeMiddleware = store.addMiddleware(({ current, next, action }) => {
+   *   if (next.value < 0) return false; // Block negative values
+   *   if (next.value > 100) return { ...next, value: 100 }; // Cap at 100
+   *   return true; // Allow change
+   * });
+   *
+   * // Later remove the middleware
+   * removeMiddleware();
+   * ```
+   */
   addMiddleware(middleware: StoreMiddleware<T>): UnsubscribeFn {
     this.middlewares_.add(middleware);
 
@@ -487,6 +586,24 @@ export class Store<T> {
     return this.state;
   };
 
+  /**
+   * React hook to select and subscribe to a derived value from the store.
+   * The component will re-render only when the selected value changes.
+   *
+   * @param selector - Function that derives a value from the state
+   * @param options - Configuration options
+   * @param options.equalityFn - Function to compare previous and current selected values (default: shallowEqual)
+   * @param options.useExternalDeps - Whether to update selector based on external dependencies
+   * @returns The selected value
+   *
+   * @example
+   * ```tsx
+   * const Component = () => {
+   *   const fullName = store.useSelector(state => `${state.first} ${state.last}`);
+   *   return <div>{fullName}</div>;
+   * };
+   * ```
+   */
   useSelector<S>(
     selector: (state: T) => S,
     { equalityFn = shallowEqual, useExternalDeps }: UseStateOptions = {},
@@ -505,6 +622,15 @@ export class Store<T> {
     );
   }
 
+  /**
+   * React hook to select and subscribe to a derived value from the store (runtime callable version).
+   * Similar to useSelector but optimized for usage with react compiler.
+   *
+   * @param selector - Function that derives a value from the state
+   * @param options - Configuration options
+   * @param options.equalityFn - Function to compare previous and current selected values (default: shallowEqual)
+   * @returns The selected value
+   */
   useSelectorRC<S>(
     selector: (state: T) => S,
     {
@@ -522,6 +648,23 @@ export class Store<T> {
     );
   }
 
+  /**
+   * React hook to subscribe to a specific key in the store state.
+   * The component will re-render only when the value of this key changes.
+   *
+   * @param key - The state key to subscribe to
+   * @param options - Configuration options
+   * @param options.equalityFn - Function to compare previous and current values (default: Object.is)
+   * @returns The current value of the key
+   *
+   * @example
+   * ```tsx
+   * const Component = () => {
+   *   const count = store.useKey('count');
+   *   return <div>{count}</div>;
+   * };
+   * ```
+   */
   useKey<K extends keyof T>(
     key: K,
     { equalityFn = Object.is }: UseStateOptions = {},
@@ -529,10 +672,44 @@ export class Store<T> {
     return this.useSelector((s) => s[key], { equalityFn });
   }
 
+  /**
+   * React hook to subscribe to the entire store state.
+   * The component will re-render when any part of the state changes.
+   *
+   * @param options - Configuration options
+   * @param options.equalityFn - Function to compare previous and current state (default: shallowEqual)
+   * @returns The current state
+   *
+   * @example
+   * ```tsx
+   * const Component = () => {
+   *   const state = store.useState();
+   *   return <div>{state.count} - {state.name}</div>;
+   * };
+   * ```
+   */
   useState(options?: UseStateOptions) {
     return this.useSelector((s) => s, options);
   }
 
+  /**
+   * React hook to subscribe to multiple specific keys from the store state.
+   * The component will re-render when any of the specified keys change.
+   *
+   * @param keys - Array of keys or individual keys as arguments
+   * @param options - Configuration options (when using array form)
+   * @param options.equalityFn - Function to compare previous and current values (default: shallowEqual)
+   * @returns Object containing only the specified keys
+   *
+   * @example
+   * ```tsx
+   * // Using spread syntax
+   * const { count, name } = store.useSlice('count', 'name');
+   *
+   * // Using array syntax with options
+   * const slice = store.useSlice(['count', 'name'], { equalityFn: deepEqual });
+   * ```
+   */
   useSlice<K extends keyof T>(...keys: K[]): Readonly<Pick<T, K>>;
   useSlice<K extends keyof T>(
     keys: K[],
@@ -554,6 +731,20 @@ export class Store<T> {
   }
 }
 
+/**
+ * Recursively freezes an object and all its nested properties.
+ * Used in development mode to ensure state immutability.
+ *
+ * @param obj - The object to freeze
+ * @param ignore - Optional function to determine which values to skip freezing
+ * @returns The frozen object
+ *
+ * @example
+ * ```ts
+ * const frozenState = deepFreeze({ user: { name: 'John' } });
+ * // frozenState and frozenState.user are both frozen
+ * ```
+ */
 export function deepFreeze<T>(
   obj: T,
   ignore: ((value: unknown) => boolean) | undefined,
@@ -579,7 +770,14 @@ export function deepFreeze<T>(
   return obj;
 }
 
-/** @internal */
+/**
+ * Type guard to check if a value is a function.
+ *
+ * @param value - The value to check
+ * @returns true if the value is a function
+ *
+ * @internal
+ */
 export function isFunction(value: unknown): value is (...args: any[]) => any {
   return typeof value === 'function';
 }
