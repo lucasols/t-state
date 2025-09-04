@@ -727,3 +727,58 @@ describe('useSubscribeToStore', () => {
     });
   });
 });
+
+test('updating the state inside a subscribe should not interfere with other subscribers', () => {
+  type StoreState = {
+    fields: {
+      a: { initial: number; current: number };
+      b: { initial: string; current: string };
+    };
+  };
+
+  const store = new Store<StoreState>({
+    state: {
+      fields: {
+        a: { initial: 0, current: 0 },
+        b: { initial: 'initial', current: 'initial' },
+      },
+    },
+  });
+
+  function updateStore() {
+    store.batch(() => {
+      store.produceState((draft) => {
+        draft.fields.b.current = 'changed';
+      });
+    });
+  }
+
+  store.subscribe((prevAndCurrent) => {
+    const observe = observeChanges(prevAndCurrent);
+
+    observe
+      .withEqualityFn(deepEqual)
+      .ifSelector((s) => Object.values(s.fields).map((f) => f.current))
+      .change.then(() => {
+        updateStore();
+      });
+  });
+
+  const subscriber2Calls: { prev: number; current: number }[] = [];
+
+  store.subscribe(({ prev, current }) => {
+    subscriber2Calls.push({
+      prev: prev.fields.a.current,
+      current: current.fields.a.current,
+    });
+  });
+
+  store.produceState((draft) => {
+    draft.fields.a.current = 1;
+  });
+
+  expect(subscriber2Calls).toEqual([
+    { prev: 0, current: 1 },
+    { prev: 1, current: 1 },
+  ]);
+});

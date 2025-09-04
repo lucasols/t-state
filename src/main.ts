@@ -70,6 +70,8 @@ export class Store<T> {
   private ignoreValueInDeepFreeze_?: (value: unknown) => boolean;
   private middlewares_ = new Set<StoreMiddleware<T>>();
   private hasPendingFlush_ = false;
+  private isFlushing_ = false;
+  private pendingFlushQueue_: Array<Action | undefined> = [];
 
   constructor({
     debugName,
@@ -92,15 +94,15 @@ export class Store<T> {
     this.ignoreValueInDeepFreeze_ = ignoreValueInDeepFreeze;
     this.debounceSideEffects_ = debounceSideEffects;
 
-    const devToolsMiddeware =
+    const devToolsMiddleware =
       process.env.NODE_ENV === 'development' &&
       typeof window !== 'undefined' &&
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       ((window as any).__REDUX_DEVTOOLS_EXTENSION__ ? startDevTools : false);
 
-    if (devToolsMiddeware && debugName) {
+    if (devToolsMiddleware && debugName) {
       this.subscribers_.add(
-        devToolsMiddeware(debugName, state, (newState) => {
+        devToolsMiddleware(debugName, state, (newState) => {
           this.setState(newState as T);
         }),
       );
@@ -141,6 +143,12 @@ export class Store<T> {
       return;
     }
 
+    // If we're already flushing, queue this flush to run later
+    if (this.isFlushing_) {
+      this.pendingFlushQueue_.push(action);
+      return;
+    }
+
     if (this.debounceSideEffects_) {
       clearTimeout(this.debouncedFlushTimeout_);
 
@@ -165,8 +173,21 @@ export class Store<T> {
       this.lastFlushTimestamp_ = now;
     }
 
+    this.isFlushing_ = true;
+
+    const prev = this.lastState;
+    const current = this.state;
+
     for (const subscriber of this.subscribers_) {
-      subscriber({ prev: this.lastState, current: this.state, action });
+      subscriber({ prev, current, action });
+    }
+
+    this.isFlushing_ = false;
+
+    // Process any queued flushes that occurred during subscriber notifications
+    while (this.pendingFlushQueue_.length > 0) {
+      const queuedAction = this.pendingFlushQueue_.shift();
+      this.flush_(queuedAction);
     }
   }
 
@@ -182,30 +203,30 @@ export class Store<T> {
       equalityCheck?: EqualityFn | false;
     } = {},
   ): boolean {
-    let unwrapedNewState = unwrapValueArg(newState, this.state);
+    let unwrappedNewState = unwrapValueArg(newState, this.state);
 
-    if (equalityCheck && equalityCheck(unwrapedNewState, this.state))
+    if (equalityCheck && equalityCheck(unwrappedNewState, this.state))
       return false;
 
     for (const middleware of this.middlewares_) {
       const result = middleware({
         current: this.state,
-        next: unwrapedNewState,
+        next: unwrappedNewState,
         action,
       });
 
       if (!result) return false;
 
-      if (typeof result === 'object' && result !== unwrapedNewState) {
-        unwrapedNewState = result;
+      if (typeof result === 'object' && result !== unwrappedNewState) {
+        unwrappedNewState = result;
       }
     }
 
     this.lastState_ = shallowCloneState(this.state);
     this.state_ =
       process.env.NODE_ENV === 'development' && !this.disableDeepFreezeInDev_ ?
-        deepFreeze(unwrapedNewState, this.ignoreValueInDeepFreeze_)
-      : unwrapedNewState;
+        deepFreeze(unwrappedNewState, this.ignoreValueInDeepFreeze_)
+      : unwrappedNewState;
 
     this.flush_(action);
 
@@ -278,7 +299,7 @@ export class Store<T> {
     });
   }
 
-  /** set a new state mutanting the state with Immer produce function */
+  /** set a new state mutating the state with Immer produce function */
   produceState(
     recipe: (draftState: T) => void | T,
     {
@@ -287,7 +308,7 @@ export class Store<T> {
     }: {
       action?: Action;
       /** perform a equality check before setting the new value, by default a ===
-       * equallity function is used, you can pass false to ignore the check or pass
+       * equality function is used, you can pass false to ignore the check or pass
        * a custom equality function
        */
       equalityCheck?: EqualityFn | false;
