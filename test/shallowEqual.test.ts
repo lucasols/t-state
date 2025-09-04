@@ -1,6 +1,5 @@
-/* eslint-disable jest/valid-title */
+import { describe, expect, test } from 'vitest';
 import { shallowEqual } from '../src/shallowEqual';
-import { expect, describe, test } from 'vitest';
 
 const obj1 = {
   foo: 'bar',
@@ -257,7 +256,6 @@ describe('shallow equal', () => {
     different(NaN, null);
     different(1, -1);
     same(0, -0);
-    // eslint-disable-next-line no-void
     same(void 0, undefined);
     same(undefined, undefined);
     different(null, undefined);

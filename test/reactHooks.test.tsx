@@ -534,7 +534,7 @@ describe('useSelector', () => {
 
     const Component2 = () => {
       const state = testState.useSelector((s) => s, {
-        equalityFn: (_, current) => current.key1 === 1,
+        equalityFn: (_, current: { key1: number }) => current.key1 === 1,
       });
 
       onRender();

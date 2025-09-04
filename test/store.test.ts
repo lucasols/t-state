@@ -26,7 +26,7 @@ function createTestStore() {
 
   return {
     store,
-    addItem(item: TestState['items'][0]) {
+    addItem: (item: TestState['items'][0]) => {
       store.produceState((draft) => {
         draft.items.push(item);
       });
@@ -188,16 +188,21 @@ describe('subscribe', () => {
   test('initization call', () => {
     const { store } = createTestStore();
 
-    const mockSubscriber = vi.fn();
+    const calls: { current: TestState; prev: TestState }[] = [];
 
-    store.subscribe(mockSubscriber, { initCall: true });
+    store.subscribe(
+      ({ current, prev }) => {
+        calls.push({ current, prev });
+      },
+      { initCall: true },
+    );
 
-    expect(mockSubscriber).toHaveBeenCalledTimes(1);
-    expect(mockSubscriber.mock.calls[0]![0].prev).toEqual({
+    expect(calls.length).toBe(1);
+    expect(calls[0]!.prev).toEqual({
       items: [{ id: 1, text: 'Hello' }],
       string: 'Hello',
     });
-    expect(mockSubscriber.mock.calls[0]![0].current).toEqual({
+    expect(calls[0]!.current).toEqual({
       items: [{ id: 1, text: 'Hello' }],
       string: 'Hello',
     });

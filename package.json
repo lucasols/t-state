@@ -24,7 +24,7 @@
   },
   "scripts": {
     "lint": "pnpm tsc && pnpm eslint && pnpm format",
-    "eslint": "eslint src/",
+    "eslint": "eslint src/ test/",
     "format": "prettier src/ --write  --list-different",
     "tsc": "tsc -p tsconfig.prod.json",
     "test:ui": "vitest --ui",
