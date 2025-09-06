@@ -5,7 +5,8 @@ import {
   render,
   renderHook,
 } from '@testing-library/react';
-import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { Store, shallowEqual } from '../src/main';
 

@@ -9,13 +9,14 @@ import {
   isFunction,
   pick,
   unwrapValueSetter as unwrapValueArg,
-  ValueArg,
 } from './utils';
+import type { ValueArg } from './utils';
 
 export { useCreateStore, useSelectFromStore, useStoreSnapshot } from './hooks';
 export { observeChanges, useSubscribeToStore } from './subscribeUtils';
 
-export { computed, ComputedStore, useComputed } from './computed';
+export { computed, useComputed } from './computed';
+export type { ComputedStore } from './computed';
 
 export { deepEqual, shallowEqual, useSyncExternalStoreWithSelector };
 

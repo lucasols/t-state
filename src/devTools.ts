@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { nanoid } from 'nanoid';
-import { Action } from './main';
+import type { Action } from './main';
 
 let tabId: string | null = null;
 let tabIdWasLogged = false;

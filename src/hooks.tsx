@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
-import { EqualityFn, Store, StoreProps, useSubscribeToStore } from './main';
+import { Store, useSubscribeToStore } from './main';
+import type { EqualityFn, StoreProps } from './main';
 
 /**
  * Creates and returns a store instance within a React component.

@@ -1,5 +1,6 @@
 import { useInsertionEffect } from 'react';
-import { Store, StoreProps, shallowEqual } from './main';
+import { Store, shallowEqual } from './main';
+import type { StoreProps } from './main';
 import { useConst } from './utils';
 
 type UnsubscribeFn = () => void;

@@ -1,12 +1,11 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
-import { ComputedStore } from './computed';
+import type { ComputedStore } from './computed';
 import {
-  Action,
-  EqualityFn,
   initCallAction,
   shallowEqual,
   Store,
 } from './main';
+import type { Action, EqualityFn } from './main';
 import { pick } from './utils';
 
 interface Then {
