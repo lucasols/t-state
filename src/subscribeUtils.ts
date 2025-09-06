@@ -4,12 +4,12 @@ import type { Action, EqualityFn } from './main';
 import { initCallAction, shallowEqual, Store } from './main';
 import { pick } from './utils';
 
-interface Then {
-  then: (callback: () => any) => any;
-}
-
 interface SelectorThen<R, P = R> {
   then: (callback: (selection: { current: R; prev: P }) => any) => any;
+}
+
+interface Then {
+  then: (callback: () => any) => any;
 }
 
 interface ChangeMethods<T> {

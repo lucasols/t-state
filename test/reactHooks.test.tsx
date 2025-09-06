@@ -10,12 +10,12 @@ import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { Store, shallowEqual } from '../src/main';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-type anyFunction = () => any;
-
 afterEach(() => {
   cleanup();
 });
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+type anyFunction = () => any;
 
 describe('useKey', () => {
   type TestState = {

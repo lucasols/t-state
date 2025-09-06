@@ -17,6 +17,17 @@ export type { ComputedStore } from './computed';
 export { deepEqual, shallowEqual, useSyncExternalStoreWithSelector };
 
 /**
+ * Action object or string that describes a state change.
+ * Used for debugging, middleware, and Redux DevTools integration.
+ */
+export type Action =
+  | {
+      type: string;
+      [k: string]: any;
+    }
+  | string;
+
+/**
  * Function called when store state changes.
  *
  * @template T - The type of the store state
@@ -32,17 +43,6 @@ export type Subscriber<T> = {
 export type EqualityFn = (prev: any, current: any) => boolean;
 
 type AnyObj = Record<string, unknown>;
-
-/**
- * Action object or string that describes a state change.
- * Used for debugging, middleware, and Redux DevTools integration.
- */
-export type Action =
-  | {
-      type: string;
-      [k: string]: any;
-    }
-  | string;
 
 /**
  * Configuration options for creating a new Store instance.

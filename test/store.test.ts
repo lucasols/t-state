@@ -557,9 +557,7 @@ describe('middlewares', () => {
     });
 
     store.addMiddleware(({ next }) => {
-      if (next.text === 'block') {
-        return false;
-      }
+      if (next.text === 'block') return false;
 
       return true;
     });
@@ -579,9 +577,7 @@ describe('middlewares', () => {
     });
 
     store.addMiddleware(({ action }) => {
-      if (action === 'block') {
-        return false;
-      }
+      if (action === 'block') return false;
 
       return true;
     });

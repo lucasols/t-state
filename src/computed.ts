@@ -5,6 +5,14 @@ import { useConst } from './utils';
 
 type UnsubscribeFn = () => void;
 
+type ComputedOptions = {
+  debounceSideEffects?: StoreProps<unknown>['debounceSideEffects'];
+  storeEqualityFn?: (a: any, b: any) => boolean;
+  computedEqualityFn?: (a: any, b: any) => boolean;
+  debugName?: string;
+  lazySubInitialization?: boolean;
+};
+
 export type ComputedStore<T> = {
   state: T;
   subscribe: Store<T>['subscribe'];
@@ -14,14 +22,6 @@ export type ComputedStore<T> = {
   destroy(): void;
   initializeSubscriptions(): void;
   forceUpdate: () => void;
-};
-
-type ComputedOptions = {
-  debounceSideEffects?: StoreProps<unknown>['debounceSideEffects'];
-  storeEqualityFn?: (a: any, b: any) => boolean;
-  computedEqualityFn?: (a: any, b: any) => boolean;
-  debugName?: string;
-  lazySubInitialization?: boolean;
 };
 
 type ComputedStoreInput<T> = Store<T> | ComputedStore<T>;

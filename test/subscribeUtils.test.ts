@@ -6,18 +6,18 @@ import { computed } from '../src/computed';
 import { deepEqual, Store } from '../src/main';
 import { observeChanges, useSubscribeToStore } from '../src/subscribeUtils';
 
-type TestState = {
-  key1: number;
-  key2: string;
-  key3: number[];
-  key4: number[];
-};
-
 const initialState = {
   key1: 1,
   key2: '👍',
   key3: [0, 1, 2],
   key4: [0, 1, 2],
+};
+
+type TestState = {
+  key1: number;
+  key2: string;
+  key3: number[];
+  key4: number[];
 };
 
 let testState: Store<TestState>;
