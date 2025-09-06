@@ -8,6 +8,8 @@ export default lsStackEslintCfg({
   rules: {
     '@typescript-eslint/no-explicit-any': OFF,
     '@typescript-eslint/no-unsafe-assignment': OFF,
+    '@typescript-eslint/no-non-null-assertion': OFF,
+    '@typescript-eslint/consistent-type-assertions': OFF,
   },
   extends: [
     {
@@ -15,9 +17,7 @@ export default lsStackEslintCfg({
       rules: {
         '@ls-stack/prefer-named-functions': OFF,
         '@ls-stack/require-description': OFF,
-        '@typescript-eslint/no-non-null-assertion': OFF,
         'unicorn/no-array-for-each': OFF,
-        '@typescript-eslint/consistent-type-assertions': OFF,
       },
     },
   ],
