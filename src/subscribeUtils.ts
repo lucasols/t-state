@@ -1,11 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import type { ComputedStore } from './computed';
-import {
-  initCallAction,
-  shallowEqual,
-  Store,
-} from './main';
 import type { Action, EqualityFn } from './main';
+import { initCallAction, shallowEqual, Store } from './main';
 import { pick } from './utils';
 
 interface Then {
@@ -132,7 +128,7 @@ export function useSubscribeToStore<T>(
     current: T;
     observe: ChangeMethods<T>;
   }) => any,
-) {
+): void {
   const callbackRef = useRef(onChange);
   useLayoutEffect(() => {
     callbackRef.current = onChange;

@@ -14,11 +14,12 @@
     "noImplicitAny": true,
     "alwaysStrict": true,
     "strict": true,
+    "declaration": true,
     "noUncheckedIndexedAccess": true,
     "stripInternal": true,
     "forceConsistentCasingInFileNames": true,
     "strictPropertyInitialization": true,
     "verbatimModuleSyntax": true,
-    "isolatedModules": true
+    "isolatedDeclarations": true
   }
 }

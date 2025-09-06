@@ -3,7 +3,7 @@ import { useRef } from 'react';
 export function pick<T extends Record<string, any>, K extends keyof T>(
   obj: T,
   keys: K[],
-) {
+): Pick<T, K> {
   const slice: Pick<T, K> = {} as Pick<T, K>;
 
   for (let i = 0; i < keys.length; i++) {

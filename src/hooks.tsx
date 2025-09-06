@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
-import { Store, useSubscribeToStore } from './main';
 import type { EqualityFn, StoreProps } from './main';
+import { Store, useSubscribeToStore } from './main';
 
 /**
  * Creates and returns a store instance within a React component.
@@ -20,7 +20,7 @@ import type { EqualityFn, StoreProps } from './main';
  */
 export function useCreateStore<T>(
   storeProps: StoreProps<T> | (() => StoreProps<T>),
-) {
+): Store<T> {
   const store = useRef<Store<T>>();
 
   if (!store.current) {
@@ -95,6 +95,6 @@ export function useSelectFromStore<T, S>(
   options?: {
     equalityFn?: EqualityFn | false;
   },
-) {
+): Readonly<S> {
   return store.useSelectorRC(selector, options);
 }

@@ -5,12 +5,8 @@ import { useCallback } from 'react';
 import { deepEqual } from './deepEqual';
 import { shallowEqual } from './shallowEqual';
 import { useSyncExternalStoreWithSelector } from './useSyncExternalStoreWithSelector';
-import {
-  isFunction,
-  pick,
-  unwrapValueSetter as unwrapValueArg,
-} from './utils';
 import type { ValueArg } from './utils';
+import { isFunction, pick, unwrapValueSetter as unwrapValueArg } from './utils';
 
 export { useCreateStore, useSelectFromStore, useStoreSnapshot } from './hooks';
 export { observeChanges, useSubscribeToStore } from './subscribeUtils';
@@ -118,7 +114,7 @@ export const initCallAction = { type: 'init.subscribe.call' };
  */
 export class Store<T> {
   readonly debugName_: string = '';
-  subscribers_ = new Set<Subscriber<T>>();
+  subscribers_: Set<Subscriber<T>> = new Set<Subscriber<T>>();
   private batchUpdates_ = false;
   private state_: T | undefined;
   private lazyInitialState_: (() => T) | undefined;
@@ -209,7 +205,7 @@ export class Store<T> {
    *
    * @returns The initialized state
    */
-  initializeStore() {
+  initializeStore(): T {
     return this.state;
   }
 
@@ -361,7 +357,7 @@ export class Store<T> {
        * value, you can pass false to ignore the check or pass a custom equality function */
       equalityCheck?: boolean | EqualityFn;
     } = {},
-  ) {
+  ): void {
     if (equalityCheck) {
       const nextValue = unwrapValueArg(value, this.state[key]);
       if (equalityCheck === true) {
@@ -412,7 +408,7 @@ export class Store<T> {
        */
       equalityCheck?: EqualityFn | false;
     } = {},
-  ) {
+  ): void {
     if (equalityCheck) {
       if (
         equalityCheck(
@@ -458,7 +454,7 @@ export class Store<T> {
        */
       equalityCheck?: EqualityFn | false;
     } = {},
-  ) {
+  ): boolean {
     return this.setState((current) => produce(current, recipe), {
       action: action ?? { type: 'produceState' },
       equalityCheck,
@@ -480,7 +476,7 @@ export class Store<T> {
    * });
    * ```
    */
-  batch(fn: () => void, action?: Action) {
+  batch(fn: () => void, action?: Action): void {
     if (this.batchUpdates_) {
       fn();
       return;
@@ -503,7 +499,7 @@ export class Store<T> {
    *
    * @see resumeFlush
    */
-  stopFlush() {
+  stopFlush(): void {
     this.batchUpdates_ = true;
   }
 
@@ -513,7 +509,7 @@ export class Store<T> {
    *
    * @see stopFlush
    */
-  resumeFlush() {
+  resumeFlush(): void {
     this.batchUpdates_ = false;
 
     if (this.hasPendingFlush_) {
@@ -694,7 +690,7 @@ export class Store<T> {
    * };
    * ```
    */
-  useState(options?: UseStateOptions) {
+  useState(options?: UseStateOptions): Readonly<T> {
     return this.useSelector((s) => s, options);
   }
 

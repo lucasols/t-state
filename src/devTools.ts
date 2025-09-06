@@ -90,7 +90,7 @@ export function startDevTools(
     });
   }
 
-  return ({ action, current }: { current: any; action?: Action }) => {
+  return ({ action, current }: { current: any; action?: Action }): void => {
     lastState = current;
     devTools.send(action ?? null, current);
   };
