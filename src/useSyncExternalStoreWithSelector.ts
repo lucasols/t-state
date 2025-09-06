@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion -- this is a fork of a library */
 /**
  * Forked from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreWithSelector.js
  */
@@ -49,6 +49,7 @@ export function useSyncExternalStoreWithSelector<Snapshot, Selection>(
     let hasMemo = false;
     let memoizedSnapshot: Snapshot;
     let memoizedSelection: Selection;
+    // eslint-disable-next-line @ls-stack/prefer-named-functions -- this is a fork of a library
     const memoizedSelector = (nextSnapshot: Snapshot) => {
       if (!hasMemo) {
         // The first time the hook is called, there is no memoized result.

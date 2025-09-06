@@ -31,6 +31,7 @@ export function useConst<T>(value: () => T): T {
   return ref.current;
 }
 
+// eslint-disable-next-line @ls-stack/no-type-guards -- this is a utility function
 export function isFunction(value: unknown): value is (...args: any[]) => any {
   return typeof value === 'function';
 }

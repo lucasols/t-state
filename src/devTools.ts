@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/consistent-type-assertions -- we need to use any here */
+ 
 /* eslint-disable @typescript-eslint/no-unsafe-argument -- we need to use any here */
 /* eslint-disable @typescript-eslint/no-unsafe-call -- we need to use any here */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access -- we need to use any here */

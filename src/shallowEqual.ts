@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* eslint-disable -- this is a fork of a library */
 var has = Object.prototype.hasOwnProperty;
 
 function find(iter: any[], tar: any, key?: any) {

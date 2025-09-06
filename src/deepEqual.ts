@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* eslint-disable -- this is a fork of a library */
 /** forked from https://github.com/lukeed/dequal to conside invalid dates as equal */
 
 var has = Object.prototype.hasOwnProperty;
