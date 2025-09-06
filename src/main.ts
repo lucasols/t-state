@@ -171,7 +171,6 @@ export class Store<T> {
     if (devToolsMiddleware && debugName) {
       this.subscribers_.add(
         devToolsMiddleware(debugName, state, (newState) => {
-           
           this.setState(newState as T);
         }),
       );
@@ -422,7 +421,6 @@ export class Store<T> {
     if (equalityCheck) {
       if (
         equalityCheck(
-           
           pick(this.state as AnyObj, Object.keys(newState)),
           newState,
         )
@@ -731,7 +729,6 @@ export class Store<T> {
   useSlice<K extends keyof T>(
     ...args: K[] | [K[], UseStateOptions]
   ): Readonly<Pick<T, K>> {
-     
     const keys = (typeof args[0] === 'string' ? args : args[0]) as K[];
     const equalityFn =
       typeof args[1] === 'object' && args[1].equalityFn ?
@@ -739,7 +736,6 @@ export class Store<T> {
       : shallowEqual;
 
     return this.useSelector(
-       
       (s) => pick(s as AnyObj, keys as string[]) as Pick<T, K>,
       { equalityFn },
     );
@@ -787,7 +783,6 @@ export function deepFreeze<T>(
 
 function shallowCloneState<T>(state: T): T {
   if (Array.isArray(state)) {
-     
     return [...state] as T;
   }
 

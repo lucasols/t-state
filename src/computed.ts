@@ -84,7 +84,6 @@ function computedBasedOnMultipleStores(
 
     if (stores.length === 1) {
       unsubscribe = [
-         
         stores[0]!.subscribe(({ current, prev }) => {
           if (!storeEqualityFn(current, prev)) {
             if (!computedValuesStore.isInitialized) {
@@ -184,7 +183,6 @@ export function useComputed(
   options?: ComputedOptions,
 ): ComputedStore<unknown> {
   const computedStore = useConst(() => {
-     
     return computed(stores as any, computedValue, {
       ...options,
       lazySubInitialization: true,
