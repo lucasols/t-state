@@ -1,6 +1,6 @@
 import { useInsertionEffect } from 'react';
-import { Store, shallowEqual } from './main';
 import type { StoreProps } from './main';
+import { Store, shallowEqual } from './main';
 import { useConst } from './utils';
 
 type UnsubscribeFn = () => void;
@@ -84,6 +84,7 @@ function computedBasedOnMultipleStores(
 
     if (stores.length === 1) {
       unsubscribe = [
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- safe assertion here
         stores[0]!.subscribe(({ current, prev }) => {
           if (!storeEqualityFn(current, prev)) {
             if (!computedValuesStore.isInitialized) {
@@ -183,6 +184,7 @@ export function useComputed(
   options?: ComputedOptions,
 ): ComputedStore<unknown> {
   const computedStore = useConst(() => {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- we need to cast the stores to any to avoid type errors
     return computed(stores as any, computedValue, {
       ...options,
       lazySubInitialization: true,

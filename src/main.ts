@@ -1,3 +1,4 @@
+/* eslint-disable @ls-stack/no-reexport -- this is the lib entry point */
 import { isDraftable, produce } from 'immer';
 import { startDevTools } from './devTools';
 
@@ -164,12 +165,13 @@ export class Store<T> {
     const devToolsMiddleware =
       process.env.NODE_ENV === 'development' &&
       typeof window !== 'undefined' &&
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/consistent-type-assertions -- we need to use any here
       ((window as any).__REDUX_DEVTOOLS_EXTENSION__ ? startDevTools : false);
 
     if (devToolsMiddleware && debugName) {
       this.subscribers_.add(
         devToolsMiddleware(debugName, state, (newState) => {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- dev only code, it is ok to not be 100% type safe
           this.setState(newState as T);
         }),
       );
@@ -192,7 +194,11 @@ export class Store<T> {
    */
   get state(): T {
     if (this.state_ === undefined) {
-      this.state_ = this.lazyInitialState_!();
+      if (!this.lazyInitialState_) {
+        throw new Error('Store is not initialized');
+      }
+
+      this.state_ = this.lazyInitialState_();
       this.lazyInitialState_ = undefined;
       this.lastState_ = this.state_;
     }
@@ -211,7 +217,11 @@ export class Store<T> {
 
   private get lastState(): T {
     if (this.lastState_ === undefined) {
-      this.state_ = this.lazyInitialState_!();
+      if (!this.lazyInitialState_) {
+        throw new Error('Store is not initialized');
+      }
+
+      this.state_ = this.lazyInitialState_();
       this.lazyInitialState_ = undefined;
       this.lastState_ = this.state_;
     }
@@ -412,6 +422,7 @@ export class Store<T> {
     if (equalityCheck) {
       if (
         equalityCheck(
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- this is a safe assertion
           pick(this.state as AnyObj, Object.keys(newState)),
           newState,
         )
@@ -720,6 +731,7 @@ export class Store<T> {
   useSlice<K extends keyof T>(
     ...args: K[] | [K[], UseStateOptions]
   ): Readonly<Pick<T, K>> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- this is a safe assertion
     const keys = (typeof args[0] === 'string' ? args : args[0]) as K[];
     const equalityFn =
       typeof args[1] === 'object' && args[1].equalityFn ?
@@ -727,6 +739,7 @@ export class Store<T> {
       : shallowEqual;
 
     return this.useSelector(
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- this is a safe assertion
       (s) => pick(s as AnyObj, keys as string[]) as Pick<T, K>,
       { equalityFn },
     );
@@ -774,6 +787,7 @@ export function deepFreeze<T>(
 
 function shallowCloneState<T>(state: T): T {
   if (Array.isArray(state)) {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- this is a safe assertion
     return [...state] as T;
   }
 

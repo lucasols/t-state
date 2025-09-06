@@ -1,6 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/consistent-type-assertions -- we need to use any here */
+/* eslint-disable @typescript-eslint/no-unsafe-argument -- we need to use any here */
+/* eslint-disable @typescript-eslint/no-unsafe-call -- we need to use any here */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access -- we need to use any here */
 import { nanoid } from 'nanoid';
 import type { Action } from './main';
 
