@@ -6,7 +6,6 @@
   "author": "Lucas Santos",
   "repository": "github:lucasols/t-state",
   "type": "module",
-  "main": "./dist/main.cjs",
   "module": "./dist/main.js",
   "types": "./dist/main.d.ts",
   "files": [
@@ -28,6 +27,7 @@
     "format": "prettier src/ --write  --list-different",
     "tsc": "tsc -p tsconfig.prod.json",
     "test:ui": "vitest --ui",
+    "tsc:watch": "tsc -p tsconfig.prod.json --watch",
     "test": "vitest run",
     "build": "pnpm test && pnpm lint && pnpm build:no-test",
     "build:no-test": "tsup --dts",

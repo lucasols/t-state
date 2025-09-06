@@ -6,9 +6,7 @@
     "module": "CommonJS",
     "jsx": "react-jsx",
     "skipLibCheck": true,
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "noEmit": true,
     "esModuleInterop": true,
     "strictNullChecks": true,
@@ -19,6 +17,8 @@
     "noUncheckedIndexedAccess": true,
     "stripInternal": true,
     "forceConsistentCasingInFileNames": true,
-    "strictPropertyInitialization": true
+    "strictPropertyInitialization": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true
   }
 }
