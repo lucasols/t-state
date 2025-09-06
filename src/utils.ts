@@ -22,7 +22,7 @@ export function unwrapValueSetter<T>(value: ValueArg<T>, current: T): T {
 }
 
 export function useConst<T>(value: () => T): T {
-  const ref = useRef<T>();
+  const ref = useRef<T | undefined>(undefined);
 
   if (ref.current === undefined) {
     ref.current = value();

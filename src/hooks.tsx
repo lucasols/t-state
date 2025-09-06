@@ -21,7 +21,7 @@ import { Store, useSubscribeToStore } from './main';
 export function useCreateStore<T>(
   storeProps: StoreProps<T> | (() => StoreProps<T>),
 ): Store<T> {
-  const store = useRef<Store<T>>();
+  const store = useRef<Store<T> | undefined>(undefined);
 
   if (!store.current) {
     store.current = new Store(
