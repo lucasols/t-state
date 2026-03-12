@@ -31,8 +31,7 @@
     "test": "vitest run",
     "build": "pnpm test && pnpm lint && pnpm build:no-test",
     "build:no-test": "tsup --dts",
-    "pre-publish": "./scripts/check-if-is-sync.sh && pnpm build",
-    "npm-publish": "pnpm publish --access=public"
+    "pre-publish": "pnpm build"
   },
   "devDependencies": {
     "@ls-stack/eslint-cfg": "^0.4.0",
