@@ -197,7 +197,13 @@ export class Store<T> {
         throw new Error('Store is not initialized');
       }
 
-      this.state_ = this.lazyInitialState_();
+      const initialState = this.lazyInitialState_();
+
+      this.state_ =
+        process.env.NODE_ENV === 'development' &&
+        !this.disableDeepFreezeInDev_ ?
+          deepFreeze(initialState, this.ignoreValueInDeepFreeze_)
+        : initialState;
       this.lazyInitialState_ = undefined;
       this.lastState_ = this.state_;
     }
@@ -220,7 +226,13 @@ export class Store<T> {
         throw new Error('Store is not initialized');
       }
 
-      this.state_ = this.lazyInitialState_();
+      const initialState = this.lazyInitialState_();
+
+      this.state_ =
+        process.env.NODE_ENV === 'development' &&
+        !this.disableDeepFreezeInDev_ ?
+          deepFreeze(initialState, this.ignoreValueInDeepFreeze_)
+        : initialState;
       this.lazyInitialState_ = undefined;
       this.lastState_ = this.state_;
     }

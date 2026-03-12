@@ -444,6 +444,20 @@ describe('freeze state', () => {
       baseStore.state.store.setState({ text: 'change text' });
     }).not.toThrowError();
   });
+
+  test('freeze lazy initialized state', () => {
+    const store = new Store({
+      state: () => ({ items: [{ id: 1, text: 'Hello' }], string: 'Hello' }),
+    });
+
+    expect(() => {
+      store.state.string = 'change text';
+    }).toThrowError();
+
+    expect(() => {
+      store.state.items[0]!.text = 'change text';
+    }).toThrowError();
+  });
 });
 
 describe('batched updates', () => {
