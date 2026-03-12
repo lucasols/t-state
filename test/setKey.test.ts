@@ -37,5 +37,27 @@ describe('setKey with ValueArg (function) equality', () => {
     expect(store.state.n).toBe(2);
     expect(sub).toHaveBeenCalledTimes(1);
   });
+
+  test('setter function should be called only once when equality check passes', () => {
+    const store = new Store({ state: { n: 1 } });
+
+    const setter = vi.fn((prev: number) => prev + 1);
+
+    store.setKey('n', setter);
+
+    expect(setter).toHaveBeenCalledTimes(1);
+    expect(store.state.n).toBe(2);
+  });
+
+  test('setter function should not produce inconsistent results from double evaluation', () => {
+    const store = new Store({ state: { n: 0 } });
+
+    let counter = 0;
+    store.setKey('n', () => ++counter);
+
+    // The stored value should match what the equality check evaluated
+    expect(store.state.n).toBe(1);
+    expect(counter).toBe(1);
+  });
 });
 

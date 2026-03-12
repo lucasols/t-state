@@ -55,7 +55,11 @@ export function useStoreSnapshot<T, S>(
   snapshotWhen: (state: T) => boolean,
 ): S {
   const [state, setState] = useState(() => selector(store.state));
-  const snapshotWasTaken = useRef(false);
+  const snapshotWasTaken = useRef<boolean>(undefined);
+
+  if (snapshotWasTaken.current === undefined) {
+    snapshotWasTaken.current = snapshotWhen(store.state);
+  }
 
   useSubscribeToStore(store, ({ current }) => {
     if (snapshotWasTaken.current) return;

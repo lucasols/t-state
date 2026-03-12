@@ -200,8 +200,10 @@ export class Store<T> {
       const initialState = this.lazyInitialState_();
 
       this.state_ =
-        process.env.NODE_ENV === 'development' &&
-        !this.disableDeepFreezeInDev_ ?
+        (
+          process.env.NODE_ENV === 'development' &&
+          !this.disableDeepFreezeInDev_
+        ) ?
           deepFreeze(initialState, this.ignoreValueInDeepFreeze_)
         : initialState;
       this.lazyInitialState_ = undefined;
@@ -229,8 +231,10 @@ export class Store<T> {
       const initialState = this.lazyInitialState_();
 
       this.state_ =
-        process.env.NODE_ENV === 'development' &&
-        !this.disableDeepFreezeInDev_ ?
+        (
+          process.env.NODE_ENV === 'development' &&
+          !this.disableDeepFreezeInDev_
+        ) ?
           deepFreeze(initialState, this.ignoreValueInDeepFreeze_)
         : initialState;
       this.lazyInitialState_ = undefined;
@@ -379,8 +383,9 @@ export class Store<T> {
       equalityCheck?: boolean | EqualityFn;
     } = {},
   ): void {
+    const nextValue = unwrapValueArg(value, this.state[key]);
+
     if (equalityCheck) {
-      const nextValue = unwrapValueArg(value, this.state[key]);
       if (equalityCheck === true) {
         if (this.state[key] === nextValue) return;
       } else {
@@ -391,7 +396,7 @@ export class Store<T> {
     this.setState(
       (current) => ({
         ...current,
-        [key]: unwrapValueArg(value, current[key]),
+        [key]: nextValue,
       }),
       {
         action: action ?? {

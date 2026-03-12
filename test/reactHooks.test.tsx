@@ -8,6 +8,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { useStoreSnapshot } from '../src/hooks';
 import { Store, shallowEqual } from '../src/main';
 
 afterEach(() => {
@@ -863,5 +864,67 @@ describe('useSelectorRC', () => {
     expect(result.current).toBe(4);
 
     expect(renderCount.current).toBe(3);
+  });
+});
+
+describe('useStoreSnapshot', () => {
+  test('should lock snapshot when condition is already true at mount', () => {
+    const store = new Store({
+      state: { isLoaded: true, data: 'initial' },
+    });
+
+    const { result } = renderHook(() =>
+      useStoreSnapshot(
+        store,
+        (s) => s.data,
+        (s) => s.isLoaded,
+      ),
+    );
+
+    expect(result.current).toBe('initial');
+
+    // Change to false then back to true - snapshot should NOT update
+    act(() => {
+      store.setState({ isLoaded: false, data: 'intermediate' });
+    });
+
+    act(() => {
+      store.setState({ isLoaded: true, data: 'updated' });
+    });
+
+    expect(result.current).toBe('initial');
+  });
+
+  test('should take snapshot on first matching change when condition starts false', () => {
+    const store = new Store({
+      state: { isLoaded: false, data: 'loading' },
+    });
+
+    const { result } = renderHook(() =>
+      useStoreSnapshot(
+        store,
+        (s) => s.data,
+        (s) => s.isLoaded,
+      ),
+    );
+
+    expect(result.current).toBe('loading');
+
+    act(() => {
+      store.setState({ isLoaded: true, data: 'loaded' });
+    });
+
+    expect(result.current).toBe('loaded');
+
+    // Further changes should not update
+    act(() => {
+      store.setState({ isLoaded: false, data: 'changed' });
+    });
+
+    act(() => {
+      store.setState({ isLoaded: true, data: 'changed again' });
+    });
+
+    expect(result.current).toBe('loaded');
   });
 });

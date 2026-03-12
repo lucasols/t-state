@@ -155,7 +155,9 @@ function computedBasedOnMultipleStores(
       return computedValuesStore.useSelectorRC(selector, options);
     },
     forceUpdate() {
-      computedValuesStore.setState(computedValueFn(...getPrevStates()));
+      computedValuesStore.setState(
+        computedValueFn(...stores.map((store) => store.state)),
+      );
     },
   };
 }

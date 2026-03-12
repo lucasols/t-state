@@ -726,6 +726,52 @@ describe('useSubscribeToStore', () => {
       current: { a: 2 },
     });
   });
+
+  test('should resubscribe when store identity changes', () => {
+    const storeA = new Store<{ value: number }>({
+      debugName: 'storeA',
+      state: { value: 1 },
+    });
+
+    const storeB = new Store<{ value: number }>({
+      debugName: 'storeB',
+      state: { value: 100 },
+    });
+
+    const calls: number[] = [];
+
+    const { rerender } = renderHook(
+      ({ store }) => {
+        useSubscribeToStore(store, ({ current }) => {
+          calls.push(current.value);
+        });
+      },
+      { initialProps: { store: storeA as Store<{ value: number }> } },
+    );
+
+    act(() => {
+      storeA.setState({ value: 2 });
+    });
+
+    expect(calls).toEqual([2]);
+
+    // Switch to storeB
+    rerender({ store: storeB });
+
+    act(() => {
+      storeB.setState({ value: 200 });
+    });
+
+    // Should receive updates from storeB
+    expect(calls).toContain(200);
+
+    act(() => {
+      storeA.setState({ value: 3 });
+    });
+
+    // Should NOT receive updates from storeA anymore
+    expect(calls).not.toContain(3);
+  });
 });
 
 test('updating the state inside a subscribe should not interfere with other subscribers', () => {

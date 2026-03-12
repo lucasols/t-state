@@ -379,3 +379,49 @@ test('equality checks', () => {
   expect(computedStoreChanged).toEqual([]);
   expect(computedFnCalled).toMatchInlineSnapshot(`[]`);
 });
+
+test('forceUpdate uses current state, not stale values', () => {
+  const baseStore = new Store({
+    state: { value: 1 },
+  });
+
+  const computedStore = computed(baseStore, (state) => {
+    return state.value * 10;
+  });
+
+  // Subscribe to initialize the computed store
+  const calls: number[] = [];
+  computedStore.subscribe(({ current }) => {
+    calls.push(current);
+  });
+
+  // Update base store multiple times
+  baseStore.setState({ value: 2 });
+  baseStore.setState({ value: 3 });
+
+  expect(computedStore.state).toBe(30);
+
+  // forceUpdate should use current state (value: 3), not stale state
+  computedStore.forceUpdate();
+
+  // The computed value should still be 30 (3 * 10), not based on stale prev
+  expect(computedStore.state).toBe(30);
+});
+
+test('forceUpdate with multiple stores uses current states', () => {
+  const store1 = new Store({ state: 1 });
+  const store2 = new Store({ state: 10 });
+
+  const computedStore = computed([store1, store2], (s1, s2) => s1 + s2);
+
+  computedStore.subscribe(() => {});
+
+  store1.setState(5);
+  store2.setState(20);
+
+  expect(computedStore.state).toBe(25);
+
+  computedStore.forceUpdate();
+
+  expect(computedStore.state).toBe(25);
+});

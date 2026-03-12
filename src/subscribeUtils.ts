@@ -143,5 +143,5 @@ export function useSubscribeToStore<T>(
     });
 
     return unsubscribe;
-  }, []);
+  }, [store]);
 }
