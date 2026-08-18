@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { shallowEqual } from '../src/shallowEqual';
+import { shallowEqual } from '../src/main';
 
 const obj1 = {
   foo: 'bar',

@@ -3,8 +3,8 @@ import { isDraftable, produce } from 'immer';
 import { startDevTools } from './devTools';
 
 import { useCallback } from 'react';
-import { deepEqual } from './deepEqual';
-import { shallowEqual } from './shallowEqual';
+import { deepEqual } from '@ls-stack/utils/deepEqual';
+import { shallowEqual } from '@ls-stack/utils/shallowEqual';
 import { useSyncExternalStoreWithSelector } from './useSyncExternalStoreWithSelector';
 import type { ValueArg } from './utils';
 import { isFunction, pick, unwrapValueSetter as unwrapValueArg } from './utils';
