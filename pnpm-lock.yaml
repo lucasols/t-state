@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@ls-stack/utils':
+        specifier: ^3.77.1
+        version: 3.77.1
       immer:
         specifier: ^10.1.3
         version: 10.1.3
@@ -18,9 +21,6 @@ importers:
       '@ls-stack/eslint-cfg':
         specifier: ^0.4.0
         version: 0.4.0(typescript@5.9.2)(vitest@3.2.4)
-      '@ls-stack/utils':
-        specifier: ^3.77.1
-        version: 3.77.1
       '@testing-library/jest-dom':
         specifier: ^6.8.0
         version: 6.8.0
