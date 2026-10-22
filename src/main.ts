@@ -611,6 +611,10 @@ export class Store<T> {
     return this.state;
   };
 
+  private subscribe_ = (onStoreChange: () => void) => {
+    return this.subscribe(onStoreChange);
+  };
+
   /**
    * React hook to select and subscribe to a derived value from the store.
    * The component will re-render only when the selected value changes.
@@ -633,7 +637,7 @@ export class Store<T> {
     { equalityFn = shallowEqual }: UseStateOptions = {},
   ): Readonly<S> {
     return useSyncExternalStoreWithSelector(
-      this.subscribe.bind(this),
+      this.subscribe_,
       this.getState_,
       null,
       selector,

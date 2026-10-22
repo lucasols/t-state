@@ -862,6 +862,31 @@ describe('useSelector', () => {
 
     expect(renderCount.current).toBe(3);
   });
+  test('does not resubscribe to the store on re-render', () => {
+    const testStore = new Store<{ key1: number }>({
+      state: { key1: 1 },
+    });
+
+    const subscribeSpy = vi.spyOn(testStore, 'subscribe');
+
+    const selector = (state: { key1: number }) => state.key1;
+
+    const { rerender, result } = renderHook(() =>
+      testStore.useSelector(selector),
+    );
+
+    expect(subscribeSpy).toHaveBeenCalledTimes(1);
+
+    rerender();
+    rerender();
+
+    act(() => {
+      testStore.setKey('key1', 2);
+    });
+
+    expect(result.current).toBe(2);
+    expect(subscribeSpy).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('useStoreSnapshot', () => {
