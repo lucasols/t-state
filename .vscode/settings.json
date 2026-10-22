@@ -3,7 +3,7 @@
   "workbench.colorCustomizations": {
     "editor.selectionHighlightBorder": "#135564",
     "activityBar.background": "#540d4a",
-    "activityBar.activeBorder": "#616e11",
+    "activityBar.activeBorder": "#e7e7e7",
     "activityBar.foreground": "#e7e7e7",
     "activityBar.inactiveForeground": "#e7e7e799",
     "activityBarBadge.background": "#616e11",
@@ -19,7 +19,8 @@
     "activityBarTop.background": "#540d4a",
     "activityBarTop.foreground": "#e7e7e7",
     "activityBarTop.inactiveForeground": "#e7e7e799",
-    "commandCenter.foreground": "#e7e7e7"
+    "commandCenter.foreground": "#e7e7e7",
+    "activityBarTop.activeBorder": "#e7e7e7"
   },
   "peacock.color": "#280623",
   "git.branchProtection": [

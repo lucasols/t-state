@@ -100,5 +100,5 @@ export function useSelectFromStore<T, S>(
     equalityFn?: EqualityFn | false;
   },
 ): Readonly<S> {
-  return store.useSelectorRC(selector, options);
+  return store.useSelector(selector, options);
 }

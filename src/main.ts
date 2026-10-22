@@ -2,7 +2,6 @@
 import { isDraftable, produce } from 'immer';
 import { startDevTools } from './devTools';
 
-import { useCallback } from 'react';
 import { deepEqual } from '@ls-stack/utils/deepEqual';
 import { shallowEqual } from '@ls-stack/utils/shallowEqual';
 import { useSyncExternalStoreWithSelector } from './useSyncExternalStoreWithSelector';
@@ -74,8 +73,6 @@ export type StoreProps<T> = {
 export type UseStateOptions = {
   /** Function to compare previous and current values, or false to disable equality checking */
   equalityFn?: EqualityFn | false;
-  /** Whether to update selector based on external dependencies */
-  useExternalDeps?: boolean;
 };
 
 /**
@@ -621,7 +618,6 @@ export class Store<T> {
    * @param selector - Function that derives a value from the state
    * @param options - Configuration options
    * @param options.equalityFn - Function to compare previous and current selected values (default: shallowEqual)
-   * @param options.useExternalDeps - Whether to update selector based on external dependencies
    * @returns The selected value
    *
    * @example
@@ -634,38 +630,7 @@ export class Store<T> {
    */
   useSelector<S>(
     selector: (state: T) => S,
-    { equalityFn = shallowEqual, useExternalDeps }: UseStateOptions = {},
-  ): Readonly<S> {
-    const memoizedSelector = useCallback(
-      (s: T) => selector(s),
-      [useExternalDeps ? selector : 0],
-    );
-
-    return useSyncExternalStoreWithSelector(
-      this.subscribe.bind(this),
-      this.getState_,
-      null,
-      memoizedSelector,
-      equalityFn === false ? undefined : equalityFn,
-    );
-  }
-
-  /**
-   * React hook to select and subscribe to a derived value from the store (runtime callable version).
-   * Similar to useSelector but optimized for usage with react compiler.
-   *
-   * @param selector - Function that derives a value from the state
-   * @param options - Configuration options
-   * @param options.equalityFn - Function to compare previous and current selected values (default: shallowEqual)
-   * @returns The selected value
-   */
-  useSelectorRC<S>(
-    selector: (state: T) => S,
-    {
-      equalityFn = shallowEqual,
-    }: {
-      equalityFn?: EqualityFn | false;
-    } = {},
+    { equalityFn = shallowEqual }: UseStateOptions = {},
   ): Readonly<S> {
     return useSyncExternalStoreWithSelector(
       this.subscribe.bind(this),

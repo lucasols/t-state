@@ -601,9 +601,7 @@ describe('useSelector', () => {
       );
 
       const id = useRef(idCounter++);
-      const state = testState.useSelector(selector, {
-        useExternalDeps: true,
-      });
+      const state = testState.useSelector(selector);
 
       return (
         <div>
@@ -716,7 +714,9 @@ describe('useSelector', () => {
     const Component2 = () => {
       const [count, setCount] = useState(0);
 
-      const value = testState.useSelector((state) => selector(state));
+      const value = testState.useSelector(
+        useCallback((state: TestState) => selector(state), []),
+      );
 
       return (
         <>
@@ -761,7 +761,6 @@ describe('useSelector', () => {
           selectorCalls++;
           return selector(state);
         }, []),
-        { useExternalDeps: true },
       );
     });
 
@@ -779,9 +778,7 @@ describe('useSelector', () => {
     expect(result.current).toBe(3);
     expect(selectorCalls).toBe(2);
   });
-});
 
-describe('useSelectorRC', () => {
   test('should not rerender when selected state does not change', () => {
     const testStore = new Store<{ key1: number; key2: number }>({
       state: { key1: 1, key2: 2 },
@@ -794,7 +791,7 @@ describe('useSelectorRC', () => {
         renderCount++;
       }, []);
 
-      return testStore.useSelectorRC(
+      return testStore.useSelector(
         useCallback((state) => {
           return state.key1;
         }, []),
@@ -829,7 +826,7 @@ describe('useSelectorRC', () => {
       ({ prop }: { prop: number }) => {
         renderCount.current++;
 
-        return testStore.useSelectorRC(
+        return testStore.useSelector(
           useCallback(
             (state) => {
               return state.key1 + prop;

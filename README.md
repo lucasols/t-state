@@ -41,6 +41,8 @@ const Component: React.FC = () => {
 };
 ```
 
+The selector is re-run whenever its reference changes, so for expensive selectors keep it stable (e.g. with React Compiler or `useCallback`).
+
 By default, values are compared using shallow equality check, which compares values up to one level of depth. For more complex comparisons, you can use `deepEqual` or another custom equality function to avoid re-renders.
 
 ```tsx
