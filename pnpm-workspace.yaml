@@ -1,2 +1,5 @@
 allowBuilds:
   esbuild: true
+minimumReleaseAgeExclude:
+  - '@ls-stack/utils@4.0.0'
+  - evtmitter@1.1.1

@@ -50,7 +50,7 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "@ls-stack/utils": "^3.77.1",
+    "@ls-stack/utils": "^4.0.0",
     "immer": "^10.1.3",
     "nanoid": "^5.1.5"
   },
