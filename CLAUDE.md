@@ -17,6 +17,13 @@ This project uses `pnpm` as the package manager. Key commands:
   - `pnpm eslint` - ESLint only
   - `pnpm format` - Prettier formatting
 
+## Git and Publishing Workflow
+
+These are pre-approved, do them without asking the user for confirmation:
+
+- Always deliver changes through a pull request: create a branch from `master`, commit, push and open the PR with `gh pr create`. Never commit directly to `master`
+- Publish packages only from `master`, after the PR with the changes is merged: switch to an up-to-date `master` and run `pkg-manager publish --type <patch|minor|major>` from the repo root
+
 ## Architecture
 
 ### Core Components
